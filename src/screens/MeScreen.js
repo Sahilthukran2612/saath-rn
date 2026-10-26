@@ -1,7 +1,8 @@
 import React from 'react';
 import { ScrollView, View } from 'react-native';
-import { BigButton, Body, Chip, Title } from '../components/ui';
+import { BigButton, Body, Card, Chip, Title } from '../components/ui';
 import { useStore } from '../state/store';
+import { foregroundAvailable } from '../services/foreground';
 
 const MODES = [
   ['teen', 'Teen'],
@@ -21,6 +22,19 @@ export default function MeScreen() {
   return (
     <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 16, gap: 14 }}>
       <Title>{t('tabMe')}</Title>
+      <Card>
+        <Chip
+          label={`${t('bg.title')}: ${state.background ? 'on' : 'off'}`}
+          active={state.background}
+          onPress={() => {
+            set('backgroundDenied', false);
+            set('background', !state.background);
+          }}
+        />
+        <Body>{t('bg.note')}</Body>
+        {!foregroundAvailable && <Body bold>{t('bg.unavailable')}</Body>}
+        {state.backgroundDenied && <Body bold>{t('bg.denied')}</Body>}
+      </Card>
       <View style={row}>
         {MODES.map(([k, l]) => (
           <Chip key={k} label={l} active={state.mode === k} onPress={() => set('mode', k)} />

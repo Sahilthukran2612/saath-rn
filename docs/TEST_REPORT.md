@@ -89,3 +89,12 @@ The `apple-design-polish` branch from the parallel session (soft depth, spring p
 
 ### Not verified
 Camera capture itself, PDF "Save" to storage after the print dialog, TalkBack, a physical phone, and every Hindi screen visually (strings are unit-tested for key parity, not read by a native speaker). Food content and IDRS cut-offs need clinical review (see README).
+## Foreground service (2026-10-27)
+| Check | Result |
+|---|---|
+| `npm test` | 216 passed, 12 suites (adds the wrapper without the native module, and the Me-tab switch with a mocked native layer: permission asked first, service started with a localized notice, setting turns itself off if refused, stop on off) |
+| `npm run lint` | 0 errors, 0 warnings |
+| Kotlin module `SaathForegroundModule` and `SaathForegroundService` | Compiled by Gradle (class files produced, no `e:` errors) |
+| Merged Android manifest | Contains the `specialUse` service, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_SPECIAL_USE`, `POST_NOTIFICATIONS`. `RECORD_AUDIO` and storage permissions are removed |
+| Full `assembleDebug` | **Failed** in the C++ step (`:app:buildCMakeDebug`): Windows 260-character path limit. Not a code error. See `docs/ARCHITECTURE.md`, "Build blocker" |
+| Service on a device or emulator | **Not run** (no APK) |

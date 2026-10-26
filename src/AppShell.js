@@ -16,6 +16,8 @@ import MeScreen from './screens/MeScreen';
 import ConsentScreen from './screens/ConsentScreen';
 import { startFallListener } from './services/sensing';
 import { cfgFrom } from './care';
+import { askNotificationPermission, startWatching, stopWatching } from './services/foreground';
+import { t as translate } from './i18n/strings';
 
 const TABS = [
   ['today', 'tabToday', '🏠', TodayScreen],
@@ -47,6 +49,29 @@ export default function AppShell({ sensing = true }) {
       onActivity: (at) => dispatch({ type: 'ACTIVITY', at }),
     });
   }, [sensing, state.hydrated, dispatch, impactG, inactiveHours]);
+
+  // "Keep watching in the background": a visible foreground service keeps the app alive.
+  // Without the notification permission it does not start, and the setting turns itself off.
+  const { background, lang } = state;
+  useEffect(() => {
+    if (!state.hydrated) return undefined;
+    if (!background) {
+      stopWatching();
+      return undefined;
+    }
+    let cancelled = false;
+    askNotificationPermission().then((ok) => {
+      if (cancelled) return;
+      if (ok) startWatching('Saath', translate(lang, 'bg.notice'));
+      else {
+        dispatch({ type: 'SET', key: 'background', value: false });
+        dispatch({ type: 'SET', key: 'backgroundDenied', value: true });
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [state.hydrated, background, lang, dispatch]);
 
   // Delegations and help requests expire by themselves.
   useEffect(() => {

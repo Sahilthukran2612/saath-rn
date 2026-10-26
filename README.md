@@ -34,12 +34,11 @@ None requested yet. The foreground accelerometer needs no permission. Phase 2 ad
 | Food guide content and the IDRS cut-offs | Starter content written by this project. **Needs review by a clinician or dietitian and a check against the original IDRS source before any real use** |
 | Foot photo diary | Camera permission only on tap. Photos stay on the phone and are not analysed. Camera capture itself not run (emulator camera not exercised) |
 | Push to the circle, SMS gateway, glucometer photo | Future. Push needs accounts (Phase 4), the gateway needs a server, the photo needs the camera |
-| True background sensing (foreground service) | **Not built.** Decision and reasons in `docs/ARCHITECTURE.md`. Needs a dev client and the NDK; not attempted yet |
+| True background sensing (foreground service) | **Written and compiled, not run.** Kotlin module and Me-tab switch exist and are unit-tested with the native layer mocked. The APK could not be built on Windows (260-character path limit in the C++ build); see `docs/ARCHITECTURE.md` |
 | Voice confirm on Rhythm Board | Speaks on add and tick. Speech recognition (voice input) not built |
 | Per-task times and reminders actually firing | Future (needs local notifications, Phase 2) |
-| Glucose trend, refill, budget, Transition Ladder detail, Health Passport | Future (Phase 2 and 3). Home cards show labelled demo values |
 
 ## Known limits
-- Never tested on a physical phone or in Expo Go (no device available in this session).
+- Tested on an Android emulator through Expo Go, never on a physical phone. The background service has not run on any device.
 - Saath helps notice when someone may need help. It cannot promise to catch every fall and it does not sense blood sugar.
 - Demo data is labelled as such. Scheme and pharmacy info will be marked "verify locally".

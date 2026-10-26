@@ -91,6 +91,8 @@ export const initialState = {
   meds: { name: 'Metformin (demo)', pillsLeft: 24, perDay: 2 },
   testPlan: { perDay: 2, strips: 20 }, // set by the clinician; Saath only counts
   budget: demoBudget(),
+  background: false, // "keep watching in the background" (visible foreground service)
+  backgroundDenied: false, // the notification permission was refused, so the service did not start
   // Phase 3
   profile: { name: '', condition: '', allergies: '', emergencyId: 'm1' },
   ladder: initialLadder(),

@@ -24,6 +24,7 @@ const PERSIST = [
   'meds',
   'testPlan',
   'budget',
+  'background',
   'profile',
   'ladder',
   'ladderApproval',

@@ -23,7 +23,7 @@ Rules that live in pure functions are unit tested without a device. The reducer 
 | Foreground service (chosen) | The only supported way to keep an accelerometer listener alive. Visible to the user, which also fits "no silent watching". |
 | Flutter / Kotlin rewrite | Not worth losing the tested JS logic and Expo tooling. |
 
-**Duty cycle (planned).** Sample at 10 Hz in 5 s windows every 30 s while the phone is moving or screen on; drop to a low-rate wake-up when the phone has been still. A window that detects an impact switches to continuous sampling for the 3 s stillness check. All numbers live in `CFG`.
+**Sampling (corrected).** An earlier draft proposed short sampling windows every 30 s. That is wrong for falls: an impact lasts a fraction of a second, so a window would miss most of them. The detector needs continuous low-rate sampling instead, and the saving has to come from a lower rate or hardware batching, not from switching the sensor off. Today the JavaScript listener samples at 10 Hz. **Battery cost has not been measured.** Next steps: profile 5 Hz against 10 Hz on a real phone, and consider Android sensor batching in the native module so the CPU can sleep between batches.
 
 **Data gaps.** Samples can stop (battery saver, process kill). `detectFall` treats too few samples after an impact as "unsure" and asks the person. `isInactive` uses the last activity time, so a gap is shown as a gap, not as inactivity by itself.
 
@@ -34,7 +34,8 @@ Rules that live in pure functions are unit tested without a device. The reducer 
 |---|---|
 | Detection and inactivity logic, personal baseline, confidence | Built, unit tested, and the foreground path was run on an Android emulator with injected sensor values |
 | Foreground listener in Expo Go | Built, works only while the app is open |
-| Foreground service, duty cycling, headless task | **Not built.** Needs `expo prebuild` and the Android NDK. Not attempted because the system drive had about 4.5 GB free; see TEST_REPORT |
+| Foreground service | **Written and compiled, not yet run.** Local Expo module `modules/saath-foreground` (Kotlin service + module, `specialUse` type, visible ongoing notification) is autolinked. Its Kotlin compiles and the service and permissions appear in the merged manifest. A "Keep watching in the background" switch on the Me tab starts and stops it, asks for the notification permission first, and turns itself off if refused (unit-tested with a mocked native layer). **The APK was not built**, so the service has not run on a device: the C++ part of the Gradle build fails on Windows' 260-character path limit (see "Build blocker" below) |
+| Headless task | Not needed with this design: the service keeps the process alive and the existing JS listener keeps running. Not yet verified that JS keeps running with the app swiped away; that needs the APK |
 | Escalation step 1: push to the circle | **Not built.** Needs accounts and FCM (Phase 4). The UI shows the contact being reached but does not send a push |
 | Escalation fallback: tap-to-call and prefilled SMS | Built. Opens the dialer or SMS app with the number and text filled in. The person must tap Call or Send. Run on the emulator (dialer opened with the right number). SMS composer not run |
 | Optional SMS gateway | **Not built.** Needs a server and a provider. Configurable endpoint planned |
@@ -48,3 +49,13 @@ Raw accelerometer samples stay in memory inside `sensing.js` (8 s buffer) and ar
 
 ## Phase 4 sync (planned)
 Supabase Postgres with row-level security that implements the Privacy Dial (a row of type safety is visible to every member, routine to dial >= 1, summary to dial = 2), plus FCM for push. The app stays local-first: the existing `queue` is the sync queue.
+
+## Build blocker (Windows)
+`./gradlew assembleDebug` compiles the Kotlin, resolves dependencies and installs SDK platform 37, Build-Tools 36 and the NDK, then fails in `:app:buildCMakeDebug` with `ninja: error: mkdir(...): No such file or directory`. React Native builds the generated C++ for libraries such as `react-native-safe-area-context` and `react-native-svg`, and CMake mirrors each source path under the build folder. The longest object path is about 327 characters, and Windows stops at 260. The project path appears twice in it, so even a very short folder (`D:\s`) plus a short build folder only reaches about 278.
+
+What was tried: a virtual drive (`subst`), which breaks Gradle plugin resolution because Node returns real paths. What remains:
+1. Turn on Windows long paths (`LongPathsEnabled=1`, needs an administrator) **and** use a CMake whose Ninja is long-path aware. The CMake 3.22.1 bundled with the SDK ships an older Ninja, so this may still fail; a newer CMake from the SDK Manager is the likely fix.
+2. Build on Linux, WSL or a CI runner.
+3. Cloud build (EAS). That uploads the project to a third party, so it needs the team's decision first.
+
+Other build notes: Java could not reach `services.gradle.org` (IPv6), so the Gradle zip was downloaded with PowerShell and `distributionUrl` pointed at it; `-Djava.net.preferIPv4Stack=true` is set. The generated `android/` folder is not committed (it is regenerated by `npx expo prebuild`), so these edits live only on this machine.

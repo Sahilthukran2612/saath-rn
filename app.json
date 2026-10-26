@@ -1,27 +1,41 @@
 {
-  "expo": {
-    "name": "saath-rn",
-    "slug": "saath-rn",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
-    "plugins": [
-      "expo-sharing"
-    ]
-  }
+    "expo":  {
+                 "name":  "Saath",
+                 "slug":  "saath-rn",
+                 "version":  "1.0.0",
+                 "orientation":  "portrait",
+                 "icon":  "./assets/icon.png",
+                 "userInterfaceStyle":  "light",
+                 "ios":  {
+                             "supportsTablet":  true
+                         },
+                 "android":  {
+                                 "adaptiveIcon":  {
+                                                      "backgroundColor":  "#E6F4FE",
+                                                      "foregroundImage":  "./assets/android-icon-foreground.png",
+                                                      "backgroundImage":  "./assets/android-icon-background.png",
+                                                      "monochromeImage":  "./assets/android-icon-monochrome.png"
+                                                  },
+                                 "package":  "com.anonymous.saathrn",
+                                 "blockedPermissions":  [
+                                                            "android.permission.RECORD_AUDIO",
+                                                            "android.permission.READ_EXTERNAL_STORAGE",
+                                                            "android.permission.WRITE_EXTERNAL_STORAGE"
+                                                        ]
+                             },
+                 "web":  {
+                             "favicon":  "./assets/favicon.png"
+                         },
+                 "plugins":  [
+                                 "expo-sharing",
+                                 [
+                                     "expo-image-picker",
+                                     {
+                                         "cameraPermission":  "Saath uses the camera only when you tap the photo button, for your own foot-check diary. Photos stay on this phone.",
+                                         "microphonePermission":  false,
+                                         "photosPermission":  false
+                                     }
+                                 ]
+                             ]
+             }
 }

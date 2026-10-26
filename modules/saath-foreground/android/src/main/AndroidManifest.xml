@@ -1,0 +1,18 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+  <application>
+    <!-- A visible, ongoing notification keeps the app alive so Saath can keep helping notice a fall or
+         a long quiet period. The person turns it on and off themselves. -->
+    <service
+      android:name=".SaathForegroundService"
+      android:exported="false"
+      android:foregroundServiceType="specialUse">
+      <property
+        android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+        android:value="Helps notice a fall or long inactivity for a person with a chronic illness. Always shown as a visible notification that the person can turn off." />
+    </service>
+  </application>
+</manifest>
