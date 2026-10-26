@@ -2,6 +2,7 @@ import React from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { BigButton, Body, Card, Title, useScale } from '../components/ui';
 import { useStore } from '../state/store';
+import { adviceText } from '../i18n/strings';
 import RoutineEditor from '../components/RoutineEditor';
 import { glucoseAdvice, can } from '../logic';
 import { colors } from '../theme';
@@ -100,7 +101,7 @@ function PersonHome() {
       <Card>
         <Title>{t('sugarPlan')}</Title>
         <Body bold>{last ? `${last.mgdl} mg/dL` : '—'}</Body>
-        <Body>{advice.text}</Body>
+        <Body>{adviceText(state.lang, advice.level)}</Body>
       </Card>
       <Card>
         <Body bold>

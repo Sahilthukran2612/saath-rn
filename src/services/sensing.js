@@ -5,7 +5,7 @@ const BUFFER_MS = 8000;
 
 // Foreground-only listener (Expo Go). True background sensing needs a foreground
 // service in a dev client: see docs/ARCHITECTURE.md (Phase 2). Not tested on a device yet.
-export function startFallListener({ onFall, onActivity }) {
+export function startFallListener({ cfg = CFG, onFall, onActivity }) {
   let buf = [];
   let lastCheck = 0;
   let lastActivity = 0;
@@ -22,7 +22,7 @@ export function startFallListener({ onFall, onActivity }) {
       }
       if (t - lastCheck > 1000) {
         lastCheck = t;
-        const r = detectFall(buf, CFG);
+        const r = detectFall(buf, cfg);
         if (r.state === 'fall') {
           buf = [];
           onFall(r);

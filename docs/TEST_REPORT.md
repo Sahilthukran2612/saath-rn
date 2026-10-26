@@ -60,3 +60,14 @@ Environment: Android emulator `Medium_Phone_API_37.0` (Android 17, 1080x2400), E
 
 ### Process note
 A PowerShell `Set-Content` round trip corrupted non-ASCII characters in six screen files (the `·` separators, emoji, Hindi). Caught from a screenshot of the log text, restored from git, and re-patched with UTF-8 safe code. A repo scan now finds no corrupted characters.
+## Phase 2, JS side (2026-10-27)
+| Check | Result |
+|---|---|
+| `npm test` | 144 passed, 7 suites (adds care logic, baseline wiring, no-dose checks, Care and alert screens, English/Hindi key parity) |
+| `npm run lint` | 0 errors, 0 warnings |
+| `npx expo export --platform android` | Bundles (677 modules) |
+| Android emulator (Expo Go) | Care screen with night check-in prompt, glucose card, stock card, budget card (Hindi and large text). Escalation shows "Reaching: Asha" with Call and Send message. **Call opened the dialer with (900) 000-0001 prefilled.** SMS composer not run. Prompt text and tips checked in Hindi after fixes |
+
+Found by running: sugar advice and budget tips were English only in Hindi mode. They are now keys in `strings.js`, and a test fails if English and Hindi keys differ.
+
+Not verified: foreground service (not built), push, SMS gateway, glucometer photo, voice on a device, TalkBack, a physical phone. The rule thresholds (2 hours without a meal after insulin, 4 hours without a night reading) are plain defaults that a clinician should set; they have not been clinically reviewed.

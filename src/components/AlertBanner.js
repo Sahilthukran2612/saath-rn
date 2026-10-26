@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { View } from 'react-native';
+import { Linking, View } from 'react-native';
+import { callLink, escalationMessage, smsLink } from '../care';
 import { BigButton, Body, Card, Title } from './ui';
 import { colors } from '../theme';
 import { useStore } from '../state/store';
@@ -45,6 +46,22 @@ export default function AlertBanner() {
         <Body style={{ color: colors.white }} bold>
           {t('calling')}: {who.name} ({al.remaining}s)
         </Body>
+      )}
+      {who?.phone && (
+        <View style={{ gap: 10 }}>
+          <BigButton
+            kind="quiet"
+            icon="📞"
+            label={`${t('callNow')} ${who.name}`}
+            onPress={() => Linking.openURL(callLink(who.phone))}
+          />
+          <BigButton
+            kind="quiet"
+            icon="💬"
+            label={t('sendMessage')}
+            onPress={() => Linking.openURL(smsLink(who.phone, escalationMessage('A Saath user', al.kind)))}
+          />
+        </View>
       )}
       {al.phase === 'done' && <Body style={{ color: colors.white }}>{t('nobodyReached')}</Body>}
       <View style={{ gap: 10 }}>

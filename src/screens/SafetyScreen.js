@@ -3,15 +3,15 @@ import { ScrollView, Share } from 'react-native';
 import { BigButton, Body, Card, Title } from '../components/ui';
 import { useStore } from '../state/store';
 import { tallyToCsv } from '../services/export';
-import { CFG } from '../logic';
+import { explainBaseline } from '../care';
 
-// Simulated quiet: fast-forward a virtual clock to 14:00 with the last activity at 07:00
-// (seven quiet hours, outside the sleep window) and let isInactive decide.
-function quietTrace() {
+// Simulated quiet: fast-forward a virtual clock to 14:00 with the last activity one hour
+// longer ago than the person's own quiet threshold, and let isInactive decide.
+function quietTrace(inactiveHours) {
   const d = new Date();
   d.setHours(14, 0, 0, 0);
   const nowMs = d.getTime();
-  return { nowMs, lastActiveMs: nowMs - (CFG.inactiveHours + 1) * 3600000 };
+  return { nowMs, lastActiveMs: nowMs - (inactiveHours + 1) * 3600000 };
 }
 
 export default function SafetyScreen() {
@@ -46,10 +46,24 @@ export default function SafetyScreen() {
           icon="🕒"
           onPress={() =>
             !idle &&
-            dispatch({ type: 'QUIET_CHECK', ...quietTrace(), simulated: true, id: String(Date.now()) })
+            dispatch({
+              type: 'QUIET_CHECK',
+              ...quietTrace(state.baseline.inactiveHours),
+              simulated: true,
+              id: String(Date.now()),
+            })
           }
         />
-        <BigButton kind="quiet" label={t('missedEvent')} onPress={() => dispatch({ type: 'MISSED' })} />
+        <BigButton
+          kind="quiet"
+          label={t('missedFall')}
+          onPress={() => dispatch({ type: 'MISSED', kind: 'fall' })}
+        />
+        <BigButton
+          kind="quiet"
+          label={t('missedQuiet')}
+          onPress={() => dispatch({ type: 'MISSED', kind: 'quiet' })}
+        />
         <Body>
           {t('tallyAlerts')}: {tl.alerts} · {t('tallyImOk')}: {tl.imOk} · {t('tallyEscalated')}:{' '}
           {tl.escalated}
@@ -62,6 +76,17 @@ export default function SafetyScreen() {
           onPress={() => Share.share({ message: tallyToCsv(tl) })}
         />
         <BigButton kind="quiet" label="Reset tally" onPress={() => dispatch({ type: 'RESET_TALLY' })} />
+      </Card>
+      <Card>
+        <Title>{t('baselineTitle')}</Title>
+        {explainBaseline(state.baseline).map((line) => (
+          <Body key={line}>{line}</Body>
+        ))}
+        <BigButton
+          kind="quiet"
+          label={t('resetBaseline')}
+          onPress={() => dispatch({ type: 'RESET_BASELINE' })}
+        />
       </Card>
     </ScrollView>
   );

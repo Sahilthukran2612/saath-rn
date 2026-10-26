@@ -19,6 +19,11 @@ const PERSIST = [
   'queue',
   'online',
   'synced',
+  'baseline',
+  'careEvents',
+  'meds',
+  'testPlan',
+  'budget',
 ];
 
 export async function load() {

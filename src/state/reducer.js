@@ -1,4 +1,17 @@
 import { CFG, clampDial, escalationChain, isDelegationActive, isInactive } from '../logic';
+import { adjustBaseline, cfgFrom, defaultBaseline } from '../care';
+
+const DAY = 86400000;
+// Demo budget: clearly labelled in the UI. Dates are relative so the trend always makes sense.
+const demoBudget = () => {
+  const now = Date.now();
+  return [
+    { id: 'b1', amount: 420, cat: 'medicine', at: now - 2 * DAY, demo: true },
+    { id: 'b2', amount: 260, cat: 'strips', at: now - 5 * DAY, demo: true },
+    { id: 'b3', amount: 380, cat: 'medicine', at: now - 33 * DAY, demo: true },
+    { id: 'b4', amount: 120, cat: 'travel', at: now - 36 * DAY, demo: true },
+  ];
+};
 
 export const SEED = {
   members: [
@@ -72,6 +85,11 @@ export const initialState = {
   queue: [], // offline queue of changes waiting to sync
   online: false, // no backend yet (Phase 4): "going online" only simulates a sync
   synced: 0,
+  baseline: defaultBaseline(), // personal thresholds, tuned by false-alarm and missed feedback
+  careEvents: { lastInsulinAt: null, lastMealAt: null }, // times only. Saath never records or suggests a dose
+  meds: { name: 'Metformin (demo)', pillsLeft: 24, perDay: 2 },
+  testPlan: { perDay: 2, strips: 20 }, // set by the clinician; Saath only counts
+  budget: demoBudget(),
 };
 
 // Changes that must reach other phones go through the offline queue.
@@ -109,7 +127,8 @@ export function reducer(state, a) {
       return openAlert(state, a);
     case 'QUIET_CHECK': {
       // a.lastActiveMs and a.nowMs come from the sensing service or the fast-forward simulation
-      const r = isInactive(a.lastActiveMs, a.nowMs);
+      const cfg = cfgFrom(state.baseline);
+      const r = isInactive(a.lastActiveMs, a.nowMs, cfg, cfg.inactiveHours);
       const next = { ...state, lastActiveMs: a.lastActiveMs, simNowMs: a.simulated ? a.nowMs : null };
       return r.inactive
         ? openAlert(next, { kind: 'quiet', confidence: r.confidence, reason: r.reason, id: a.id })
@@ -143,10 +162,32 @@ export function reducer(state, a) {
         : state;
     case 'FALSE_ALARM':
       return state.alert
-        ? { ...state, alert: null, tally: bump(state.tally, 'falseAlarm'), simNowMs: null }
+        ? {
+            ...state,
+            alert: null,
+            tally: bump(state.tally, 'falseAlarm'),
+            baseline: adjustBaseline(state.baseline, state.alert.kind, 'false_alarm'),
+            simNowMs: null,
+          }
         : state;
     case 'MISSED':
-      return { ...state, tally: bump(state.tally, 'missed') };
+      return {
+        ...state,
+        tally: bump(state.tally, 'missed'),
+        baseline: adjustBaseline(state.baseline, a.kind || 'fall', 'missed'),
+      };
+    case 'RESET_BASELINE':
+      return { ...state, baseline: defaultBaseline() };
+    case 'LOG_INSULIN': // time only: there is deliberately no dose field
+      return { ...state, careEvents: { ...state.careEvents, lastInsulinAt: a.at } };
+    case 'LOG_MEAL':
+      return { ...state, careEvents: { ...state.careEvents, lastMealAt: a.at } };
+    case 'MEDS_SET':
+      return { ...state, meds: { ...state.meds, pillsLeft: Math.max(0, a.pillsLeft) } };
+    case 'STRIPS_SET':
+      return { ...state, testPlan: { ...state.testPlan, strips: Math.max(0, a.strips) } };
+    case 'BUDGET_ADD':
+      return { ...state, budget: [...state.budget, { id: a.id, amount: a.amount, cat: a.cat, at: a.at }] };
     case 'RESET_TALLY':
       return { ...state, tally: initialState.tally };
     case 'TOGGLE_TASK':
@@ -178,7 +219,11 @@ export function reducer(state, a) {
     case 'TASK_DELETE':
       return enqueue({ ...state, tasks: state.tasks.filter((t) => t.id !== a.id) }, a);
     case 'ADD_READING':
-      return { ...state, readings: [...state.readings, { id: a.id, mgdl: a.mgdl, at: a.at }] };
+      return {
+        ...state,
+        readings: [...state.readings, { id: a.id, mgdl: a.mgdl, at: a.at }],
+        testPlan: { ...state.testPlan, strips: Math.max(0, state.testPlan.strips - 1) },
+      };
     case 'SET_DIAL': {
       // Clamp to the guardian limit for teens. Safety alerts are not governed by the dial.
       const dial = clampDial(state.members.find((m) => m.id === a.id) || {}, a.dial, state.mode);

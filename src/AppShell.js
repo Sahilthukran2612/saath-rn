@@ -14,6 +14,7 @@ import CareScreen from './screens/CareScreen';
 import MeScreen from './screens/MeScreen';
 import ConsentScreen from './screens/ConsentScreen';
 import { startFallListener } from './services/sensing';
+import { cfgFrom } from './care';
 
 const TABS = [
   ['today', 'tabToday', '🏠', TodayScreen],
@@ -27,10 +28,12 @@ export default function AppShell({ sensing = true }) {
   const { state, dispatch, t } = useStore();
   const [tab, setTab] = useState('today');
   const k = useScale();
+  const { impactG, inactiveHours } = state.baseline;
 
   useEffect(() => {
     if (!sensing || !state.hydrated) return undefined;
     return startFallListener({
+      cfg: cfgFrom({ impactG, inactiveHours }),
       onFall: (r) =>
         dispatch({
           type: 'TRIGGER_ALERT',
@@ -41,7 +44,7 @@ export default function AppShell({ sensing = true }) {
         }),
       onActivity: (at) => dispatch({ type: 'ACTIVITY', at }),
     });
-  }, [sensing, state.hydrated, dispatch]);
+  }, [sensing, state.hydrated, dispatch, impactG, inactiveHours]);
 
   // Delegations and help requests expire by themselves.
   useEffect(() => {
