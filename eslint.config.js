@@ -6,7 +6,15 @@ module.exports = [
   {
     files: ['__tests__/**/*.js', 'jest.setup.js'],
     languageOptions: {
-      globals: { jest: 'readonly', describe: 'readonly', test: 'readonly', expect: 'readonly', it: 'readonly' },
+      globals: {
+        jest: 'readonly',
+        describe: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        it: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+      },
     },
   },
 ];

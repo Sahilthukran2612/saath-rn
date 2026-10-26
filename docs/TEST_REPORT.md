@@ -71,3 +71,21 @@ A PowerShell `Set-Content` round trip corrupted non-ASCII characters in six scre
 Found by running: sugar advice and budget tips were English only in Hindi mode. They are now keys in `strings.js`, and a test fails if English and Hindi keys differ.
 
 Not verified: foreground service (not built), push, SMS gateway, glucometer photo, voice on a device, TalkBack, a physical phone. The rule thresholds (2 hours without a meal after insulin, 4 hours without a night reading) are plain defaults that a clinician should set; they have not been clinically reviewed.
+## Phase 3 (2026-10-27)
+| Check | Result |
+|---|---|
+| `npm test` | 207 passed, 10 suites (adds plan logic, Plan screen flows, PDF fallback, readable printed passport, design checks) |
+| `npm run lint` | 0 errors, 0 warnings |
+| `npx expo export --platform android` | Bundles (1004 modules) |
+| Android emulator (Expo Go) | Six-tab bar fits with large text. Plan menu, weekly check-in, body check (foot checklist saved), health passport: **QR code renders (92 of 700 characters)**, print dialog opens with a preview. Camera permission prompt appears only on tap; **Don't allow** leaves the app and checklist working |
+
+### Bugs found by running, now fixed
+1. **PDF sharing failed on the emulator**: `Sharing.shareAsync` rejected with "Not allowed to read file under given URL" and the app showed the raw error. It now shares with an explicit PDF type, falls back to the system print dialog (Save as PDF), and shows a plain message only if both fail. Three tests cover this.
+2. **Printed passport used cryptic QR keys** (`n:`, `c:`) and empty lines. It now uses readable, localized labels and skips empty fields.
+3. After merging the apple-design branch, **large emoji were clipped** because `Body` computed line height from its default size. It now follows the font size actually used (test added).
+
+### Merged
+The `apple-design-polish` branch from the parallel session (soft depth, spring press feedback that respects reduce-motion, selected-tab pill). Merged cleanly; no new dependencies.
+
+### Not verified
+Camera capture itself, PDF "Save" to storage after the print dialog, TalkBack, a physical phone, and every Hindi screen visually (strings are unit-tested for key parity, not read by a native speaker). Food content and IDRS cut-offs need clinical review (see README).

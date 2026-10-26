@@ -1,5 +1,6 @@
 import { CFG, clampDial, escalationChain, isDelegationActive, isInactive } from '../logic';
 import { adjustBaseline, cfgFrom, defaultBaseline } from '../care';
+import { addCheckin, approveAdvance, declineAdvance, initialLadder, requestAdvance, stepBack } from '../plan';
 
 const DAY = 86400000;
 // Demo budget: clearly labelled in the UI. Dates are relative so the trend always makes sense.
@@ -90,6 +91,17 @@ export const initialState = {
   meds: { name: 'Metformin (demo)', pillsLeft: 24, perDay: 2 },
   testPlan: { perDay: 2, strips: 20 }, // set by the clinician; Saath only counts
   budget: demoBudget(),
+  // Phase 3
+  profile: { name: '', condition: '', allergies: '', emergencyId: 'm1' },
+  ladder: initialLadder(),
+  ladderApproval: false, // true: a parent must agree before the teen moves up a stage
+  visitQuestions: [],
+  checkins: [], // [{ week, mood 1-5, at }], one per week
+  meals: [], // [{ id, icon, at }] icon-based meal log
+  footChecks: [], // [{ at, items: [ids looked at] }]
+  footPhotos: [], // [{ uri, at }] stay on the phone, never analysed
+  waist: [], // [{ cm, at }]
+  risk: null, // { answers, result, at } latest questionnaire
 };
 
 // Changes that must reach other phones go through the offline queue.
@@ -176,6 +188,39 @@ export function reducer(state, a) {
         tally: bump(state.tally, 'missed'),
         baseline: adjustBaseline(state.baseline, a.kind || 'fall', 'missed'),
       };
+    case 'LADDER_REQUEST':
+      return enqueue(
+        { ...state, ladder: requestAdvance(state.ladder, a.id, { needsApproval: state.ladderApproval }) },
+        a
+      );
+    case 'LADDER_APPROVE':
+      return enqueue({ ...state, ladder: approveAdvance(state.ladder, a.id) }, a);
+    case 'LADDER_DECLINE':
+      return { ...state, ladder: declineAdvance(state.ladder, a.id) };
+    case 'LADDER_BACK':
+      return enqueue({ ...state, ladder: stepBack(state.ladder, a.id) }, a);
+    case 'PROFILE_SET':
+      return { ...state, profile: { ...state.profile, ...a.patch } };
+    case 'VISIT_Q_ADD': {
+      const text = String(a.text || '').trim();
+      return text ? { ...state, visitQuestions: [...state.visitQuestions, text].slice(-20) } : state;
+    }
+    case 'VISIT_Q_REMOVE':
+      return { ...state, visitQuestions: state.visitQuestions.filter((_, i) => i !== a.index) };
+    case 'CHECKIN':
+      return { ...state, checkins: addCheckin(state.checkins, a.mood, a.at) };
+    case 'MEAL_LOG':
+      return { ...state, meals: [...state.meals, { id: a.id, icon: a.icon, at: a.at }].slice(-60) };
+    case 'FOOT_CHECK':
+      return { ...state, footChecks: [...state.footChecks, { at: a.at, items: a.items }].slice(-60) };
+    case 'FOOT_PHOTO':
+      return { ...state, footPhotos: [...state.footPhotos, { uri: a.uri, at: a.at }].slice(-30) };
+    case 'WAIST_ADD':
+      return a.cm > 30 && a.cm < 250
+        ? { ...state, waist: [...state.waist, { cm: a.cm, at: a.at }].slice(-60) }
+        : state;
+    case 'RISK_SET':
+      return { ...state, risk: { answers: a.answers, result: a.result, at: a.at } };
     case 'RESET_BASELINE':
       return { ...state, baseline: defaultBaseline() };
     case 'LOG_INSULIN': // time only: there is deliberately no dose field

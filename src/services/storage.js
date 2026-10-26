@@ -24,6 +24,16 @@ const PERSIST = [
   'meds',
   'testPlan',
   'budget',
+  'profile',
+  'ladder',
+  'ladderApproval',
+  'visitQuestions',
+  'checkins',
+  'meals',
+  'footChecks',
+  'footPhotos',
+  'waist',
+  'risk',
 ];
 
 export async function load() {

@@ -11,6 +11,7 @@ import TodayScreen from './screens/TodayScreen';
 import CircleScreen from './screens/CircleScreen';
 import SafetyScreen from './screens/SafetyScreen';
 import CareScreen from './screens/CareScreen';
+import PlanScreen from './screens/PlanScreen';
 import MeScreen from './screens/MeScreen';
 import ConsentScreen from './screens/ConsentScreen';
 import { startFallListener } from './services/sensing';
@@ -21,6 +22,7 @@ const TABS = [
   ['circle', 'tabCircle', '👥', CircleScreen],
   ['safety', 'tabSafety', '🛟', SafetyScreen],
   ['care', 'tabCare', '💊', CareScreen],
+  ['plan', 'tabPlan', '🗂️', PlanScreen],
   ['me', 'tabMe', '🙂', MeScreen],
 ];
 

@@ -30,6 +30,9 @@ None requested yet. The foreground accelerometer needs no permission. Phase 2 ad
 | Invite link share, joining, offline queue "sync", Rhythm Board edit | Simulated: local only, "Mark joined" and "Go online" are demo buttons. Real delivery needs accounts (Phase 4) |
 | Guardian consent for under-18s | Records a name and number on this phone. **Does not verify identity. Needs legal review. Not a compliance claim** |
 | Personal baseline from false-alarm / missed feedback, glucose trend, low-sugar prompts (insulin logged and no meal, night check-in), strips plan, refill days, Care Budget, tap-to-call / prefilled SMS links | Real logic (unit-tested). Run on an Android emulator: night prompt, budget, stock, Call opens the dialer with the right number |
+| Transition Ladder (4 stages, 4 skills, teen confirms, optional parent approval, step back), Visit Prep, Health Passport QR and PDF, weekly check-in, food guide (curated JSON, verify locally), foot check, waist, diabetes risk (IDRS), teen school card | Real. Logic unit-tested. Run on an Android emulator: Plan menu, QR code, print-to-PDF dialog, check-in, body check, camera permission prompt and deny path. Hindi and English |
+| Food guide content and the IDRS cut-offs | Starter content written by this project. **Needs review by a clinician or dietitian and a check against the original IDRS source before any real use** |
+| Foot photo diary | Camera permission only on tap. Photos stay on the phone and are not analysed. Camera capture itself not run (emulator camera not exercised) |
 | Push to the circle, SMS gateway, glucometer photo | Future. Push needs accounts (Phase 4), the gateway needs a server, the photo needs the camera |
 | True background sensing (foreground service) | **Not built.** Decision and reasons in `docs/ARCHITECTURE.md`. Needs a dev client and the NDK; not attempted yet |
 | Voice confirm on Rhythm Board | Speaks on add and tick. Speech recognition (voice input) not built |
