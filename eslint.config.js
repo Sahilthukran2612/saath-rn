@@ -2,7 +2,7 @@ const expo = require('eslint-config-expo/flat');
 
 module.exports = [
   ...expo,
-  { ignores: ['node_modules/', '.expo/', 'dist/', 'docs/'] },
+  { ignores: ['node_modules/', '.expo/', 'dist/', 'docs/', '.claude/worktrees/'] },
   {
     files: ['__tests__/**/*.js', 'jest.setup.js'],
     languageOptions: {
