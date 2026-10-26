@@ -26,7 +26,11 @@ None requested yet. The foreground accelerometer needs no permission. Phase 2 ad
 | Audit log | Real, one entry per meaningful view by a non-Person viewer |
 | Hindi / English, voice prompts | Partly real. A few labels are still English only. Voice not run on a device |
 | Background sensing, push, SMS, accounts, sync | Future (Phase 2 and 4) |
-| Guardian consent, invite flow, delegation, Rhythm Board editing | Future (Phase 1) |
+| Invite by phone or link, delegation expiry, guardian limit, second-person consent for contact numbers, `shouldNudge`, phase defaults | Real logic (unit-tested) |
+| Invite link share, joining, offline queue "sync", Rhythm Board edit | Simulated: local only, "Mark joined" and "Go online" are demo buttons. Real delivery needs accounts (Phase 4) |
+| Guardian consent for under-18s | Records a name and number on this phone. **Does not verify identity. Needs legal review. Not a compliance claim** |
+| Voice confirm on Rhythm Board | Speaks on add and tick. Speech recognition (voice input) not built |
+| Per-task times and reminders actually firing | Future (needs local notifications, Phase 2) |
 | Glucose trend, refill, budget, Transition Ladder detail, Health Passport | Future (Phase 2 and 3). Home cards show labelled demo values |
 
 ## Known limits

@@ -95,3 +95,42 @@ export const CARE_RULES = {
   clinician: { viewSummary: true, logReading: false, editPlan: true },
 };
 export const can = (role, action) => !!CARE_RULES[role]?.[action];
+
+// ---- Phase 1: circle, consent, delegation, routine ----
+
+export const validPhone = (s) => /^(\+91)?[6-9]\d{9}$/.test(String(s || '').replace(/[\s-]/g, ''));
+export const inviteLink = (code) => `https://saath.app/join/${code}`;
+
+// Guardian limit for teens: a guardian can see at least Routine. The teen may raise or lower
+// any other member freely. Safety events are never affected: canReceive always passes them.
+export function minDialFor(member, mode) {
+  return mode === 'teen' && member.guardian ? DIAL.routine : DIAL.safetyOnly;
+}
+export const clampDial = (member, dial, mode) => Math.max(dial, minDialFor(member, mode));
+
+// A delegation or help request is only active until it expires.
+export const isDelegationActive = (d, now) => d.status === 'open' && now < d.expiresAt;
+
+// Interdependent privacy: an item that involves other people needs each of them to consent.
+// item.involves is a list of member ids besides the owner; consents maps id -> true.
+export const canShareItem = (item, consents) => (item.involves || []).every((id) => consents?.[id] === true);
+
+// Phase-aware defaults: more guidance early or in a crisis, fewer prompts when stable.
+export function phaseDefaults(phase) {
+  if (phase === 'new') return { guidance: 'high', maxPromptsPerDay: 8 };
+  if (phase === 'crisis') return { guidance: 'high', maxPromptsPerDay: 6 };
+  return { guidance: 'low', maxPromptsPerDay: 3 };
+}
+
+// May Saath send a non-safety reminder now? Safety is always allowed.
+export function shouldNudge(
+  { nowMs, timeOff = false, phase = 'stable', isSafety = false, sentToday = 0 },
+  cfg = CFG
+) {
+  if (isSafety) return { ok: true, reason: 'safety' };
+  if (timeOff) return { ok: false, reason: 'time off' };
+  if (inWindow(new Date(nowMs).getHours(), cfg.quietWindow)) return { ok: false, reason: 'sleep window' };
+  if (sentToday >= phaseDefaults(phase).maxPromptsPerDay)
+    return { ok: false, reason: 'enough prompts today' };
+  return { ok: true, reason: 'ok' };
+}

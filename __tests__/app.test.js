@@ -16,7 +16,10 @@ test("elder home shows one big I'm OK button", async () => {
 });
 
 test('teen home shows the transition ladder', async () => {
-  await mount({ mode: 'teen' });
+  await mount({
+    mode: 'teen',
+    consent: { status: 'granted', guardianName: 'A', guardianPhone: '9876543210', at: 1 },
+  });
   expect(screen.getByText('Transition ladder')).toBeTruthy();
 });
 

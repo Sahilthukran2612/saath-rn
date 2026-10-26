@@ -11,6 +11,7 @@ import CircleScreen from './screens/CircleScreen';
 import SafetyScreen from './screens/SafetyScreen';
 import CareScreen from './screens/CareScreen';
 import MeScreen from './screens/MeScreen';
+import ConsentScreen from './screens/ConsentScreen';
 import { startFallListener } from './services/sensing';
 
 const TABS = [
@@ -40,6 +41,21 @@ export default function AppShell({ sensing = true }) {
       onActivity: (at) => dispatch({ type: 'ACTIVITY', at }),
     });
   }, [sensing, state.hydrated, dispatch]);
+
+  // Delegations and help requests expire by themselves.
+  useEffect(() => {
+    const h = setInterval(() => dispatch({ type: 'EXPIRE_DELEGATIONS', now: Date.now() }), 30000);
+    return () => clearInterval(h);
+  }, [dispatch]);
+
+  // Under-18 users need a guardian's agreement first (needs legal review).
+  if (state.hydrated && state.mode === 'teen' && state.consent.status !== 'granted') {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.mist }}>
+        <ConsentScreen />
+      </SafeAreaView>
+    );
+  }
 
   const Screen = TABS.find((x) => x[0] === tab)[3];
   return (

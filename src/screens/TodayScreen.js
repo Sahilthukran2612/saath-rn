@@ -2,6 +2,7 @@ import React from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { BigButton, Body, Card, Title, useScale } from '../components/ui';
 import { useStore } from '../state/store';
+import RoutineEditor from '../components/RoutineEditor';
 import { glucoseAdvice, can } from '../logic';
 import { colors } from '../theme';
 import { speak } from '../services/voice';
@@ -160,7 +161,18 @@ function ProHome() {
 export default function TodayScreen() {
   const { state, t } = useStore();
   let body;
-  if (state.role === 'person') body = <PersonHome />;
+  if (state.role === 'person')
+    body = (
+      <>
+        {state.phase !== 'stable' && (
+          <Card>
+            <Body bold>{t(state.phase === 'new' ? 'guidanceNew' : 'guidanceCrisis')}</Body>
+          </Card>
+        )}
+        <PersonHome />
+        <RoutineEditor />
+      </>
+    );
   else if (state.role === 'family') body = <FamilyHome />;
   else if (state.role === 'neighbour')
     body = (

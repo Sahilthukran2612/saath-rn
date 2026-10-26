@@ -13,6 +13,12 @@ const PERSIST = [
   'readings',
   'audit',
   'tally',
+  'invites',
+  'delegations',
+  'consent',
+  'queue',
+  'online',
+  'synced',
 ];
 
 export async function load() {

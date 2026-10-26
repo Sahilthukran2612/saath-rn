@@ -1,11 +1,45 @@
-import { CFG, escalationChain, isInactive } from '../logic';
+import { CFG, clampDial, escalationChain, isDelegationActive, isInactive } from '../logic';
 
 export const SEED = {
   members: [
-    { id: 'm1', name: 'Asha (daughter)', role: 'family', dial: 2, timeOff: false },
-    { id: 'm2', name: 'Ramesh (neighbour)', role: 'neighbour', dial: 0, timeOff: false },
-    { id: 'm3', name: 'Sunita (ASHA)', role: 'asha', dial: 1, timeOff: false },
-    { id: 'm4', name: 'Dr. Rao (clinic)', role: 'clinician', dial: 1, timeOff: false },
+    // Demo numbers are fake. shareContact is that member's own consent to show their number to the circle.
+    {
+      id: 'm1',
+      name: 'Asha (daughter)',
+      role: 'family',
+      dial: 2,
+      timeOff: false,
+      guardian: true,
+      phone: '9000000001',
+      shareContact: true,
+    },
+    {
+      id: 'm2',
+      name: 'Ramesh (neighbour)',
+      role: 'neighbour',
+      dial: 0,
+      timeOff: false,
+      phone: '9000000002',
+      shareContact: false,
+    },
+    {
+      id: 'm3',
+      name: 'Sunita (ASHA)',
+      role: 'asha',
+      dial: 1,
+      timeOff: false,
+      phone: '9000000003',
+      shareContact: false,
+    },
+    {
+      id: 'm4',
+      name: 'Dr. Rao (clinic)',
+      role: 'clinician',
+      dial: 1,
+      timeOff: false,
+      phone: '9000000004',
+      shareContact: true,
+    },
   ],
   tasks: [
     { id: 't1', icon: '💊', title: 'Morning medicine', done: false },
@@ -32,7 +66,16 @@ export const initialState = {
   tally: { alerts: 0, imOk: 0, escalated: 0, falseAlarm: 0, missed: 0 },
   lastActiveMs: null,
   simNowMs: null, // virtual clock used by the "long quiet" simulation
+  invites: [], // { id, name, phone, role, code, status: 'pending' | 'accepted' }
+  delegations: [], // { id, kind: 'help' | 'task', taskId, to, expiresAt, status: 'open' | 'done' | 'expired' }
+  consent: { status: 'none', guardianName: '', guardianPhone: '', at: null }, // minors: needs legal review
+  queue: [], // offline queue of changes waiting to sync
+  online: false, // no backend yet (Phase 4): "going online" only simulates a sync
+  synced: 0,
 };
+
+// Changes that must reach other phones go through the offline queue.
+const enqueue = (state, a) => ({ ...state, queue: [...state.queue, { op: a.type, at: a.at ?? 0 }] });
 
 const bump = (tally, key) => ({ ...tally, [key]: tally[key] + 1 });
 
@@ -107,11 +150,132 @@ export function reducer(state, a) {
     case 'RESET_TALLY':
       return { ...state, tally: initialState.tally };
     case 'TOGGLE_TASK':
-      return { ...state, tasks: state.tasks.map((t) => (t.id === a.id ? { ...t, done: !t.done } : t)) };
+      return enqueue(
+        { ...state, tasks: state.tasks.map((t) => (t.id === a.id ? { ...t, done: !t.done } : t)) },
+        a
+      );
+    case 'TASK_ADD':
+      return enqueue(
+        {
+          ...state,
+          tasks: [
+            ...state.tasks,
+            { id: a.id, icon: a.icon || '📌', title: a.title, done: false, hour: a.hour ?? null },
+          ],
+        },
+        a
+      );
+    case 'TASK_EDIT':
+      return enqueue(
+        {
+          ...state,
+          tasks: state.tasks.map((t) =>
+            t.id === a.id ? { ...t, title: a.title, hour: a.hour ?? t.hour } : t
+          ),
+        },
+        a
+      );
+    case 'TASK_DELETE':
+      return enqueue({ ...state, tasks: state.tasks.filter((t) => t.id !== a.id) }, a);
     case 'ADD_READING':
       return { ...state, readings: [...state.readings, { id: a.id, mgdl: a.mgdl, at: a.at }] };
-    case 'SET_DIAL':
-      return { ...state, members: state.members.map((m) => (m.id === a.id ? { ...m, dial: a.dial } : m)) };
+    case 'SET_DIAL': {
+      // Clamp to the guardian limit for teens. Safety alerts are not governed by the dial.
+      const dial = clampDial(state.members.find((m) => m.id === a.id) || {}, a.dial, state.mode);
+      return { ...state, members: state.members.map((m) => (m.id === a.id ? { ...m, dial } : m)) };
+    }
+    case 'SET_SHARE_CONTACT':
+      return {
+        ...state,
+        members: state.members.map((m) => (m.id === a.id ? { ...m, shareContact: a.on } : m)),
+      };
+    case 'INVITE_ADD':
+      return enqueue(
+        {
+          ...state,
+          invites: [
+            ...state.invites,
+            { id: a.id, name: a.name, phone: a.phone, role: a.role, code: a.code, status: 'pending' },
+          ],
+        },
+        a
+      );
+    case 'INVITE_ACCEPT': {
+      // Simulated until accounts exist. A new member starts at Safety only (most private).
+      const inv = state.invites.find((i) => i.id === a.id && i.status === 'pending');
+      if (!inv) return state;
+      return {
+        ...state,
+        invites: state.invites.map((i) => (i.id === a.id ? { ...i, status: 'accepted' } : i)),
+        members: [
+          ...state.members,
+          {
+            id: `m-${inv.id}`,
+            name: inv.name,
+            role: inv.role,
+            dial: 0,
+            timeOff: false,
+            phone: inv.phone,
+            shareContact: false,
+          },
+        ],
+      };
+    }
+    case 'DELEGATE':
+    case 'HELP_REQUEST':
+      return enqueue(
+        {
+          ...state,
+          delegations: [
+            ...state.delegations,
+            {
+              id: a.id,
+              kind: a.type === 'HELP_REQUEST' ? 'help' : 'task',
+              taskId: a.taskId ?? null,
+              to: a.to,
+              expiresAt: a.expiresAt,
+              status: 'open',
+            },
+          ],
+        },
+        a
+      );
+    case 'DELEGATION_DONE':
+      return {
+        ...state,
+        delegations: state.delegations.map((d) =>
+          d.id === a.id && d.status === 'open' ? { ...d, status: 'done' } : d
+        ),
+      };
+    case 'EXPIRE_DELEGATIONS':
+      return {
+        ...state,
+        delegations: state.delegations.map((d) =>
+          d.status === 'open' && !isDelegationActive(d, a.now) ? { ...d, status: 'expired' } : d
+        ),
+      };
+    case 'GRANT_CONSENT':
+      return {
+        ...state,
+        consent: {
+          status: 'granted',
+          guardianName: a.guardianName,
+          guardianPhone: a.guardianPhone,
+          at: a.at,
+        },
+      };
+    case 'REVOKE_CONSENT':
+      return { ...state, consent: initialState.consent };
+    case 'SET_ONLINE': {
+      // Simulated sync: going online clears the queue and counts what was sent.
+      const flush = a.online && state.queue.length > 0;
+      return {
+        ...state,
+        online: a.online,
+        queue: flush ? [] : state.queue,
+        synced: state.synced + (flush ? state.queue.length : 0),
+      };
+    }
     case 'SET_TIME_OFF':
       return { ...state, members: state.members.map((m) => (m.id === a.id ? { ...m, timeOff: a.on } : m)) };
     case 'VIEW': {
