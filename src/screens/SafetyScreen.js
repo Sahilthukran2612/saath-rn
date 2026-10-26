@@ -19,7 +19,7 @@ export default function SafetyScreen() {
   const tl = state.tally;
   const idle = !!state.alert;
   return (
-    <ScrollView contentContainerStyle={{ padding: 16, gap: 14 }}>
+    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 16, gap: 14 }}>
       <Title>{t('tabSafety')}</Title>
       <Body>{t('helpsNotice')}</Body>
       <Card>

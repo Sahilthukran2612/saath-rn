@@ -57,6 +57,17 @@ describe('detectFall (synthetic traces)', () => {
     const s = [spike, ...trace(walking, 30, 1100)];
     expect(detectFall(s).state).toBe('none');
   });
+  test('a long impact (several high samples) then still is still a fall', () => {
+    const impact = trace(() => ({ x: 0, y: 0, z: 3.4 }), 5, 1000);
+    expect(detectFall([...impact, ...trace(still, 30, 1500)]).state).toBe('fall');
+  });
+  test('a long impact then walking is not a fall', () => {
+    const impact = trace(() => ({ x: 0, y: 0, z: 3.4 }), 5, 1000);
+    expect(detectFall([...impact, ...trace(walking, 30, 1500)]).state).toBe('none');
+  });
+  test('impact still in progress (no samples after yet) is unsure, not a fall', () => {
+    expect(detectFall(trace(() => ({ x: 0, y: 0, z: 3.4 }), 8, 1000)).state).toBe('unsure');
+  });
   test('no spike is none', () => {
     expect(detectFall(trace(still, 50)).state).toBe('none');
   });

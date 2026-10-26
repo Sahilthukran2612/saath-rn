@@ -10,7 +10,7 @@ export default function CircleScreen() {
   const { state, dispatch, t } = useStore();
   const isPerson = state.role === 'person';
   return (
-    <ScrollView contentContainerStyle={{ padding: 16, gap: 14 }}>
+    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 16, gap: 14 }}>
       <Title>{t('privacyDial')}</Title>
       <Body>{t('safetyAlways')}</Body>
       {state.members.map((m) => (

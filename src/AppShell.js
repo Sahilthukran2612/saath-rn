@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, View, Pressable, Text } from 'react-native';
+import { KeyboardAvoidingView, View, Pressable, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useStore } from './state/store';
 import { colors } from './theme';
@@ -60,40 +61,42 @@ export default function AppShell({ sensing = true }) {
   const Screen = TABS.find((x) => x[0] === tab)[3];
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.mist }}>
-      <StatusBar style="dark" />
-      <RoleBar />
-      <AlertBanner />
-      <View style={{ flex: 1 }}>{state.hydrated ? <Screen /> : null}</View>
-      <View
-        style={{
-          flexDirection: 'row',
-          backgroundColor: colors.white,
-          borderTopWidth: 1,
-          borderColor: colors.line,
-        }}
-      >
-        {TABS.map(([id, key, icon]) => (
-          <Pressable
-            key={id}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: tab === id }}
-            accessibilityLabel={t(key)}
-            onPress={() => setTab(id)}
-            style={{ flex: 1, minHeight: 64, alignItems: 'center', justifyContent: 'center' }}
-          >
-            <Text style={{ fontSize: 22 * k }}>{icon}</Text>
-            <Text
-              style={{
-                fontSize: 14 * k,
-                color: tab === id ? colors.indigo : colors.ink,
-                fontWeight: tab === id ? '700' : '400',
-              }}
+      <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+        <StatusBar style="dark" />
+        <RoleBar />
+        <AlertBanner />
+        <View style={{ flex: 1 }}>{state.hydrated ? <Screen /> : null}</View>
+        <View
+          style={{
+            flexDirection: 'row',
+            backgroundColor: colors.white,
+            borderTopWidth: 1,
+            borderColor: colors.line,
+          }}
+        >
+          {TABS.map(([id, key, icon]) => (
+            <Pressable
+              key={id}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: tab === id }}
+              accessibilityLabel={t(key)}
+              onPress={() => setTab(id)}
+              style={{ flex: 1, minHeight: 64, alignItems: 'center', justifyContent: 'center' }}
             >
-              {t(key)}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
+              <Text style={{ fontSize: 22 * k }}>{icon}</Text>
+              <Text
+                style={{
+                  fontSize: 14 * k,
+                  color: tab === id ? colors.indigo : colors.ink,
+                  fontWeight: tab === id ? '700' : '400',
+                }}
+              >
+                {t(key)}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

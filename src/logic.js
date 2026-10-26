@@ -45,7 +45,11 @@ export function detectFall(samples, cfg = CFG) {
   if (!samples || samples.length === 0) return { state: 'none', confidence: 0, reason: 'no data' };
   const spike = samples.findIndex((s) => mag(s) >= cfg.fallImpactG);
   if (spike === -1) return { state: 'none', confidence: 0.9, reason: 'no impact' };
-  const after = samples.filter((s) => s.t > samples[spike].t && s.t <= samples[spike].t + cfg.stillWindowMs);
+  // An impact can span several samples. Measure stillness from where it ends, so the impact
+  // itself is never counted as movement afterwards.
+  let end = spike;
+  while (end + 1 < samples.length && mag(samples[end + 1]) >= cfg.fallImpactG) end++;
+  const after = samples.filter((s) => s.t > samples[end].t && s.t <= samples[end].t + cfg.stillWindowMs);
   if (after.length < cfg.minSamplesAfterSpike)
     return { state: 'unsure', confidence: 0.3, reason: 'sensor gap after impact' };
   const still = after.filter((s) => Math.abs(mag(s) - 1) < cfg.stillBandG).length / after.length;

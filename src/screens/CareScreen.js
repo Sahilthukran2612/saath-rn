@@ -18,7 +18,7 @@ export default function CareScreen() {
 
   if (!allowed) {
     return (
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 16 }}>
         <Body>{t('noAccess')}</Body>
       </ScrollView>
     );
@@ -33,7 +33,7 @@ export default function CareScreen() {
     }
   };
   return (
-    <ScrollView contentContainerStyle={{ padding: 16, gap: 14 }}>
+    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 16, gap: 14 }}>
       <Title>{t('tabCare')}</Title>
       <Card>
         <Body bold>{last ? `${last.mgdl} mg/dL${last.demo ? ` (${t('demoBanner')})` : ''}` : '—'}</Body>

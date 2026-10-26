@@ -19,7 +19,7 @@ export default function MeScreen() {
   const set = (key, value) => dispatch({ type: 'SET', key, value });
   const row = { flexDirection: 'row', flexWrap: 'wrap', gap: 6 };
   return (
-    <ScrollView contentContainerStyle={{ padding: 16, gap: 14 }}>
+    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 16, gap: 14 }}>
       <Title>{t('tabMe')}</Title>
       <View style={row}>
         {MODES.map(([k, l]) => (

@@ -34,7 +34,7 @@ export default function ConsentScreen() {
   };
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 16, gap: 14 }}>
+    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 16, gap: 14 }}>
       <Title>{t('consentTitle')}</Title>
       <Body>{t('consentBody')}</Body>
       <Card>

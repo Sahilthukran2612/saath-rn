@@ -35,7 +35,14 @@ function TaskList({ big }) {
           }}
         >
           <Body style={{ fontSize: (big ? 34 : 26) * k }}>{task.icon}</Body>
-          <Body bold style={{ color: task.done ? colors.white : colors.ink, fontSize: (big ? 26 : 18) * k }}>
+          <Body
+            bold
+            style={{
+              flexShrink: 1,
+              color: task.done ? colors.white : colors.ink,
+              fontSize: (big ? 26 : 18) * k,
+            }}
+          >
             {task.title}
           </Body>
         </Pressable>
@@ -182,7 +189,7 @@ export default function TodayScreen() {
     );
   else body = <ProHome />;
   return (
-    <ScrollView contentContainerStyle={{ padding: 16, gap: 14 }}>
+    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 16, gap: 14 }}>
       <Title>{t('tabToday')}</Title>
       {body}
     </ScrollView>
