@@ -40,4 +40,5 @@ yarn-error.*
 /ios
 /android
 
-# other sessions' git worktrees\n.claude/worktrees/
+# other sessions' git worktrees
+.claude/worktrees/
