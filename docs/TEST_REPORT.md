@@ -98,3 +98,21 @@ Camera capture itself, PDF "Save" to storage after the print dialog, TalkBack, a
 | Merged Android manifest | Contains the `specialUse` service, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_SPECIAL_USE`, `POST_NOTIFICATIONS`. `RECORD_AUDIO` and storage permissions are removed |
 | Full `assembleDebug` | **Failed** in the C++ step (`:app:buildCMakeDebug`): Windows 260-character path limit. Not a code error. See `docs/ARCHITECTURE.md`, "Build blocker" |
 | Service on a device or emulator | **Not run** (no APK) |
+## UI/UX redesign (2026-10-27)
+| Check | Result |
+|---|---|
+| `npm test` | 240 passed, 13 suites (adds icon-set guard, Toggle, Segmented, Field, drawn components at their edges, tab bar, Today by role, Circle dial and Time off, alert screen) |
+| `npm run lint` | 0 errors, 0 warnings |
+| `npx expo export --platform android` | Bundles (1157 modules) |
+| Android emulator (Expo Go) | Checked visually, normal and large text: shell, Today (elder after ticking tasks, adult, family), Circle, Safety, Care, Plan menu, check-in, food guide, Me, consent, and the alert in both phases |
+
+Bugs found by running it, now fixed:
+1. Importing the whole Lucide package made the bundle 3,052 modules (about 2,000 unused icons). Icons are now imported one per file (1,157 modules).
+2. All seven Mukta weights were being packaged. Only the three used are imported now.
+3. The "Time off" switches had no visible label; the member rows repeated the role under the name.
+4. "Language" broke mid-word at large text because the selector squeezed it; the selector now sits under the label.
+5. On the consent screen the status bar icons were white on a light background (nearly invisible).
+6. Task-name editing dispatched on every keystroke and would have filled the offline queue; it saves on blur again.
+7. The adult home still showed fixed demo numbers (12 days, 640); it now reads the real stock, strips and budget.
+
+Not verified: TalkBack, a physical phone, contrast with a measuring tool, a native-speaker read of every Hindi screen, dark mode (not built). See `docs/DESIGN.md`.

@@ -1,21 +1,36 @@
-// Indian textile dyes. Brick is for real safety alerts only.
+// Indian textile dyes. Neel (indigo) for trust, haldi for warmth, leaf for done.
+// Brick is for real safety alerts only. Everything else stays quiet so one thing can be memorable:
+// the dye ring on Today.
 export const colors = {
   indigo: '#26306B',
+  indigoDeep: '#171D4A',
+  indigoTint: '#E8EAF5',
+  indigoSoft: '#C9CEEA',
   haldi: '#F2B134',
+  haldiTint: '#FDF1D6',
+  haldiDeep: '#8A5B00',
   leaf: '#2F8F6B',
+  leafDeep: '#1D6B4E',
+  leafTint: '#E3F2EC',
   brick: '#B3261E',
+  brickTint: '#FBE9E7',
+  madder: '#9B3D2E',
   mist: '#F6F7FB',
   ink: '#1B1E2B',
-  white: '#FFFFFF',
-  line: '#D9DCE8',
-  // Quiet tints for selected and resting states (dark text on them stays above 7:1).
-  indigoTint: '#E8EAF5',
-  leafTint: '#E3F2EC',
   inkSoft: '#4A4F66',
+  inkFaint: '#626780',
+  white: '#FFFFFF',
+  line: '#E1E3EE',
+  lineStrong: '#C9CDDF',
 };
 
-export const type = { body: 18, small: 16, title: 24, hero: 32 };
-export const sizes = { target: 56, gutter: 16, radius: 20 };
+// Mukta carries Devanagari and Latin in one voice, so Hindi and English sit together.
+export const fonts = { regular: 'Mukta_400Regular', semi: 'Mukta_600SemiBold', bold: 'Mukta_700Bold' };
+
+export const type = { body: 18, small: 16, title: 26, hero: 34 };
+export const sizes = { target: 56, gutter: 20, radius: 20 };
+export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 };
+export const radii = { sm: 12, md: 16, lg: 20, hero: 28, pill: 999 };
 
 // Tracking and leading change with size: tight on large text, near zero on body.
 export const text = {
@@ -45,3 +60,11 @@ export const shadow = {
 
 // Press feedback: critically damped (no bounce), responds on press-in.
 export const press = { scale: 0.97, spring: { damping: 20, stiffness: 400, mass: 1 } };
+
+// Layout and entrance springs. Critically damped by default; bounce only where a gesture had momentum.
+export const motion = {
+  settle: { damping: 22, stiffness: 260, mass: 1 },
+  pill: { damping: 20, stiffness: 300, mass: 1 },
+  enterMs: 260,
+  staggerMs: 45,
+};

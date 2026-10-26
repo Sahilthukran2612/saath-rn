@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Share, TextInput, View } from 'react-native';
-import { BigButton, Body, Card, Chip, Title } from '../ui';
+import { Share, View } from 'react-native';
+import { Send, UserPlus } from '../icons';
+import { BigButton, Body, Caption, Card, Chip, Glyph, Title } from '../ui';
+import { Avatar, Badge, Field, ListGroup, ListRow } from '../kit';
 import { useStore } from '../../state/store';
 import { inviteLink, validPhone } from '../../logic';
 import { colors } from '../../theme';
 
 const ROLES = ['family', 'neighbour', 'asha', 'clinician'];
-const ROLE_LABEL = { family: 'Family', neighbour: 'Neighbour', asha: 'ASHA', clinician: 'Clinician' };
 const newCode = () => Math.random().toString(36).slice(2, 8).toUpperCase();
 
 // Invite by phone number or link. The link is shared through the phone's own share sheet
@@ -40,52 +41,52 @@ export default function InviteSection() {
     }
   };
 
-  const field = {
-    minHeight: 56,
-    fontSize: 20,
-    borderWidth: 2,
-    borderColor: colors.indigo,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-  };
+  const pending = state.invites.filter((i) => i.status === 'pending');
   return (
-    <Card>
-      <Title>{t('inviteTitle')}</Title>
-      <TextInput
-        accessibilityLabel={t('inviteName')}
-        placeholder={t('inviteName')}
-        value={name}
-        onChangeText={setName}
-        style={field}
-      />
-      <TextInput
-        accessibilityLabel={t('invitePhone')}
-        placeholder={t('invitePhone')}
-        keyboardType="phone-pad"
-        value={phone}
-        onChangeText={setPhone}
-        style={field}
-      />
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+    <Card style={{ gap: 14 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <View
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 14,
+            backgroundColor: colors.indigoTint,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Glyph icon={UserPlus} size={22} color={colors.indigo} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Title style={{ fontSize: 22 }}>{t('inviteTitle')}</Title>
+          <Caption>{t('inviteSub')}</Caption>
+        </View>
+      </View>
+      <Field label={t('inviteName')} value={name} onChangeText={setName} />
+      <Field label={t('invitePhone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
         {ROLES.map((r) => (
-          <Chip key={r} label={ROLE_LABEL[r]} active={role === r} onPress={() => setRole(r)} />
+          <Chip key={r} label={t(`role.${r}`)} active={role === r} onPress={() => setRole(r)} />
         ))}
       </View>
-      {error && <Body style={{ color: colors.brick }}>{t('invalidPhone')}</Body>}
-      <BigButton icon="📨" label={t('inviteShare')} onPress={send} />
-      {state.invites
-        .filter((i) => i.status === 'pending')
-        .map((i) => (
-          <View key={i.id} style={{ gap: 6 }}>
-            <Body>
-              {i.name} · {ROLE_LABEL[i.role]} · {t('invitePending')}
-            </Body>
-            <Chip
-              label={t('inviteAcceptSim')}
+      {error ? <Body style={{ color: colors.brick }}>{t('invalidPhone')}</Body> : null}
+      <BigButton icon={Send} label={t('inviteShare')} onPress={send} />
+      {pending.length > 0 ? (
+        <ListGroup>
+          {pending.map((i) => (
+            <ListRow
+              key={i.id}
+              lead={<Avatar name={i.name} role={i.role} />}
+              title={i.name}
+              subtitle={t(`role.${i.role}`)}
+              trailing={<Badge label={t('invitePending')} tone="haldi" />}
               onPress={() => dispatch({ type: 'INVITE_ACCEPT', id: i.id })}
+              label={t('inviteAcceptSim')}
+              chevron={false}
             />
-          </View>
-        ))}
+          ))}
+        </ListGroup>
+      ) : null}
     </Card>
   );
 }

@@ -1,10 +1,15 @@
-import React, { useEffect } from 'react';
-import { Linking, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Animated, Easing, Linking, Modal, StyleSheet, Text, View } from 'react-native';
 import { callLink, escalationMessage, smsLink } from '../care';
-import { BigButton, Body, Card, Title } from './ui';
-import { colors } from '../theme';
+import { CFG } from '../logic';
+import { Body, Caption, Glyph, PressRow, Title } from './ui';
+import { Avatar, ProgressRing } from './kit';
+import { Check, MessageCircle, Phone, Siren } from './icons';
+import { useReducedMotion } from './motion';
+import { colors, fonts, radii } from '../theme';
 import { useStore } from '../state/store';
 import { speak } from '../services/voice';
+import { warn } from '../services/haptics';
 
 // Ticks the countdown. Only depends on the alert id and phase, and dispatches without
 // reading state, so there is no stale closure and each transition is counted once in the reducer.
@@ -16,63 +21,221 @@ function useEscalationClock(alertId, active, dispatch) {
   }, [alertId, active, dispatch]);
 }
 
+// A soft pulse behind the siren. It runs only while a real alert is open, and not at all when the
+// phone asks for reduced motion.
+function Pulse({ children }) {
+  const reduced = useReducedMotion();
+  const [v] = useState(() => new Animated.Value(0));
+  useEffect(() => {
+    if (reduced) return undefined;
+    const loop = Animated.loop(
+      Animated.timing(v, {
+        toValue: 1,
+        duration: 1600,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      })
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [reduced, v]);
+  return (
+    <View style={styles.pulseWrap}>
+      {!reduced && (
+        <Animated.View
+          style={[
+            styles.pulse,
+            {
+              opacity: v.interpolate({ inputRange: [0, 1], outputRange: [0.45, 0] }),
+              transform: [{ scale: v.interpolate({ inputRange: [0, 1], outputRange: [1, 1.7] }) }],
+            },
+          ]}
+        />
+      )}
+      {children}
+    </View>
+  );
+}
+
+function ActionButton({ label, icon, onPress, filled }) {
+  return (
+    <PressRow
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      style={[styles.action, filled ? styles.actionFilled : styles.actionGhost]}
+    >
+      {icon ? (
+        <Glyph icon={icon} size={24} color={filled ? colors.leafDeep : colors.white} strokeWidth={2.4} />
+      ) : null}
+      <Text
+        style={{
+          fontFamily: fonts.bold,
+          fontSize: 20,
+          color: filled ? colors.leafDeep : colors.white,
+          flexShrink: 1,
+        }}
+      >
+        {label}
+      </Text>
+    </PressRow>
+  );
+}
+
 export default function AlertBanner() {
   const { state, dispatch, t } = useStore();
   const al = state.alert;
   useEscalationClock(al?.id, al && al.phase !== 'done', dispatch);
 
   useEffect(() => {
-    if (al) speak(`${t('areYouOk')} ${t('areYouOkSub')}`, state.lang);
+    if (al) {
+      warn();
+      speak(`${t('areYouOk')} ${t('areYouOkSub')}`, state.lang);
+    }
   }, [al?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!al) return null;
   const who = al.phase === 'escalating' ? al.chain[al.stepIndex] : null;
+  const total = al.phase === 'countdown' ? CFG.countdownSec : CFG.stepSec;
+  const progress = al.phase === 'done' ? 0 : al.remaining / total;
   return (
-    <Card
-      style={{ backgroundColor: colors.brick, borderColor: colors.brick, margin: 16 }}
-      accessibilityLiveRegion="assertive"
-    >
-      <Title style={{ color: colors.white }}>{t('areYouOk')}</Title>
-      <Body style={{ color: colors.white }}>{t('areYouOkSub')}</Body>
-      <Body style={{ color: colors.white }}>
-        {t('confidence')}: {Math.round(al.confidence * 100)}% ({al.reason})
-      </Body>
-      {al.phase === 'countdown' && (
-        <Body style={{ color: colors.white }} bold>
-          {al.remaining}s
-        </Body>
-      )}
-      {who && (
-        <Body style={{ color: colors.white }} bold>
-          {t('calling')}: {who.name} ({al.remaining}s)
-        </Body>
-      )}
-      {who?.phone && (
-        <View style={{ gap: 10 }}>
-          <BigButton
-            kind="quiet"
-            icon="📞"
-            label={`${t('callNow')} ${who.name}`}
-            onPress={() => Linking.openURL(callLink(who.phone))}
-          />
-          <BigButton
-            kind="quiet"
-            icon="💬"
-            label={t('sendMessage')}
-            onPress={() => Linking.openURL(smsLink(who.phone, escalationMessage('A Saath user', al.kind)))}
-          />
+    <Modal visible transparent={false} animationType="fade" statusBarTranslucent onRequestClose={() => {}}>
+      <View style={styles.screen} accessibilityLiveRegion="assertive">
+        <View style={styles.top}>
+          <Pulse>
+            <View style={styles.sirenDisc}>
+              <Glyph icon={Siren} size={34} color={colors.white} strokeWidth={2.2} />
+            </View>
+          </Pulse>
+          <Title style={{ color: colors.white, fontSize: 38, textAlign: 'center', letterSpacing: -0.8 }}>
+            {t('areYouOk')}
+          </Title>
+          <Body style={{ color: colors.white, textAlign: 'center', opacity: 0.92 }}>{t('areYouOkSub')}</Body>
         </View>
-      )}
-      {al.phase === 'done' && <Body style={{ color: colors.white }}>{t('nobodyReached')}</Body>}
-      <View style={{ gap: 10 }}>
-        <BigButton
-          kind="ok"
-          icon="✅"
-          label={t('imOk')}
-          onPress={() => dispatch({ type: 'IM_OK', at: Date.now() })}
-        />
-        <BigButton kind="quiet" label={t('falseAlarm')} onPress={() => dispatch({ type: 'FALSE_ALARM' })} />
+
+        <View style={styles.middle}>
+          <ProgressRing
+            size={188}
+            stroke={12}
+            progress={progress}
+            color={colors.white}
+            track="rgba(255,255,255,0.28)"
+          >
+            <Text
+              style={{
+                fontFamily: fonts.bold,
+                fontSize: 64,
+                lineHeight: 72,
+                color: colors.white,
+                letterSpacing: -2,
+              }}
+            >
+              {al.phase === 'done' ? '–' : al.remaining}
+            </Text>
+            <Text style={{ fontFamily: fonts.semi, fontSize: 16, color: colors.white, opacity: 0.9 }}>s</Text>
+          </ProgressRing>
+
+          {who ? (
+            <View style={styles.contact}>
+              <Avatar name={who.name} role={who.role} size={52} />
+              <View style={{ flex: 1 }}>
+                <Caption>{t('calling')}</Caption>
+                <Body bold>{who.name}</Body>
+              </View>
+              {who.phone ? (
+                <View style={{ flexDirection: 'row', gap: 10 }}>
+                  <PressRow
+                    accessibilityRole="button"
+                    accessibilityLabel={`${t('callNow')} ${who.name}`}
+                    onPress={() => Linking.openURL(callLink(who.phone))}
+                    style={styles.roundBtn}
+                  >
+                    <Glyph icon={Phone} size={24} color={colors.white} />
+                  </PressRow>
+                  <PressRow
+                    accessibilityRole="button"
+                    accessibilityLabel={t('sendMessage')}
+                    onPress={() =>
+                      Linking.openURL(smsLink(who.phone, escalationMessage('A Saath user', al.kind)))
+                    }
+                    style={styles.roundBtn}
+                  >
+                    <Glyph icon={MessageCircle} size={24} color={colors.white} />
+                  </PressRow>
+                </View>
+              ) : null}
+            </View>
+          ) : null}
+          {al.phase === 'done' ? (
+            <Body style={{ color: colors.white, textAlign: 'center' }}>{t('nobodyReached')}</Body>
+          ) : null}
+          <Caption style={{ color: colors.white, opacity: 0.85, textAlign: 'center' }}>
+            {t('confidence')}: {Math.round(al.confidence * 100)}% ({al.reason})
+          </Caption>
+        </View>
+
+        <View style={styles.bottom}>
+          <ActionButton
+            filled
+            icon={Check}
+            label={t('imOk')}
+            onPress={() => dispatch({ type: 'IM_OK', at: Date.now() })}
+          />
+          <ActionButton label={t('falseAlarm')} onPress={() => dispatch({ type: 'FALSE_ALARM' })} />
+        </View>
       </View>
-    </Card>
+    </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: colors.brick,
+    paddingHorizontal: 24,
+    paddingTop: 56,
+    paddingBottom: 32,
+    justifyContent: 'space-between',
+  },
+  top: { alignItems: 'center', gap: 10 },
+  middle: { alignItems: 'center', gap: 20 },
+  bottom: { gap: 12 },
+  pulseWrap: { width: 80, height: 80, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
+  pulse: { position: 'absolute', width: 72, height: 72, borderRadius: 36, backgroundColor: colors.white },
+  sirenDisc: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  contact: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: colors.white,
+    borderRadius: radii.lg,
+    padding: 14,
+    alignSelf: 'stretch',
+  },
+  roundBtn: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: colors.indigo,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  action: {
+    minHeight: 64,
+    borderRadius: radii.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingHorizontal: 20,
+  },
+  actionFilled: { backgroundColor: colors.white },
+  actionGhost: { borderWidth: 2, borderColor: 'rgba(255,255,255,0.7)' },
+});

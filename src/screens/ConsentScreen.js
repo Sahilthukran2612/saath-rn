@@ -1,20 +1,14 @@
 import React, { useState } from 'react';
-import { ScrollView, TextInput } from 'react-native';
-import { BigButton, Body, Card, Title } from '../components/ui';
+import { ScrollView, View } from 'react-native';
+import { BigButton, Body, Caption, Card, Title } from '../components/ui';
+import { Field } from '../components/kit';
+import { SaathMark } from '../components/art';
+import { Check } from '../components/icons';
 import { useStore } from '../state/store';
 import { validPhone } from '../logic';
 import { colors } from '../theme';
 import { speak } from '../services/voice';
-
-const input = {
-  minHeight: 56,
-  fontSize: 20,
-  borderWidth: 2,
-  borderColor: colors.indigo,
-  borderRadius: 12,
-  paddingHorizontal: 12,
-  backgroundColor: colors.white,
-};
+import { nowMs } from '../services/clock';
 
 // Guardian-consent step for under-18s. It records who agreed, on this phone only.
 // It does NOT verify identity: real verifiable consent needs legal review and accounts.
@@ -30,33 +24,29 @@ export default function ConsentScreen() {
       speak(t('consentNeed'), state.lang);
       return;
     }
-    dispatch({ type: 'GRANT_CONSENT', guardianName: name.trim(), guardianPhone: phone, at: Date.now() });
+    dispatch({ type: 'GRANT_CONSENT', guardianName: name.trim(), guardianPhone: phone, at: nowMs() });
   };
 
   return (
-    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 16, gap: 14 }}>
-      <Title>{t('consentTitle')}</Title>
-      <Body>{t('consentBody')}</Body>
-      <Card>
-        <TextInput
-          accessibilityLabel={t('consentName')}
-          placeholder={t('consentName')}
-          value={name}
-          onChangeText={setName}
-          style={input}
-        />
-        <TextInput
-          accessibilityLabel={t('consentPhone')}
-          placeholder={t('consentPhone')}
-          keyboardType="phone-pad"
-          value={phone}
-          onChangeText={setPhone}
-          style={input}
-        />
-        {error && <Body style={{ color: colors.brick }}>{t('consentNeed')}</Body>}
-        <BigButton kind="ok" icon="✅" label={t('consentAgree')} onPress={submit} />
+    <ScrollView
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={{ padding: 24, paddingTop: 32, gap: 18 }}
+    >
+      <SaathMark size={56} />
+      <View style={{ gap: 6 }}>
+        <Title style={{ fontSize: 32, letterSpacing: -0.6 }}>{t('consentTitle')}</Title>
+        <Body>{t('consentBody')}</Body>
+        <Caption>{t('consentSub')}</Caption>
+      </View>
+      <Card style={{ gap: 14 }}>
+        <Field label={t('consentName')} value={name} onChangeText={setName} />
+        <Field label={t('consentPhone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+        {error ? <Body style={{ color: colors.madder }}>{t('consentNeed')}</Body> : null}
+        <BigButton kind="ok" icon={Check} label={t('consentAgree')} onPress={submit} />
       </Card>
-      <Body>{t('consentLegal')}</Body>
+      <Card tone="haldi">
+        <Caption style={{ color: colors.ink }}>{t('consentLegal')}</Caption>
+      </Card>
       <BigButton
         kind="quiet"
         label={t('notMinor')}

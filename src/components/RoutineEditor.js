@@ -1,11 +1,38 @@
 import React, { useState } from 'react';
-import { TextInput, View } from 'react-native';
-import { BigButton, Body, Card, Chip, Title } from './ui';
+import { View } from 'react-native';
+import { Bell, BellRing, Pencil, Plus, RefreshCw, X } from './icons';
+import { BigButton, Card, Chip, Title } from './ui';
+import { Field, ListGroup, ListRow, Toggle } from './kit';
 import { useStore } from '../state/store';
 import { useNow } from './useNow';
 import { shouldNudge } from '../logic';
-import { colors } from '../theme';
 import { speak } from '../services/voice';
+import { nowMs } from '../services/clock';
+import { colors } from '../theme';
+
+// One task name. The text is local while typing and saved when the person finishes, so the offline
+// queue gets one change per edit, not one per letter.
+function TaskField({ task, label, removeLabel }) {
+  const { dispatch } = useStore();
+  const [value, setValue] = useState(task.title);
+  const save = () => {
+    const v = value.trim();
+    if (v && v !== task.title) dispatch({ type: 'TASK_EDIT', id: task.id, title: v, at: nowMs() });
+    else setValue(task.title);
+  };
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8 }}>
+      <View style={{ flex: 1 }}>
+        <Field label={label} value={value} onChangeText={setValue} onEndEditing={save} />
+      </View>
+      <Chip
+        label={removeLabel}
+        icon={X}
+        onPress={() => dispatch({ type: 'TASK_DELETE', id: task.id, at: nowMs() })}
+      />
+    </View>
+  );
+}
 
 // Rhythm Board editing. Works offline: every change goes into a queue that "syncs" later.
 // Reminders respect Time Off (any member on Time Off) and the sleep window; safety is never muted.
@@ -16,70 +43,49 @@ export default function RoutineEditor() {
   const [text, setText] = useState('');
   const timeOff = state.members.some((m) => m.timeOff);
   const nudge = shouldNudge({ nowMs: now, timeOff, phase: state.phase });
+  const waiting = state.queue.length;
 
   const add = () => {
     const title = text.trim();
     if (!title) return;
-    dispatch({ type: 'TASK_ADD', id: String(Date.now()), title, at: Date.now() });
+    dispatch({ type: 'TASK_ADD', id: String(nowMs()), title, at: nowMs() });
     speak(`${t('addTask')}: ${title}`, state.lang);
     setText('');
   };
 
   return (
-    <Card>
-      <Body>
-        {nudge.ok ? t('remindersOn') : `${t('remindersPaused')} (${nudge.reason})`}
-        {state.queue.length > 0 ? ` · ${t('waiting')}: ${state.queue.length}` : ''}
-      </Body>
-      <Chip
-        label={t(state.online ? 'goOffline' : 'goOnline')}
-        onPress={() => dispatch({ type: 'SET_ONLINE', online: !state.online })}
-      />
-      <Chip label={t('editRoutine')} active={open} onPress={() => setOpen(!open)} />
-      {open && (
-        <View style={{ gap: 10 }}>
-          <Title>{t('editRoutine')}</Title>
+    <View style={{ gap: 12 }}>
+      <ListGroup>
+        <ListRow
+          icon={nudge.ok ? BellRing : Bell}
+          iconBg={nudge.ok ? colors.leafTint : colors.haldiTint}
+          iconColor={nudge.ok ? colors.leafDeep : colors.haldiDeep}
+          title={nudge.ok ? t('remindersOn') : `${t('remindersPaused')} (${nudge.reason})`}
+        />
+        <ListRow
+          icon={RefreshCw}
+          title={t(state.online ? 'goOffline' : 'goOnline')}
+          subtitle={waiting > 0 ? `${t('waiting')}: ${waiting}` : undefined}
+          trailing={
+            <Toggle
+              value={state.online}
+              label={t('syncDemo')}
+              onValueChange={(on) => dispatch({ type: 'SET_ONLINE', online: on })}
+            />
+          }
+        />
+        <ListRow icon={Pencil} title={t('editRoutine')} onPress={() => setOpen(!open)} chevron={false} />
+      </ListGroup>
+      {open ? (
+        <Card style={{ gap: 12 }}>
+          <Title style={{ fontSize: 22 }}>{t('editRoutine')}</Title>
           {state.tasks.map((x) => (
-            <View key={x.id} style={{ gap: 6 }}>
-              <TextInput
-                accessibilityLabel={t('taskName')}
-                defaultValue={x.title}
-                onEndEditing={(e) => {
-                  const v = e.nativeEvent.text.trim();
-                  if (v && v !== x.title) dispatch({ type: 'TASK_EDIT', id: x.id, title: v, at: Date.now() });
-                }}
-                style={{
-                  minHeight: 56,
-                  fontSize: 18,
-                  borderWidth: 1,
-                  borderColor: colors.line,
-                  borderRadius: 12,
-                  paddingHorizontal: 12,
-                }}
-              />
-              <Chip
-                label={`${t('remove')}: ${x.title}`}
-                onPress={() => dispatch({ type: 'TASK_DELETE', id: x.id, at: Date.now() })}
-              />
-            </View>
+            <TaskField key={x.id} task={x} label={t('taskName')} removeLabel={`${t('remove')}: ${x.title}`} />
           ))}
-          <TextInput
-            accessibilityLabel={t('taskName')}
-            placeholder={t('taskName')}
-            value={text}
-            onChangeText={setText}
-            style={{
-              minHeight: 56,
-              fontSize: 18,
-              borderWidth: 2,
-              borderColor: colors.indigo,
-              borderRadius: 12,
-              paddingHorizontal: 12,
-            }}
-          />
-          <BigButton label={t('addTask')} onPress={add} />
-        </View>
-      )}
-    </Card>
+          <Field label={t('taskName')} value={text} onChangeText={setText} />
+          <BigButton icon={Plus} label={t('addTask')} onPress={add} />
+        </Card>
+      ) : null}
+    </View>
   );
 }

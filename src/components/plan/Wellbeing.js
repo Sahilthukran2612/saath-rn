@@ -1,24 +1,18 @@
 import React, { useState } from 'react';
-import { Image, Share, TextInput, View } from 'react-native';
+import { Image, Share, StyleSheet, Text, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { BigButton, Body, Card, Chip, Title } from '../ui';
+import { Banana, Camera, Candy, Coffee, Heart, Send, Soup, Salad, Utensils, Wheat } from '../icons';
+import { BigButton, Body, Caption, Card, Chip, Glyph, PressRow, Title } from '../ui';
+import { Badge, CheckMark, Field, ListGroup, ListRow, Segmented, Stat } from '../kit';
+import { MoodFace, PlateDiagram } from '../art';
 import { useStore } from '../../state/store';
 import { useNow } from '../useNow';
+import { nowMs } from '../../services/clock';
 import { FOOT_ITEMS, idrsScore, schoolCard, weekKey, weeklySummary } from '../../plan';
 import food from '../../content/food.json';
-import { colors } from '../../theme';
+import { colors, fonts, radii } from '../../theme';
 
-const row = { flexDirection: 'row', flexWrap: 'wrap', gap: 6 };
-const field = {
-  minHeight: 56,
-  fontSize: 18,
-  borderWidth: 2,
-  borderColor: colors.indigo,
-  borderRadius: 12,
-  paddingHorizontal: 12,
-  backgroundColor: colors.white,
-};
-const MOODS = ['😣', '😟', '😐', '🙂', '😄'];
+const row = { flexDirection: 'row', flexWrap: 'wrap', gap: 8 };
 
 // A weekly "how did this week feel?" The reply is always gentle: no counts of misses,
 // no nudge to do more. A hard week points to company and Time off.
@@ -28,32 +22,56 @@ export function CheckinSection() {
   const thisWeek = state.checkins.find((c) => c.week === weekKey(now));
   const summary = weeklySummary(state.checkins);
   return (
-    <View style={{ gap: 12 }}>
-      <Title>{t('checkin.title')}</Title>
-      <View style={row}>
-        {MOODS.map((m, i) => (
-          <Chip
-            key={m}
-            label={`${m} ${t(`mood.${i + 1}`)}`}
-            active={thisWeek?.mood === i + 1}
-            onPress={() => dispatch({ type: 'CHECKIN', mood: i + 1, at: Date.now() })}
-          />
-        ))}
+    <View style={{ gap: 16 }}>
+      <Title style={{ fontSize: 24 }}>{t('checkin.title')}</Title>
+      <View style={styles.moodRow}>
+        {[1, 2, 3, 4, 5].map((n) => {
+          const on = thisWeek?.mood === n;
+          return (
+            <PressRow
+              key={n}
+              accessibilityRole="button"
+              accessibilityLabel={t(`mood.${n}`)}
+              accessibilityState={{ selected: on }}
+              onPress={() => dispatch({ type: 'CHECKIN', mood: n, at: Date.now() })}
+              containerStyle={{ flex: 1 }}
+              style={[styles.moodTile, on && styles.moodTileOn]}
+            >
+              <MoodFace level={n} size={40} color={on ? colors.white : colors.indigo} />
+            </PressRow>
+          );
+        })}
       </View>
-      <Card>
-        <Body bold>{t(`wellbeing.${summary.id}`)}</Body>
-        {state.checkins.length > 1 && (
-          <Body>
-            {state.checkins
-              .slice(-8)
-              .map((c) => MOODS[c.mood - 1])
-              .join('  ')}
-          </Body>
-        )}
+      <View style={styles.moodLabels}>
+        <Caption>{t('mood.1')}</Caption>
+        <Caption>{t('mood.5')}</Caption>
+      </View>
+      <Card tone="tint" style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <Glyph icon={Heart} size={26} color={colors.indigo} />
+        <Body bold style={{ flex: 1 }}>
+          {t(`wellbeing.${summary.id}`)}
+        </Body>
       </Card>
+      {state.checkins.length > 1 ? (
+        <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
+          {state.checkins.slice(-8).map((c) => (
+            <MoodFace key={c.week} level={c.mood} size={30} color={colors.inkFaint} />
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 }
+
+const MEALS = [
+  ['rice', Utensils],
+  ['roti', Wheat],
+  ['salad', Salad],
+  ['dal', Soup],
+  ['fruit', Banana],
+  ['sweet', Candy],
+  ['tea', Coffee],
+];
 
 export function FoodSection() {
   const { state, dispatch, t } = useStore();
@@ -62,58 +80,92 @@ export function FoodSection() {
   const meals = food.regions.find((r) => r.id === region)?.meals ?? [];
   const today = new Date().toDateString();
   const todays = state.meals.filter((m) => new Date(m.at).toDateString() === today);
+  const plateDots = [colors.leaf, colors.haldi, colors.indigoSoft];
   return (
-    <View style={{ gap: 12 }}>
-      <Body bold>{t('food.verify')}</Body>
-      <Card>
-        <Title>{t('food.plate')}</Title>
-        {food.plate.map((p) => (
-          <Body key={p.id}>
-            {p.icon} {p[lang]}
-          </Body>
-        ))}
+    <View style={{ gap: 18 }}>
+      <Card tone="haldi">
+        <Body bold>{t('food.verify')}</Body>
       </Card>
-      <Card>
-        <Title>{t('food.region')}</Title>
+      <Card style={{ gap: 14 }}>
+        <Title style={{ fontSize: 22 }}>{t('food.plate')}</Title>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+          <PlateDiagram size={132} />
+          <View style={{ flex: 1, gap: 10 }}>
+            {food.plate.map((p, i) => (
+              <View key={p.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <View style={{ width: 14, height: 14, borderRadius: 7, backgroundColor: plateDots[i] }} />
+                <Body style={{ flex: 1 }}>{p[lang]}</Body>
+              </View>
+            ))}
+          </View>
+        </View>
+      </Card>
+      <View style={{ gap: 10 }}>
+        <Body bold>{t('food.region')}</Body>
         <View style={row}>
           {food.regions.map((r) => (
             <Chip key={r.id} label={r[lang]} active={region === r.id} onPress={() => setRegion(r.id)} />
           ))}
         </View>
-        {meals.map((m) => (
-          <Body key={m.en}>
-            {m.icon} {m[lang]}
-          </Body>
-        ))}
-      </Card>
-      <Card>
-        <Title>{t('food.fasting')}</Title>
-        {food.fasting.map((f) => (
-          <Body key={f.en}>• {f[lang]}</Body>
-        ))}
-        <Title>{t('food.festival')}</Title>
-        {food.festival.map((f) => (
-          <Body key={f.en}>• {f[lang]}</Body>
-        ))}
-      </Card>
-      <Card>
-        <Title>{t('food.log')}</Title>
+        <ListGroup>
+          {meals.map((m) => (
+            <ListRow key={m.en} icon={Utensils} title={m[lang]} />
+          ))}
+        </ListGroup>
+      </View>
+      <View style={{ gap: 10 }}>
+        <Body bold>{t('food.fasting')}</Body>
+        <ListGroup>
+          {food.fasting.map((f) => (
+            <ListRow
+              key={f.en}
+              icon={Heart}
+              iconBg={colors.haldiTint}
+              iconColor={colors.haldiDeep}
+              title={f[lang]}
+            />
+          ))}
+        </ListGroup>
+        <Body bold>{t('food.festival')}</Body>
+        <ListGroup>
+          {food.festival.map((f) => (
+            <ListRow
+              key={f.en}
+              icon={Candy}
+              iconBg={colors.leafTint}
+              iconColor={colors.leafDeep}
+              title={f[lang]}
+            />
+          ))}
+        </ListGroup>
+      </View>
+      <Card style={{ gap: 12 }}>
+        <Title style={{ fontSize: 22 }}>{t('food.log')}</Title>
         <View style={row}>
-          {food.mealIcons.map((icon) => (
+          {MEALS.map(([id, Icon]) => (
             <Chip
-              key={icon}
-              label={icon}
-              onPress={() => dispatch({ type: 'MEAL_LOG', id: String(Date.now()), icon, at: Date.now() })}
+              key={id}
+              label={t(`meal.${id}`)}
+              icon={Icon}
+              onPress={() => dispatch({ type: 'MEAL_LOG', id: String(Date.now()), icon: id, at: Date.now() })}
             />
           ))}
         </View>
-        <Body>
-          {t('food.today')}: {todays.map((m) => m.icon).join(' ') || '—'}
-        </Body>
+        <Body bold>{`${t('food.today')}: ${todays.length}`}</Body>
+        {todays.length ? (
+          <View style={row}>
+            {todays.map((m) => {
+              const found = MEALS.find(([id]) => id === m.icon);
+              return <Badge key={m.id} label={found ? t(`meal.${m.icon}`) : t('food.today')} tone="leaf" />;
+            })}
+          </View>
+        ) : null}
       </Card>
     </View>
   );
 }
+
+const ACTIVITY = ['vigorous', 'moderate', 'mild', 'sedentary'];
 
 // Foot check, waist and the risk questionnaire. Photos are for the person's own diary and the
 // clinic: Saath does not look at them or analyse them.
@@ -147,17 +199,19 @@ export function BodySection() {
   const lastWaist = state.waist[state.waist.length - 1];
 
   return (
-    <View style={{ gap: 12 }}>
-      <Card>
-        <Title>{t('foot.title')}</Title>
-        {FOOT_ITEMS.map((id) => (
-          <Chip
-            key={id}
-            label={`${items.includes(id) ? '✓ ' : ''}${t(`foot.${id}`)}`}
-            active={items.includes(id)}
-            onPress={() => toggle(id)}
-          />
-        ))}
+    <View style={{ gap: 18 }}>
+      <View style={{ gap: 10 }}>
+        <Title style={{ fontSize: 24 }}>{t('foot.title')}</Title>
+        <ListGroup>
+          {FOOT_ITEMS.map((id) => (
+            <ListRowCheck
+              key={id}
+              label={t(`foot.${id}`)}
+              done={items.includes(id)}
+              onPress={() => toggle(id)}
+            />
+          ))}
+        </ListGroup>
         <BigButton
           label={t('foot.save')}
           onPress={() => {
@@ -165,66 +219,61 @@ export function BodySection() {
             setItems([]);
           }}
         />
-        <Body>
-          {t('foot.checks')}: {state.footChecks.length}
-        </Body>
-        <Body bold>{t('foot.note')}</Body>
-        <BigButton kind="quiet" icon="📷" label={t('foot.photo')} onPress={photo} />
-        <Body>{t('foot.photoNote')}</Body>
+        <Body bold>{`${t('foot.checks')}: ${state.footChecks.length}`}</Body>
+        <Card tone="haldi">
+          <Body bold>{t('foot.note')}</Body>
+        </Card>
+        <BigButton kind="quiet" icon={Camera} label={t('foot.photo')} onPress={photo} />
+        <Caption>{t('foot.photoNote')}</Caption>
         <View style={row}>
           {state.footPhotos.slice(-4).map((p) => (
             <Image
               key={p.uri}
               source={{ uri: p.uri }}
-              style={{ width: 80, height: 80, borderRadius: 10 }}
+              style={{ width: 84, height: 84, borderRadius: 14 }}
               accessibilityLabel={t('foot.photos')}
             />
           ))}
         </View>
-      </Card>
-      <Card>
-        <Title>{t('waist.title')}</Title>
-        <TextInput
-          accessibilityLabel={t('waist.title')}
-          keyboardType="number-pad"
+      </View>
+
+      <Card style={{ gap: 12 }}>
+        <Title style={{ fontSize: 22 }}>{t('waist.title')}</Title>
+        {lastWaist ? <Stat value={`${lastWaist.cm} cm`} label={t('waist.title')} /> : null}
+        <Field
+          label={t('waist.title')}
           value={waist}
           onChangeText={setWaist}
+          keyboardType="number-pad"
           placeholder="cm"
-          style={field}
         />
         <BigButton
+          kind="quiet"
           label={t('waist.save')}
           onPress={() => {
             dispatch({ type: 'WAIST_ADD', cm: parseInt(waist, 10), at: Date.now() });
             setWaist('');
           }}
         />
-        {lastWaist && <Body bold>{lastWaist.cm} cm</Body>}
       </Card>
-      <Card>
-        <Title>{t('risk.title')}</Title>
-        <TextInput
-          accessibilityLabel={t('risk.age')}
-          placeholder={t('risk.age')}
-          keyboardType="number-pad"
+
+      <Card style={{ gap: 14 }}>
+        <Title style={{ fontSize: 22 }}>{t('risk.title')}</Title>
+        <Field
+          label={t('risk.age')}
           value={a.age}
           onChangeText={(v) => setA({ ...a, age: v })}
-          style={field}
+          keyboardType="number-pad"
         />
-        <Body bold>{t('risk.gender')}</Body>
+        <Caption>{t('risk.gender')}</Caption>
+        <Segmented
+          value={a.gender}
+          onChange={(gender) => setA({ ...a, gender })}
+          options={['female', 'male'].map((g) => ({ value: g, label: t(`risk.${g}`) }))}
+        />
+        <Caption>{t('risk.activity')}</Caption>
         <View style={row}>
-          {['female', 'male'].map((g) => (
-            <Chip
-              key={g}
-              label={t(`risk.${g}`)}
-              active={a.gender === g}
-              onPress={() => setA({ ...a, gender: g })}
-            />
-          ))}
-        </View>
-        <Body bold>{t('risk.activity')}</Body>
-        <View style={row}>
-          {['vigorous', 'moderate', 'mild', 'sedentary'].map((g) => (
+          {ACTIVITY.map((g) => (
             <Chip
               key={g}
               label={t(`act.${g}`)}
@@ -233,29 +282,41 @@ export function BodySection() {
             />
           ))}
         </View>
-        <Body bold>{t('risk.family')}</Body>
-        <View style={row}>
-          {['none', 'one', 'both'].map((g) => (
-            <Chip
-              key={g}
-              label={t(`fam.${g}`)}
-              active={a.family === g}
-              onPress={() => setA({ ...a, family: g })}
-            />
-          ))}
-        </View>
+        <Caption>{t('risk.family')}</Caption>
+        <Segmented
+          value={a.family}
+          onChange={(family) => setA({ ...a, family })}
+          options={['none', 'one', 'both'].map((g) => ({ value: g, label: t(`fam.${g}`) }))}
+        />
         <BigButton label={t('risk.calc')} onPress={calc} />
-        {result && (
-          <>
-            <Body bold>
-              {t('risk.score')}: {result.score}
-            </Body>
-            <Body>{t(`risk.${result.level}`)}</Body>
-          </>
-        )}
-        <Body>{t('risk.note')}</Body>
+        {result ? (
+          <View style={{ gap: 8 }}>
+            <Body bold>{`${t('risk.score')}: ${result.score}`}</Body>
+            <Badge
+              label={t(`risk.${result.level}`)}
+              tone={result.level === 'high' ? 'haldi' : result.level === 'moderate' ? 'indigo' : 'leaf'}
+            />
+          </View>
+        ) : null}
+        <Caption>{t('risk.note')}</Caption>
       </Card>
     </View>
+  );
+}
+
+// A checklist row: the whole row is the target and the check draws itself.
+function ListRowCheck({ label, done, onPress, last }) {
+  return (
+    <PressRow
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: done }}
+      accessibilityLabel={label}
+      onPress={onPress}
+      style={[styles.checkRow, !last && styles.checkDivider]}
+    >
+      <Text style={{ flex: 1, fontFamily: fonts.semi, fontSize: 18, color: colors.ink }}>{label}</Text>
+      <CheckMark done={done} size={30} />
+    </PressRow>
   );
 }
 
@@ -265,29 +326,72 @@ export function BodySection() {
 export function SchoolSection() {
   const { state, dispatch, t } = useStore();
   const card = schoolCard(state);
-  const lines = [
-    card.name && `${card.name}`,
-    ...card.steps.map((s, i) => `${i + 1}. ${t(`school.${s}`)}`),
-    card.phone && `${t('school.guardian')}: ${card.guardian} ${card.phone}`,
-    t('school.note'),
-  ].filter(Boolean);
+  const steps = card.steps.map((s) => t(`school.${s}`));
+  const contact = card.phone ? `${t('school.guardian')}: ${card.guardian} ${card.phone}` : null;
   const share = async () => {
-    dispatch({ type: 'VIEW', viewer: 'teacher', item: t('school.shared'), at: Date.now() });
+    dispatch({ type: 'VIEW', viewer: 'teacher', item: t('school.shared'), at: nowMs() });
     try {
-      await Share.share({ message: lines.join('\n') });
+      await Share.share({
+        message: [card.name, ...steps.map((s, i) => `${i + 1}. ${s}`), contact, t('school.note')]
+          .filter(Boolean)
+          .join('\n'),
+      });
     } catch {
       // dismissing the share sheet is fine
     }
   };
   return (
-    <View style={{ gap: 12 }}>
-      <Card>
-        <Title>{t('school.title')}</Title>
-        {lines.map((l) => (
-          <Body key={l}>{l}</Body>
-        ))}
-      </Card>
-      <BigButton icon="📤" label={t('school.share')} onPress={share} />
+    <View style={{ gap: 16 }}>
+      <View style={styles.schoolCard}>
+        <View style={styles.schoolHead}>
+          <Title style={{ color: colors.white, fontSize: 22 }}>{t('school.title')}</Title>
+          {card.name ? <Body style={{ color: colors.indigoSoft }}>{card.name}</Body> : null}
+        </View>
+        <View style={{ padding: 18, gap: 14 }}>
+          {steps.map((s, i) => (
+            <View key={s} style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-start' }}>
+              <View style={styles.stepNum}>
+                <Text style={{ fontFamily: fonts.bold, fontSize: 16, color: colors.indigo }}>{i + 1}</Text>
+              </View>
+              <Body style={{ flex: 1 }}>{s}</Body>
+            </View>
+          ))}
+          {contact ? <Body bold>{contact}</Body> : null}
+          <Caption>{t('school.note')}</Caption>
+        </View>
+      </View>
+      <BigButton icon={Send} label={t('school.share')} onPress={share} />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  moodRow: { flexDirection: 'row', gap: 8 },
+  moodTile: {
+    minHeight: 72,
+    borderRadius: radii.lg,
+    backgroundColor: colors.indigoTint,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  moodTileOn: { backgroundColor: colors.indigo },
+  moodLabels: { flexDirection: 'row', justifyContent: 'space-between' },
+  checkRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 64, paddingHorizontal: 16 },
+  checkDivider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
+  schoolCard: {
+    backgroundColor: colors.white,
+    borderRadius: radii.hero,
+    overflow: 'hidden',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.line,
+  },
+  schoolHead: { backgroundColor: colors.indigo, padding: 18, gap: 2 },
+  stepNum: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: colors.indigoTint,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

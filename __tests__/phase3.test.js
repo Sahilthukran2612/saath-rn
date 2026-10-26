@@ -102,13 +102,15 @@ describe('Plan screen', () => {
     // switch to the person (demo role bar) and read the log they can see
     await fireEvent.press(screen.getByLabelText('Person'));
     await fireEvent.press(screen.getByLabelText('Circle'));
-    expect(screen.getByText(/family · Handing over care/)).toBeTruthy();
+    expect(screen.getByText('Handing over care')).toBeTruthy();
+    // the audit subtitle is "<role>, <time>", so it starts with a digit after the comma
+    expect(screen.getByText(/^Family, \d/)).toBeTruthy();
   });
   test('the teen can mark a step ready, and the stage name updates', async () => {
     await mount({ mode: 'teen', consent });
     await openPlan('Handing over care');
     await fireEvent.press(screen.getAllByLabelText('I am ready for the next step')[0]);
-    expect(screen.getAllByText(/\[ Together \]/).length).toBe(1);
+    expect(screen.getAllByText('Together')).toHaveLength(1);
   });
   test('visit prep: a suggested question is added and shown', async () => {
     await mount({});
@@ -147,7 +149,7 @@ describe('Plan screen', () => {
     await mount({});
     await openPlan('Weekly check-in');
     expect(screen.getByText(/no wrong answer/)).toBeTruthy();
-    await fireEvent.press(screen.getByLabelText('😣 Very hard'));
+    await fireEvent.press(screen.getByLabelText('Very hard'));
     expect(screen.getByText(/Thank you for sharing/)).toBeTruthy();
   });
   test('food guide is marked verify locally and switches to Hindi', async () => {
@@ -160,8 +162,8 @@ describe('Plan screen', () => {
   test('food log adds a meal icon', async () => {
     await mount({});
     await openPlan('Food guide');
-    await fireEvent.press(screen.getByLabelText('🍚'));
-    expect(screen.getByText(/Meals today: 🍚/)).toBeTruthy();
+    await fireEvent.press(screen.getByLabelText('Rice'));
+    expect(screen.getByText('Meals today: 1')).toBeTruthy();
   });
   test('foot check can be saved and counted', async () => {
     await mount({});

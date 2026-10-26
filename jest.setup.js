@@ -21,3 +21,9 @@ jest.mock('expo-image-picker', () => ({
   requestCameraPermissionsAsync: jest.fn(async () => ({ granted: true })),
   launchCameraAsync: jest.fn(async () => ({ canceled: false, assets: [{ uri: 'file:///photo.jpg' }] })),
 }));
+jest.mock('expo-haptics', () => ({
+  impactAsync: jest.fn(),
+  notificationAsync: jest.fn(),
+  ImpactFeedbackStyle: { Light: 'light' },
+  NotificationFeedbackType: { Success: 'success', Warning: 'warning' },
+}));

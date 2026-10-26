@@ -1,7 +1,9 @@
 import React from 'react';
-import { ScrollView } from 'react-native';
-import { Chip } from './ui';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Eye } from './icons';
+import { PressRow, Glyph } from './ui';
 import { useStore } from '../state/store';
+import { colors, fonts } from '../theme';
 
 const LABEL = {
   person: 'Person',
@@ -11,24 +13,64 @@ const LABEL = {
   clinician: 'Clinician',
 };
 
-// Demo device only. Real roles come from real accounts in Phase 4.
+// Demo device only: look at the app as each role. Real roles come from real accounts (Phase 4).
+// It is kept small and quiet so it does not read as part of the product.
 export default function RoleBar() {
   const { state, dispatch } = useStore();
   if (!state.demo) return null;
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      style={{ flexGrow: 0, paddingHorizontal: 16, paddingVertical: 8 }}
-    >
-      {Object.keys(LABEL).map((r) => (
-        <Chip
-          key={r}
-          label={LABEL[r]}
-          active={state.role === r}
-          onPress={() => dispatch({ type: 'SET', key: 'role', value: r })}
-        />
-      ))}
-    </ScrollView>
+    <View style={styles.strip}>
+      <View style={styles.tag}>
+        <Glyph icon={Eye} size={16} color={colors.inkSoft} />
+        <Text style={styles.tagText}>Demo view</Text>
+      </View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ gap: 6, paddingRight: 16 }}
+      >
+        {Object.keys(LABEL).map((r) => {
+          const on = state.role === r;
+          return (
+            <PressRow
+              key={r}
+              accessibilityRole="button"
+              accessibilityState={{ selected: on }}
+              accessibilityLabel={LABEL[r]}
+              onPress={() => dispatch({ type: 'SET', key: 'role', value: r })}
+              haptic={false}
+              style={[styles.chip, on && styles.chipOn]}
+            >
+              <Text
+                style={{ fontFamily: fonts.semi, fontSize: 15, color: on ? colors.white : colors.indigo }}
+              >
+                {LABEL[r]}
+              </Text>
+            </PressRow>
+          );
+        })}
+      </ScrollView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  strip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingLeft: 16,
+    paddingVertical: 6,
+    backgroundColor: colors.indigoTint,
+  },
+  tag: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  tagText: { fontFamily: fonts.semi, fontSize: 15, color: colors.inkSoft },
+  chip: {
+    minHeight: 40,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    backgroundColor: colors.white,
+    justifyContent: 'center',
+  },
+  chipOn: { backgroundColor: colors.indigo },
+});

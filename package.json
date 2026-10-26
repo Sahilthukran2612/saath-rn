@@ -3,14 +3,18 @@
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
+    "@expo-google-fonts/mukta": "^0.4.1",
     "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "~58.0.19",
+    "expo-font": "~58.0.10",
+    "expo-haptics": "~58.0.7",
     "expo-image-picker": "~58.0.10",
     "expo-print": "~58.0.7",
     "expo-sensors": "~58.0.4",
     "expo-sharing": "~58.0.20",
     "expo-speech": "~58.0.3",
     "expo-status-bar": "~58.0.4",
+    "lucide-react-native": "^1.61.0",
     "react": "19.3.0",
     "react-native": "0.88.0",
     "react-native-qrcode-svg": "^6.3.32",
@@ -47,6 +51,10 @@
     "testPathIgnorePatterns": [
       "/node_modules/",
       "<rootDir>/.claude/worktrees/"
-    ]
+    ],
+    "moduleNameMapper": {
+      "^lucide-react-native/icons/(.*)$": "<rootDir>/node_modules/lucide-react-native/dist/cjs/icons/$1.js",
+      "^lucide-react-native$": "<rootDir>/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js"
+    }
   }
 }

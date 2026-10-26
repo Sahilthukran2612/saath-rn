@@ -3,10 +3,15 @@ import { KeyboardAvoidingView, StyleSheet, View, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useStore } from './state/store';
-import { colors, shadow } from './theme';
+import { colors, fonts } from './theme';
 import RoleBar from './components/RoleBar';
 import AlertBanner from './components/AlertBanner';
-import { PressRow, useScale } from './components/ui';
+import TabBar from './components/TabBar';
+import { useScale } from './components/ui';
+import { Badge } from './components/kit';
+import { SaathMark } from './components/art';
+import { Reveal } from './components/motion';
+import { NavContext } from './components/nav';
 import TodayScreen from './screens/TodayScreen';
 import CircleScreen from './screens/CircleScreen';
 import SafetyScreen from './screens/SafetyScreen';
@@ -19,14 +24,25 @@ import { cfgFrom } from './care';
 import { askNotificationPermission, startWatching, stopWatching } from './services/foreground';
 import { t as translate } from './i18n/strings';
 
-const TABS = [
-  ['today', 'tabToday', '🏠', TodayScreen],
-  ['circle', 'tabCircle', '👥', CircleScreen],
-  ['safety', 'tabSafety', '🛟', SafetyScreen],
-  ['care', 'tabCare', '💊', CareScreen],
-  ['plan', 'tabPlan', '🗂️', PlanScreen],
-  ['me', 'tabMe', '🙂', MeScreen],
-];
+const SCREENS = {
+  today: TodayScreen,
+  circle: CircleScreen,
+  safety: SafetyScreen,
+  care: CareScreen,
+  plan: PlanScreen,
+  me: MeScreen,
+};
+
+const styles = StyleSheet.create({
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 6,
+  },
+});
 
 export default function AppShell({ sensing = true }) {
   const { state, dispatch, t } = useStore();
@@ -83,63 +99,48 @@ export default function AppShell({ sensing = true }) {
   if (state.hydrated && state.mode === 'teen' && state.consent.status !== 'granted') {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.mist }}>
+        <StatusBar style="dark" />
         <ConsentScreen />
       </SafeAreaView>
     );
   }
 
-  const Screen = TABS.find((x) => x[0] === tab)[3];
+  const Screen = SCREENS[tab];
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.mist }}>
       <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-        <StatusBar style="dark" />
-        <RoleBar />
-        <AlertBanner />
-        <View style={{ flex: 1 }}>{state.hydrated ? <Screen /> : null}</View>
-        <View
-          style={{
-            flexDirection: 'row',
-            backgroundColor: colors.white,
-            paddingHorizontal: 6,
-            paddingVertical: 6,
-            borderTopWidth: StyleSheet.hairlineWidth,
-            borderColor: colors.line,
-            ...shadow.raised,
-            shadowOffset: { width: 0, height: -2 },
-            shadowOpacity: 0.06,
-          }}
-        >
-          {TABS.map(([id, key, icon]) => (
-            <PressRow
-              key={id}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: tab === id }}
-              accessibilityLabel={t(key)}
-              onPress={() => setTab(id)}
-              containerStyle={{ flex: 1 }}
+        <NavContext.Provider value={setTab}>
+          <StatusBar style="dark" />
+          <RoleBar />
+          <View style={styles.header}>
+            <SaathMark size={34} />
+            <Text
               style={{
-                minHeight: 60,
-                marginHorizontal: 2,
-                borderRadius: 18,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: tab === id ? colors.indigoTint : 'transparent',
+                fontFamily: fonts.bold,
+                fontSize: 22 * Math.min(k, 1.2),
+                color: colors.indigo,
+                letterSpacing: -0.3,
               }}
             >
-              <Text style={{ fontSize: 22 * k }}>{icon}</Text>
-              <Text
-                style={{
-                  fontSize: 14 * k,
-                  letterSpacing: 0.1,
-                  color: tab === id ? colors.indigo : colors.inkSoft,
-                  fontWeight: tab === id ? '700' : '500',
-                }}
-              >
-                {t(key)}
-              </Text>
-            </PressRow>
-          ))}
-        </View>
+              {t('appName')}
+            </Text>
+            <View style={{ flex: 1 }} />
+            {state.background ? (
+              <Badge tone="leaf" label={t('watch.bg')} />
+            ) : (
+              <Badge tone="indigo" label={t('watch.on')} />
+            )}
+          </View>
+          <AlertBanner />
+          <View style={{ flex: 1 }}>
+            {state.hydrated ? (
+              <Reveal key={tab} style={{ flex: 1 }}>
+                <Screen />
+              </Reveal>
+            ) : null}
+          </View>
+          <TabBar tab={tab} onChange={setTab} t={t} />
+        </NavContext.Provider>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

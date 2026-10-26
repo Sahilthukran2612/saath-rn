@@ -176,7 +176,8 @@ describe('component flows', () => {
     await mount({ mode: 'elder' });
     await fireEvent.press(screen.getByLabelText('Circle'));
     await fireEvent.press(screen.getByLabelText('Ask for help'));
-    expect(screen.getAllByText(/Ask for help →/).length).toBeGreaterThan(0);
+    // the button and the new list row both say 'Ask for help'
+    expect(screen.getAllByText('Ask for help').length).toBeGreaterThanOrEqual(2);
   });
   test('a member number is hidden until they agree', async () => {
     await mount({ mode: 'elder' });
