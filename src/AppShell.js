@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, View, Pressable, Text } from 'react-native';
+import { KeyboardAvoidingView, StyleSheet, View, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useStore } from './state/store';
-import { colors } from './theme';
+import { colors, shadow } from './theme';
 import RoleBar from './components/RoleBar';
 import AlertBanner from './components/AlertBanner';
-import { useScale } from './components/ui';
+import { PressRow, useScale } from './components/ui';
 import TodayScreen from './screens/TodayScreen';
 import CircleScreen from './screens/CircleScreen';
 import SafetyScreen from './screens/SafetyScreen';
@@ -73,30 +73,44 @@ export default function AppShell({ sensing = true }) {
           style={{
             flexDirection: 'row',
             backgroundColor: colors.white,
-            borderTopWidth: 1,
+            paddingHorizontal: 6,
+            paddingVertical: 6,
+            borderTopWidth: StyleSheet.hairlineWidth,
             borderColor: colors.line,
+            ...shadow.raised,
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.06,
           }}
         >
           {TABS.map(([id, key, icon]) => (
-            <Pressable
+            <PressRow
               key={id}
               accessibilityRole="tab"
               accessibilityState={{ selected: tab === id }}
               accessibilityLabel={t(key)}
               onPress={() => setTab(id)}
-              style={{ flex: 1, minHeight: 64, alignItems: 'center', justifyContent: 'center' }}
+              containerStyle={{ flex: 1 }}
+              style={{
+                minHeight: 60,
+                marginHorizontal: 2,
+                borderRadius: 18,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: tab === id ? colors.indigoTint : 'transparent',
+              }}
             >
               <Text style={{ fontSize: 22 * k }}>{icon}</Text>
               <Text
                 style={{
                   fontSize: 14 * k,
-                  color: tab === id ? colors.indigo : colors.ink,
-                  fontWeight: tab === id ? '700' : '400',
+                  letterSpacing: 0.1,
+                  color: tab === id ? colors.indigo : colors.inkSoft,
+                  fontWeight: tab === id ? '700' : '500',
                 }}
               >
                 {t(key)}
               </Text>
-            </Pressable>
+            </PressRow>
           ))}
         </View>
       </KeyboardAvoidingView>
