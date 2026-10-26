@@ -1,10 +1,10 @@
 import React from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
-import { BigButton, Body, Card, Title, useScale } from '../components/ui';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { BigButton, Body, Card, PressRow, Title, useScale } from '../components/ui';
 import { useStore } from '../state/store';
 import RoutineEditor from '../components/RoutineEditor';
 import { glucoseAdvice, can } from '../logic';
-import { colors } from '../theme';
+import { colors, shadow, sizes } from '../theme';
 import { speak } from '../services/voice';
 
 function TaskList({ big }) {
@@ -13,7 +13,7 @@ function TaskList({ big }) {
   return (
     <View style={{ gap: 10 }}>
       {state.tasks.map((task) => (
-        <Pressable
+        <PressRow
           key={task.id}
           accessibilityRole="checkbox"
           accessibilityState={{ checked: task.done }}
@@ -27,11 +27,13 @@ function TaskList({ big }) {
             flexDirection: 'row',
             alignItems: 'center',
             gap: 14,
-            padding: 12,
-            borderRadius: 14,
+            paddingHorizontal: 16,
+            paddingVertical: 12,
+            borderRadius: sizes.radius,
             backgroundColor: task.done ? colors.leaf : colors.white,
-            borderWidth: 1,
-            borderColor: colors.line,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: task.done ? colors.leaf : colors.line,
+            ...shadow.card,
           }}
         >
           <Body style={{ fontSize: (big ? 34 : 26) * k }}>{task.icon}</Body>
@@ -45,7 +47,7 @@ function TaskList({ big }) {
           >
             {task.title}
           </Body>
-        </Pressable>
+        </PressRow>
       ))}
     </View>
   );
