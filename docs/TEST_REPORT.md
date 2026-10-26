@@ -25,7 +25,7 @@ Environment: Windows 11, Node 22.19, npm 11.7, Expo SDK 58, React Native 0.88.
 | `npm test` | 82 passed, 4 suites (adds invite, guardian limit, delegation expiry, second-person consent, nudge rules, offline queue, consent gate and Circle/Today component flows) |
 | `npm run lint` | 0 errors, 0 warnings |
 | `npx expo export --platform android` | Bundles (666 modules) |
-| On a phone | User connected through Expo Go and reported no problems with Phase 0. **Phase 1 screens not yet checked on a phone.** |
+| On a phone | The app connected in Expo Go before Phase 1; no Phase 0 feedback was given. **Phase 1 screens have not been checked on a phone.** |
 
 Found while building: lint rule `react-hooks/purity` rejected `Date.now()` in render, so a `useNow` hook was added.
 
