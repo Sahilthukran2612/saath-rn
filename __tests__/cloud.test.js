@@ -3,7 +3,16 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react-nativ
 import { StoreProvider } from '../src/state/store';
 import AppShell from '../src/AppShell';
 import { initialState, reducer } from '../src/state/reducer';
-import { cloudConfig, isConfigured, toE164, requestOtp, signIn, flush, refreshSession } from '../src/services/cloud';
+import {
+  cloudConfig,
+  isConfigured,
+  toE164,
+  requestOtp,
+  signIn,
+  signInAnonymous,
+  flush,
+  refreshSession,
+} from '../src/services/cloud';
 
 // Everything here uses a fake fetch. Nothing has been run against a real Supabase project.
 const cfg = { url: 'https://api.example.test', key: 'anon-key' };
@@ -16,7 +25,7 @@ const fakeFetch = (routes) =>
   });
 
 describe('configuration', () => {
-  const KEYS = ['EXPO_PUBLIC_SAATH_API_URL', 'EXPO_PUBLIC_SAATH_ANON_KEY'];
+  const KEYS = ['EXPO_PUBLIC_SAATH_API_URL', 'EXPO_PUBLIC_SAATH_ANON_KEY', 'EXPO_PUBLIC_SAATH_PHONE_AUTH'];
   const saved = Object.fromEntries(KEYS.map((k) => [k, process.env[k]]));
   afterEach(() => {
     KEYS.forEach((k) => (saved[k] === undefined ? delete process.env[k] : (process.env[k] = saved[k])));
@@ -91,6 +100,28 @@ describe('sign in', () => {
   });
 });
 
+describe('free sign-in without a phone number', () => {
+  test('makes an anonymous account and a household', async () => {
+    const f = fakeFetch([
+      ['POST', '/auth/v1/signup', reply(200, { access_token: 'A', refresh_token: 'R', user: { id: 'anon1' } })],
+      ['GET', '/rest/v1/households', reply(200, [])],
+      ['POST', '/rest/v1/households', reply(201, [{ id: 'h5' }])],
+    ]);
+    const r = await signInAnonymous(cfg, f, 'Amma');
+    expect(r).toEqual({ ok: true, cloud: { phone: '', access: 'A', refresh: 'R', userId: 'anon1', householdId: 'h5' } });
+    expect(JSON.parse(f.mock.calls[0][1].body)).toEqual({}); // no phone, no email, nothing personal
+    expect(JSON.parse(f.mock.calls[2][1].body)).toEqual({ person_user_id: 'anon1', person_name: 'Amma' });
+  });
+  test('says so when the server has not allowed anonymous sign-in, or is unreachable', async () => {
+    const off = fakeFetch([['POST', '/auth/v1/signup', reply(422, { msg: 'Anonymous sign-ins are disabled' })]]);
+    expect(await signInAnonymous(cfg, off)).toMatchObject({ ok: false, reason: 'disabled' });
+    const down = jest.fn(async () => {
+      throw new Error('blocked');
+    });
+    expect(await signInAnonymous(cfg, down)).toMatchObject({ ok: false, reason: 'network' });
+    expect(await signInAnonymous({ url: '', key: '' }, off)).toMatchObject({ ok: false });
+  });
+});
 describe('sending events', () => {
   const cloud = { access: 'A', refresh: 'R', householdId: 'h1' };
   const outbox = [
@@ -189,7 +220,7 @@ describe('outbox in the reducer', () => {
 });
 
 describe('account card', () => {
-  const KEYS = ['EXPO_PUBLIC_SAATH_API_URL', 'EXPO_PUBLIC_SAATH_ANON_KEY'];
+  const KEYS = ['EXPO_PUBLIC_SAATH_API_URL', 'EXPO_PUBLIC_SAATH_ANON_KEY', 'EXPO_PUBLIC_SAATH_PHONE_AUTH'];
   const saved = Object.fromEntries(KEYS.map((k) => [k, process.env[k]]));
   afterEach(() => {
     KEYS.forEach((k) => (saved[k] === undefined ? delete process.env[k] : (process.env[k] = saved[k])));
@@ -209,9 +240,10 @@ describe('account card', () => {
     expect(screen.getByText('Account and sync')).toBeTruthy();
     expect(screen.getByText(/Sync is not set up in this build/)).toBeTruthy();
   });
-  test('when configured, asks for the number and refuses a bad one', async () => {
+  test('with phone sign-in switched on, asks for the number and refuses a bad one', async () => {
     process.env.EXPO_PUBLIC_SAATH_API_URL = 'https://x.test';
     process.env.EXPO_PUBLIC_SAATH_ANON_KEY = 'k';
+    process.env.EXPO_PUBLIC_SAATH_PHONE_AUTH = '1';
     await open({});
     await fireEvent.changeText(screen.getByLabelText('Your mobile number'), '123');
     await fireEvent.press(screen.getByLabelText('Send code'));
@@ -227,6 +259,21 @@ describe('account card', () => {
     expect(screen.getByText('Signed in as +91 9876543210')).toBeTruthy();
     expect(screen.getByText('1 updates waiting to send')).toBeTruthy();
     await fireEvent.press(screen.getByLabelText('Sign out'));
-    await waitFor(() => expect(screen.getByLabelText('Send code')).toBeTruthy());
+    await waitFor(() => expect(screen.getByLabelText('Turn on sync')).toBeTruthy());
   });
-});
+  test('by default sync turns on with one button and no phone number', async () => {
+    process.env.EXPO_PUBLIC_SAATH_API_URL = 'https://x.test';
+    process.env.EXPO_PUBLIC_SAATH_ANON_KEY = 'k';
+    delete process.env.EXPO_PUBLIC_SAATH_PHONE_AUTH;
+    await open({});
+    expect(screen.getByLabelText('Turn on sync')).toBeTruthy();
+    expect(screen.queryByLabelText('Your mobile number')).toBeNull();
+    expect(screen.getByText(/No phone number needed/)).toBeTruthy();
+  });
+  test('an account without a phone number says what is lost if the data is cleared', async () => {
+    process.env.EXPO_PUBLIC_SAATH_API_URL = 'https://x.test';
+    process.env.EXPO_PUBLIC_SAATH_ANON_KEY = 'k';
+    await open({ cloud: { phone: '', userId: 'u', access: 'A', refresh: 'R', householdId: 'h' } });
+    expect(screen.getByText('Sync is on for this phone')).toBeTruthy();
+    expect(screen.getByText(/this account is lost and your circle must invite you again/)).toBeTruthy();
+  });});

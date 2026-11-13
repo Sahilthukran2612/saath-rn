@@ -166,3 +166,14 @@ Project `saath-rn` (ref `hothcnoyrfelsagiagwi`, region ap-northeast-1 Tokyo, not
 **Result: 24 passed, 0 failed.** Covered: a new member sees safety events only; the person raises the dial to routine, then full, and the member sees more; Time Off hides routine and summary but never safety; a stranger sees no events, households, members or invites; a member cannot raise their own dial, change their role or insert themselves; a member can raise a safety event but not a routine one; a stranger cannot write; a number is hidden from others until its owner shares it, then visible; a code works once; a bad code is refused; the person cannot join their own circle; members cannot read invites; `my_circles` returns the person's name.
 
 What this does not show: the app talking to the server. **Phone sign-in is switched off on the project and there is no SMS provider**, so nobody can sign in yet. Two real phones, polling, the banner and invite publishing remain untested against the real server. The test numbers and SMS settings are not configured. A first change to enable them was blocked by the permission check and was not retried.
+## Free sign-in, no SMS (2026-11-13)
+Phone sign-in needs a paid SMS provider, which the project cannot afford, so the default is now an anonymous account (`signInAnonymous`): one button, no number. Phone codes are kept behind `EXPO_PUBLIC_SAATH_PHONE_AUTH=1`.
+
+| Check | Result |
+|---|---|
+| `npm test` | 334 passed, 19 suites (adds anonymous sign-in against a fake server, default and anonymous Account card states) |
+| `npm run lint` | 0 errors, 0 warnings |
+| `npx expo export --platform android` | Bundles (1170 modules) |
+| Real server | One real request: `POST /auth/v1/signup` answered 422 `anonymous_provider_disabled`. The setting is off; it needs the owner to switch it on in the dashboard. Nothing was created |
+
+Trade-off recorded: an anonymous account is lost if the app data is cleared or the phone changes; the circle must invite the person again. The app says so on the Me tab (English and Hindi).

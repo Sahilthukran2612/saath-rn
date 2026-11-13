@@ -56,17 +56,8 @@ export async function requestOtp(cfg, phone, fetchImpl) {
   return r.ok ? { ok: true } : { ok: false, reason: r.status === 0 ? 'network' : 'rejected' };
 }
 
-// Check the SMS code, then find or create this person's household. Returns what to keep in state.
-export async function signIn(cfg, phone, code, fetchImpl, personName = '') {
-  if (!isConfigured(cfg) || !validPhone(phone)) return { ok: false, reason: 'invalid' };
-  const v = await call(
-    cfg,
-    '/auth/v1/verify',
-    { method: 'POST', body: { type: 'sms', phone: toE164(phone), token: String(code).trim() } },
-    fetchImpl
-  );
-  if (!v.ok || !v.data?.access_token) return { ok: false, reason: v.status === 0 ? 'network' : 'code' };
-  const s = sessionOf(v.data);
+// Find this person's household, or make it. Shared by both ways of signing in.
+async function ensureHousehold(cfg, s, personName, fetchImpl) {
   const found = await call(cfg, `/rest/v1/households?select=id&person_user_id=eq.${s.userId}`, { token: s.access }, fetchImpl);
   let householdId = found.ok ? found.data?.[0]?.id : null;
   if (!householdId) {
@@ -78,10 +69,39 @@ export async function signIn(cfg, phone, code, fetchImpl, personName = '') {
     );
     householdId = made.ok ? made.data?.[0]?.id : null;
   }
+  return householdId;
+}
+
+// Check the SMS code, then find or create this person's household. Returns what to keep in state.
+// Needs an SMS provider on the server, which costs money: see signInAnonymous for the free way.
+export async function signIn(cfg, phone, code, fetchImpl, personName = '') {
+  if (!isConfigured(cfg) || !validPhone(phone)) return { ok: false, reason: 'invalid' };
+  const v = await call(
+    cfg,
+    '/auth/v1/verify',
+    { method: 'POST', body: { type: 'sms', phone: toE164(phone), token: String(code).trim() } },
+    fetchImpl
+  );
+  if (!v.ok || !v.data?.access_token) return { ok: false, reason: v.status === 0 ? 'network' : 'code' };
+  const s = sessionOf(v.data);
+  const householdId = await ensureHousehold(cfg, s, personName, fetchImpl);
   if (!householdId) return { ok: false, reason: 'household' };
   return { ok: true, cloud: { phone: String(phone).replace(/\D/g, '').slice(-10), ...s, householdId } };
 }
 
+// Free sign-in with no phone number and no SMS: the server makes an anonymous account for this
+// phone. Circles still work, because people join by invite code, not by number. The catch: an
+// anonymous account cannot be recovered. If the app's data is cleared, this account is gone and the
+// circle has to invite the person again. Needs "Allow anonymous sign-ins" switched on in the project.
+export async function signInAnonymous(cfg, fetchImpl, personName = '') {
+  if (!isConfigured(cfg)) return { ok: false, reason: 'invalid' };
+  const v = await call(cfg, '/auth/v1/signup', { method: 'POST', body: {} }, fetchImpl);
+  if (!v.ok || !v.data?.access_token) return { ok: false, reason: v.status === 0 ? 'network' : 'disabled' };
+  const s = sessionOf(v.data);
+  const householdId = await ensureHousehold(cfg, s, personName, fetchImpl);
+  if (!householdId) return { ok: false, reason: 'household' };
+  return { ok: true, cloud: { phone: '', ...s, householdId } };
+}
 export async function refreshSession(cfg, refresh, fetchImpl) {
   const r = await call(cfg, '/auth/v1/token?grant_type=refresh_token', { method: 'POST', body: { refresh_token: refresh } }, fetchImpl);
   return r.ok && r.data?.access_token ? { ok: true, session: sessionOf(r.data) } : { ok: false };

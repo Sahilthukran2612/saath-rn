@@ -1,6 +1,6 @@
 # Connecting Saath to Supabase
 
-Status (2026-11-13): `schema.sql` is applied to the project `saath-rn` and 24 policy checks pass against it (`policy_tests.sql`; run with `npx supabase db query --remote --yes -f docs/supabase/policy_tests.sql` and read the "RESULT:" error). `.env` on the developer's PC holds the project URL and anon key. **Phone sign-in is not switched on and no SMS provider is set**, so the app has not yet signed in to it; the app code is tested against a fake server only. Steps 3 and 4 below are what is left. Follow these steps, then check each one off in `docs/TEST_REPORT.md` only after you have actually seen it work.
+Status (2026-11-13): `schema.sql` is applied to the project `saath-rn` and 24 policy checks pass against it (`policy_tests.sql`; run with `npx supabase db query --remote --yes -f docs/supabase/policy_tests.sql` and read the "RESULT:" error). `.env` on the developer's PC holds the project URL and anon key. **Anonymous sign-in is not switched on yet** (a free dashboard switch; see step 3), so the app has not yet signed in to it; the app code is tested against a fake server only. Steps 3 and 4 below are what is left. Follow these steps, then check each one off in `docs/TEST_REPORT.md` only after you have actually seen it work.
 
 ## 1. Create the project
 - Create a Supabase project. Pick the region closest to your users (an Indian region if offered). Note that health-related data of Indian residents may raise data-location and DPDP Act questions: **needs legal review**.
@@ -10,10 +10,14 @@ Status (2026-11-13): `schema.sql` is applied to the project `saath-rn` and 24 po
 - Run `docs/supabase/schema.sql` in the SQL editor.
 - Write policy tests before trusting it. At minimum: a Family member at dial 0 sees a safety event and no routine event; at dial 1 sees routine; on Time Off sees safety only; a stranger sees nothing; a member cannot change their own dial; `members_public` hides a number unless `share_contact` is true. Repeat the cases in `__tests__/logic.test.js`.
 
-## 3. Phone sign-in
-- Turn on the Phone provider in Authentication and connect an SMS provider that sends to Indian numbers. Indian SMS rules (sender and template registration) may apply: check with the provider.
-- The app asks for a 10-digit number, adds `+91`, and sends a one-time code.
-
+## 3. Sign-in (free: no SMS)
+Supabase itself has a free plan. What costs money is an SMS provider for phone codes (Twilio and similar charge per text), so **Saath does not use SMS by default**.
+- In the dashboard open Authentication, then Sign In / Providers, and switch on **Allow anonymous sign-ins**. It is free. Until you do, the app's "Turn on sync" button says the server has not allowed it (checked: the project currently answers `anonymous_provider_disabled`).
+- With it on, "Turn on sync" on the Me tab makes an account for that phone with no number, email or password. Circles still work because people join with an invite code.
+- The catch: an anonymous account cannot be recovered. If the app's data is cleared or the phone is changed, that account is gone and the circle has to invite the person again. The app says so on the Me tab.
+- Anonymous sign-ups are rate limited per IP by Supabase; switch on CAPTCHA if the project is ever public.
+- Phone codes remain in the code for later: build with `EXPO_PUBLIC_SAATH_PHONE_AUTH=1`, switch on the Phone provider and connect an SMS provider. Indian SMS rules (sender and template registration) may apply.
+- Free plan limits to know: a free project is paused after a period of inactivity (two older projects on this account are paused), and a paused server means no sync, though the person's own phone keeps working offline. Free projects also have no backups. Check the current limits on Supabase's pricing page before relying on it.
 ## 4. Point the app at it
 - Copy `.env.example` to `.env` and fill in the two values, then restart with `npx expo start --clear`. Variables starting with `EXPO_PUBLIC_` are baked into the app bundle, so they are visible to anyone with the app: only the anon key belongs there.
 
