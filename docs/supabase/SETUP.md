@@ -1,6 +1,6 @@
 # Connecting Saath to Supabase
 
-Status: the app code (`src/services/cloud.js`, the sign-in card on Me, the outbox) is written and tested against a fake server. **It has not been run against a real Supabase project**, and `schema.sql` has not been applied. Follow these steps, then check each one off in `docs/TEST_REPORT.md` only after you have actually seen it work.
+Status (2026-11-13): `schema.sql` is applied to the project `saath-rn` and 24 policy checks pass against it (`policy_tests.sql`; run with `npx supabase db query --remote --yes -f docs/supabase/policy_tests.sql` and read the "RESULT:" error). `.env` on the developer's PC holds the project URL and anon key. **Phone sign-in is not switched on and no SMS provider is set**, so the app has not yet signed in to it; the app code is tested against a fake server only. Steps 3 and 4 below are what is left. Follow these steps, then check each one off in `docs/TEST_REPORT.md` only after you have actually seen it work.
 
 ## 1. Create the project
 - Create a Supabase project. Pick the region closest to your users (an Indian region if offered). Note that health-related data of Indian residents may raise data-location and DPDP Act questions: **needs legal review**.

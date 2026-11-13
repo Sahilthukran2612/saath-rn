@@ -50,3 +50,4 @@ modules/*/android/.gradle/
 
 .env
 .env.local
+supabase/.temp/
