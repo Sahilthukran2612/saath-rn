@@ -245,7 +245,39 @@ describe('alert screen', () => {
     expect(screen.getAllByLabelText("I'm OK")).toHaveLength(2);
     expect(screen.getByLabelText('False alarm')).toBeTruthy();
   });
-  test('when nobody could be reached it says so', async () => {
+  test('the person being reached can be called, messaged on WhatsApp, or sent an SMS', async () => {
+    await mountApp({
+      alert: {
+        id: 'a',
+        kind: 'fall',
+        confidence: 0.9,
+        reason: 'x',
+        phase: 'escalating',
+        remaining: 20,
+        stepIndex: 0,
+        chain: [asha],
+      },
+    });
+    expect(screen.getByLabelText('Call Asha (daughter)')).toBeTruthy();
+    expect(screen.getByLabelText('WhatsApp Asha (daughter)')).toBeTruthy();
+    expect(screen.getByLabelText('Send message Asha (daughter)')).toBeTruthy();
+  });
+  test('a contact with no usable number gets no WhatsApp button', async () => {
+    await mountApp({
+      alert: {
+        id: 'a',
+        kind: 'fall',
+        confidence: 0.9,
+        reason: 'x',
+        phase: 'escalating',
+        remaining: 20,
+        stepIndex: 0,
+        chain: [{ ...asha, phone: '123' }],
+      },
+    });
+    expect(screen.queryByLabelText('WhatsApp Asha (daughter)')).toBeNull();
+    expect(screen.getByLabelText('Call Asha (daughter)')).toBeTruthy();
+  });  test('when nobody could be reached it says so', async () => {
     await mountApp({
       alert: {
         id: 'a',

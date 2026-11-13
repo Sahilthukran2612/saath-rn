@@ -42,3 +42,9 @@ Access to `*.supabase.co` was blocked by Indian ISPs from February 2026 and was 
 - **Per-member dial from the member's side.** The person sets each member's dial on their phone; that change is not yet written to the server, so every joined member stays at Safety only. Wiring `SET_DIAL`, Time Off and `share_contact` to the `members` table is the next job.
 - Removing a member, leaving a circle, and the audit log on the server.
 - Everything has only been run against a fake server (see `docs/TEST_REPORT.md`).
+
+## Alerting without paying for calls or SMS
+- **WhatsApp from the person's own phone is free.** On the alert screen, "WhatsApp" opens the chat with the contact being reached and the message already written; one tap sends it. It needs no server and no account. It only works if the person (or someone beside them) taps Send, so it is **not** a replacement for automatic alerts when a person has fallen and cannot reach the phone.
+- **Automatic WhatsApp from a server is not free.** The official WhatsApp Business API charges per conversation and needs a verified business. Unofficial libraries that drive a personal WhatsApp account break WhatsApp's rules and risk banning the number. Do not use them for a safety app.
+- **The free automatic option is push notifications (Firebase Cloud Messaging).** It costs nothing at this scale. A circle member who has Saath installed gets a notification when a safety event arrives, even with the app closed. It needs a free Firebase project and key, storing each member's device token, and a trigger on new safety events (a Supabase database webhook plus a small edge function). Not built yet. Members without Saath can still only be reached by the person's WhatsApp tap, a call, or SMS.
+- A call can use the person's own plan minutes, which may be free or cheap on many Indian plans; Saath does not control that.

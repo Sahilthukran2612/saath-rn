@@ -149,3 +149,14 @@ export const escalationMessage = (personName, kind) =>
     : `Saath: ${personName} may have had a fall and has not answered. Please call or check on them.`;
 export const smsLink = (phone, text) =>
   `sms:${String(phone).replace(/[^\d+]/g, '')}?body=${encodeURIComponent(text)}`;
+
+// WhatsApp is free when the person's own phone sends it: this opens WhatsApp with the message ready and
+// the person (or the circle member's phone) only has to tap Send. India numbers get 91 in front. A
+// server cannot send it for free: the business API charges and unofficial automation breaks WhatsApp's rules.
+export function whatsappLink(phone, text) {
+  let d = String(phone).replace(/\D/g, '');
+  if (d.length === 11 && d.startsWith('0')) d = d.slice(1);
+  if (d.length === 10) d = `91${d}`;
+  if (d.length < 11 || d.length > 15) return null;
+  return `https://wa.me/${d}?text=${encodeURIComponent(text)}`;
+}

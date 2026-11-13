@@ -187,3 +187,15 @@ Live result on project `saath-rn`, 2026-11-13: schema re-applied from scratch (`
 Found while doing it: my first trigger put a `CASE ... THEN` inside a plpgsql `IF`, which plpgsql splits at the first `THEN` (syntax error); fixed with a variable and a test that guards against the pattern. `R` is a built-in PowerShell alias, so my first batch of edits silently did nothing; I caught it by reading the result back.
 
 Still true: the limits stop casual abuse, not a determined one. Anyone can still make anonymous accounts (Supabase rate-limits sign-ups per IP; switch on CAPTCHA before the project is public). The free plan has size and inactivity limits. Re-run `policy_tests.sql` after any schema change. The app has still not signed in to the server: anonymous sign-in is off until the owner switches it on.
+
+## WhatsApp alert button (2026-11-13)
+| Check | Result |
+|---|---|
+| `npm test` | 345 passed, 19 suites (adds `whatsappLink` cases and the three-button contact card) |
+| `npm run lint` | 0 errors, 0 warnings |
+| `npx expo export --platform android` | Bundles (1170 modules) |
+| On a phone | **Not run.** Whether WhatsApp opens with the right chat and text is unchecked |
+
+The contact card on the alert screen now shows Call, WhatsApp and SMS as three labelled buttons of at least 56 px (the old round buttons were 52 px). The WhatsApp button is hidden when the stored number cannot be a phone number. Numbers are normalised for India (10 digits, +91, 91 or a leading 0 all reach the same chat). The message text is the existing one and still avoids claiming a diagnosis, and now uses the person's profile name when there is one.
+
+Limits: it is one tap by a person, not an automatic message. Free automatic alerting needs push notifications, which are not built (see `docs/supabase/SETUP.md`).

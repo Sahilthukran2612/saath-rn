@@ -11,6 +11,7 @@ import {
   budgetSummary,
   callLink,
   smsLink,
+  whatsappLink,
   escalationMessage,
   BASELINE_LIMITS,
 } from '../src/care';
@@ -190,5 +191,26 @@ describe('escalation links', () => {
   });
   test('the message helps notice, never states a diagnosis', () => {
     expect(escalationMessage('Asha', 'quiet')).not.toMatch(/is hurt|has fallen|emergency/i);
+  });
+});
+
+describe('WhatsApp link (free: the phone sends it, one tap)', () => {
+  const text = escalationMessage('Asha', 'fall');
+  test('a 10-digit Indian number gets 91 in front, and the text is encoded', () => {
+    const link = whatsappLink('98765 43210', text);
+    expect(link.startsWith('https://wa.me/919876543210?text=')).toBe(true);
+    expect(decodeURIComponent(link.split('?text=')[1])).toBe(text);
+  });
+  test('numbers with +91, 91 or a leading 0 all reach the same chat', () => {
+    const want = 'https://wa.me/919876543210';
+    ['+91 98765 43210', '919876543210', '09876543210', '+91-9876543210'].forEach((n) =>
+      expect(whatsappLink(n, 'x').startsWith(want)).toBe(true)
+    );
+  });
+  test('a number that cannot be a phone number gives no link, so no broken button', () => {
+    ['', '123', 'abc', '98765', '1'.repeat(16)].forEach((n) => expect(whatsappLink(n, 'x')).toBeNull());
+  });
+  test('the message still never claims a diagnosis', () => {
+    expect(text).not.toMatch(/is hurt|has fallen|emergency/i);
   });
 });

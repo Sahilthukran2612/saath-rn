@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Animated, Easing, Linking, Modal, StyleSheet, Text, View } from 'react-native';
-import { callLink, escalationMessage, smsLink } from '../care';
+import { callLink, escalationMessage, smsLink, whatsappLink } from '../care';
 import { CFG } from '../logic';
 import { Body, Caption, Glyph, PressRow, Title } from './ui';
 import { Avatar, ProgressRing } from './kit';
-import { Check, MessageCircle, Phone, Siren } from './icons';
+import { Check, MessageCircle, Phone, Send, Siren } from './icons';
 import { useReducedMotion } from './motion';
 import { colors, fonts, radii } from '../theme';
 import { useStore } from '../state/store';
@@ -85,6 +85,7 @@ function ActionButton({ label, icon, onPress, filled }) {
 export default function AlertBanner() {
   const { state, dispatch, t } = useStore();
   const al = state.alert;
+  const msg = escalationMessage(state.profile.name || 'A Saath user', al?.kind);
   useEscalationClock(al?.id, al && al.phase !== 'done', dispatch);
 
   useEffect(() => {
@@ -137,30 +138,43 @@ export default function AlertBanner() {
 
           {who ? (
             <View style={styles.contact}>
-              <Avatar name={who.name} role={who.role} size={52} />
-              <View style={{ flex: 1 }}>
-                <Caption>{t('calling')}</Caption>
-                <Body bold>{who.name}</Body>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <Avatar name={who.name} role={who.role} size={52} />
+                <View style={{ flex: 1 }}>
+                  <Caption>{t('calling')}</Caption>
+                  <Body bold>{who.name}</Body>
+                </View>
               </View>
               {who.phone ? (
-                <View style={{ flexDirection: 'row', gap: 10 }}>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
                   <PressRow
                     accessibilityRole="button"
                     accessibilityLabel={`${t('callNow')} ${who.name}`}
                     onPress={() => Linking.openURL(callLink(who.phone))}
-                    style={styles.roundBtn}
+                    style={styles.actionBtn}
                   >
-                    <Glyph icon={Phone} size={24} color={colors.white} />
+                    <Glyph icon={Phone} size={22} color={colors.white} />
+                    <Text style={styles.actionText}>{t('callNow')}</Text>
                   </PressRow>
+                  {whatsappLink(who.phone, msg) ? (
+                    <PressRow
+                      accessibilityRole="button"
+                      accessibilityLabel={`${t('whatsapp')} ${who.name}`}
+                      onPress={() => Linking.openURL(whatsappLink(who.phone, msg))}
+                      style={[styles.actionBtn, { backgroundColor: colors.leaf }]}
+                    >
+                      <Glyph icon={Send} size={22} color={colors.white} />
+                      <Text style={styles.actionText}>{t('whatsapp')}</Text>
+                    </PressRow>
+                  ) : null}
                   <PressRow
                     accessibilityRole="button"
-                    accessibilityLabel={t('sendMessage')}
-                    onPress={() =>
-                      Linking.openURL(smsLink(who.phone, escalationMessage('A Saath user', al.kind)))
-                    }
-                    style={styles.roundBtn}
+                    accessibilityLabel={`${t('sendMessage')} ${who.name}`}
+                    onPress={() => Linking.openURL(smsLink(who.phone, msg))}
+                    style={styles.actionBtn}
                   >
-                    <Glyph icon={MessageCircle} size={24} color={colors.white} />
+                    <Glyph icon={MessageCircle} size={22} color={colors.white} />
+                    <Text style={styles.actionText}>{t('sms')}</Text>
                   </PressRow>
                 </View>
               ) : null}
@@ -211,22 +225,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   contact: {
-    flexDirection: 'row',
-    alignItems: 'center',
     gap: 12,
     backgroundColor: colors.white,
     borderRadius: radii.lg,
     padding: 14,
     alignSelf: 'stretch',
   },
-  roundBtn: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+  actionBtn: {
+    flex: 1,
+    minHeight: 56,
+    borderRadius: radii.md,
     backgroundColor: colors.indigo,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 2,
+    paddingVertical: 6,
   },
+  actionText: { fontFamily: fonts.semi, fontSize: 15, color: colors.white },
   action: {
     minHeight: 64,
     borderRadius: radii.lg,

@@ -133,8 +133,10 @@ describe('Care and alert screens', () => {
     });
     await fireEvent.press(screen.getByLabelText('Call Asha (daughter)'));
     expect(spy).toHaveBeenCalledWith('tel:9000000001');
-    await fireEvent.press(screen.getByLabelText('Send message'));
-    expect(spy.mock.calls[1][0]).toMatch(/^sms:9000000001\?body=/);
+    await fireEvent.press(screen.getByLabelText('WhatsApp Asha (daughter)'));
+    expect(spy.mock.calls[1][0]).toMatch(/^https:\/\/wa\.me\/919000000001\?text=/);
+    await fireEvent.press(screen.getByLabelText('Send message Asha (daughter)'));
+    expect(spy.mock.calls[2][0]).toMatch(/^sms:9000000001\?body=/);
     spy.mockRestore();
   });
   test('Safety explains the baseline in plain words', async () => {
