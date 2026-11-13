@@ -53,4 +53,24 @@ describe('cloud schema (design only, not run)', () => {
   });
   test('a new member starts at safety only', () => {
     expect(code).toMatch(/values \(inv\.household_id, auth\.uid\(\), inv\.name, inv\.role, 0\)/);
+  });  test('anonymous sign-ins use the authenticated role, so every policy names it and anon gets no grants', () => {
+    const policies = code.match(/create policy [\s\S]*?;/g);
+    expect(policies.length).toBeGreaterThan(10);
+    policies.forEach((p) => expect(p).toMatch(/\bto authenticated\b/));
+    expect(code).toContain('revoke all on all tables in schema public from anon');
+    expect(code).toMatch(/revoke all on all functions in schema public from public, anon/);
+  });
+  test('a free account is limited: one household, short text, caps, and a guess lockout', () => {
+    expect(code).toMatch(/unique \(person_user_id\)/);
+    expect(code).toMatch(/char_length\(detail\) <= 120/);
+    expect(code).toMatch(/code ~ '\^\[A-Z0-9\]\{6,12\}\$'/);
+    ['events_cap', 'members_cap', 'invites_cap'].forEach((f) =>
+      expect(code).toMatch(new RegExp(`create trigger ${f} before insert`))
+    );
+    const fn = code.match(/function accept_invite[\s\S]*?end \$\$;/)[0];
+    expect(fn).toMatch(/insert into invite_attempts/);
+    expect(fn).toMatch(/>= 10/);
+  });
+  test('the IF in a trigger never contains a CASE (plpgsql would stop at its THEN)', () => {
+    expect(code).not.toMatch(/\bif\b[^;]*\bcase\b[^;]*\bthen\b[^;]*\bend\b[^;]*\bthen\b/i);
   });});

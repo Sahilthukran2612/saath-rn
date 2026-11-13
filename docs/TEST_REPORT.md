@@ -177,3 +177,13 @@ Phone sign-in needs a paid SMS provider, which the project cannot afford, so the
 | Real server | One real request: `POST /auth/v1/signup` answered 422 `anonymous_provider_disabled`. The setting is off; it needs the owner to switch it on in the dashboard. Nothing was created |
 
 Trade-off recorded: an anonymous account is lost if the app data is cleared or the phone changes; the circle must invite the person again. The app says so on the Me tab (English and Hindi).
+## RLS review for anonymous accounts (2026-11-13)
+Supabase warns that anonymous users run as the `authenticated` role and are subject to the policies for it. The policies were reviewed with that in mind. They already returned nothing to an account that is not a member (every check goes through `auth.uid()`), but a free anonymous account could still: make unlimited households, flood its own tables, send over-long text, and guess six-character invite codes at full speed.
+
+Changes (`docs/supabase/schema.sql`): every policy now says `to authenticated`; the `anon` role has no table or function grants; one household per account; length limits on text; invite codes must be 6 to 12 letters or digits (the app now makes 8); caps of 30 members, 30 open invites, 60 safety events an hour and 300 other events an hour per household; `accept_invite` records wrong codes and locks an account out after 10 in 15 minutes (a wrong code now returns null instead of an error so the attempt is kept). The app shows a separate message when locked out.
+
+Live result on project `saath-rn`, 2026-11-13: schema re-applied from scratch (`reset_dev.sql`, which refuses to run if any data exists, then `schema.sql`), `policy_tests.sql` **33 passed, 0 failed**, afterwards 0 households, 0 events, 0 users, 0 grants to `anon`, 0 policies that are not authenticated-only. The tests now act as anonymous accounts (`is_anonymous` claim) and as a signed-out client.
+
+Found while doing it: my first trigger put a `CASE ... THEN` inside a plpgsql `IF`, which plpgsql splits at the first `THEN` (syntax error); fixed with a variable and a test that guards against the pattern. `R` is a built-in PowerShell alias, so my first batch of edits silently did nothing; I caught it by reading the result back.
+
+Still true: the limits stop casual abuse, not a determined one. Anyone can still make anonymous accounts (Supabase rate-limits sign-ups per IP; switch on CAPTCHA before the project is public). The free plan has size and inactivity limits. Re-run `policy_tests.sql` after any schema change. The app has still not signed in to the server: anonymous sign-in is off until the owner switches it on.

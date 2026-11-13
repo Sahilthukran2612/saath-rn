@@ -191,8 +191,12 @@ export async function acceptInvite(cfg, cloud, code, fetchImpl) {
     (token) => call(cfg, '/rest/v1/rpc/accept_invite', { method: 'POST', token, body: { invite_code: clean } }, fetchImpl),
     fetchImpl
   );
-  if (res.ok) return { ok: true, householdId: res.data, session };
-  return { ok: false, reason: res.status === 0 ? 'network' : 'invalid', session };
+  // a wrong code comes back as null (the server keeps count of wrong tries), not as an error
+  if (res.ok && res.data) return { ok: true, householdId: res.data, session };
+  if (res.ok) return { ok: false, reason: 'invalid', session };
+  if (res.status === 0) return { ok: false, reason: 'network', session };
+  const tooMany = /too many/i.test(String(res.data?.message || ''));
+  return { ok: false, reason: tooMany ? 'limit' : 'invalid', session };
 }
 
 export async function listCircles(cfg, cloud, fetchImpl) {

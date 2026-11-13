@@ -371,7 +371,9 @@ export const strings = {
     'join.needSignIn': 'Sign in on the Me tab first.',
     'join.ok': 'You joined their circle.',
     'join.bad': 'That code did not work. Ask them for a new one.',
-    'join.net': 'Could not reach the server. Try again when you have a connection.',  },
+    'join.net': 'Could not reach the server. Try again when you have a connection.',
+    'join.limit': 'Too many tries. Wait a few minutes, then try again.',
+  },
   hi: {
     tabToday: 'आज',
     tabCircle: 'घेरा',
@@ -743,7 +745,9 @@ export const strings = {
     'join.needSignIn': 'पहले \'मैं\' टैब में साइन इन करें।',
     'join.ok': 'आप उनके घेरे में जुड़ गए।',
     'join.bad': 'यह कोड काम नहीं आया। उनसे नया कोड माँगें।',
-    'join.net': 'सर्वर तक नहीं पहुँचे। कनेक्शन मिलने पर फिर कोशिश करें।',  },
+    'join.net': 'सर्वर तक नहीं पहुँचे। कनेक्शन मिलने पर फिर कोशिश करें।',
+    'join.limit': 'बहुत कोशिशें हो गईं। कुछ मिनट रुककर फिर कोशिश करें।',
+  },
 };
 
 export const t = (lang, key) => strings[lang]?.[key] ?? strings.en[key] ?? key;

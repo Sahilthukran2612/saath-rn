@@ -101,7 +101,14 @@ describe('circle calls (fake server)', () => {
     });
     expect(await acceptInvite(cfg, cloud, 'ABCDEF', off)).toMatchObject({ ok: false, reason: 'network' });
   });
-  test('signed out means nothing is sent', async () => {
+  test('a wrong code comes back as null from the server and reads as invalid', async () => {
+    const f = route([['POST', '/rpc/accept_invite', reply(200, null)]]);
+    expect(await acceptInvite(cfg, cloud, 'ABCDEF', f)).toMatchObject({ ok: false, reason: 'invalid' });
+  });
+  test('being locked out of guessing is reported as a limit, not as a wrong code', async () => {
+    const f = route([['POST', '/rpc/accept_invite', reply(400, { message: 'too many attempts, wait a few minutes' })]]);
+    expect(await acceptInvite(cfg, cloud, 'ABCDEF', f)).toMatchObject({ ok: false, reason: 'limit' });
+  });  test('signed out means nothing is sent', async () => {
     const f = route([]);
     expect(await acceptInvite(cfg, { ...cloud, access: null }, 'ABCDEF', f)).toMatchObject({ ok: false });
     expect((await listCircles(cfg, { ...cloud, access: null }, f)).ok).toBe(false);

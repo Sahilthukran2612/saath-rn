@@ -36,7 +36,7 @@ export default function CirclesSection() {
       setCode('');
       setMsg(t('join.ok'));
     } else {
-      setMsg(r.reason === 'network' ? t('join.net') : t('join.bad'));
+      setMsg(r.reason === 'network' ? t('join.net') : r.reason === 'limit' ? t('join.limit') : t('join.bad'));
     }
     setBusy(false);
   };

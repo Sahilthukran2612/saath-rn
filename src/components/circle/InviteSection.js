@@ -8,7 +8,7 @@ import { inviteLink, validPhone } from '../../logic';
 import { colors } from '../../theme';
 
 const ROLES = ['family', 'neighbour', 'asha', 'clinician'];
-const newCode = () => Math.random().toString(36).slice(2, 8).toUpperCase();
+const newCode = () => (Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)).slice(0, 8).toUpperCase();
 
 // Invite by phone number or link. The link is shared through the phone's own share sheet
 // (WhatsApp, SMS). Joining is simulated until real accounts exist (Phase 4).

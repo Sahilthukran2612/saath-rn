@@ -1,4 +1,5 @@
--- Policy tests for docs/supabase/schema.sql. They act as real authenticated users inside one
+-- Policy tests for docs/supabase/schema.sql. They act as real signed-in users (anonymous accounts, like
+-- the app's free sign-in) and as a signed-out client, inside one
 -- transaction and always finish by raising an exception, so nothing is kept (the test users, household
 -- and events are rolled back). Read the result from the exception text: "RESULT: N passed, 0 failed".
 --
@@ -13,6 +14,7 @@ declare
   s uuid := gen_random_uuid();  -- a stranger
   h uuid;
   c int;
+  i int;
   v text;
   passed int := 0;
   failed text := '';
@@ -26,7 +28,7 @@ begin
 
   -- the person creates a household and two invites
   perform set_config('role', 'authenticated', true);
-  perform set_config('request.jwt.claims', json_build_object('sub', p, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', p, 'role', 'authenticated', 'is_anonymous', true)::text, true);
   insert into households (person_user_id, person_name) values (p, 'Amma') returning id into h;
   insert into invites (household_id, name, role, code) values
     (h, 'Asha', 'family', 'TESTAAA1'), (h, 'Raju', 'neighbour', 'TESTBBB2');
@@ -34,13 +36,10 @@ begin
     (h, 0, 'fall', null), (h, 1, 'task_done', 'Lunch'), (h, 2, 'weekly_summary', null);
 
   -- the family member joins with a code; lower case and spaces are tolerated
-  perform set_config('request.jwt.claims', json_build_object('sub', f, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', f, 'role', 'authenticated', 'is_anonymous', true)::text, true);
   perform accept_invite(' testaaa1 ');
   -- the same code cannot be used twice
-  begin
-    perform accept_invite('TESTAAA1');
-    failed := failed || ' [code reusable]';
-  exception when others then passed := passed + 1; end;
+  if accept_invite('TESTAAA1') is null then passed := passed + 1; else failed := failed || ' [code reusable]'; end if;
 
   -- a new member starts at safety only: sees the fall, not the routine event or the summary
   select count(*) into c from events where household_id = h;
@@ -73,17 +72,17 @@ begin
   exception when others then passed := passed + 1; end;
 
   -- the person raises the dial to routine, then full
-  perform set_config('request.jwt.claims', json_build_object('sub', p, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', p, 'role', 'authenticated', 'is_anonymous', true)::text, true);
   update members set dial = 1 where user_id = f;
-  perform set_config('request.jwt.claims', json_build_object('sub', f, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', f, 'role', 'authenticated', 'is_anonymous', true)::text, true);
   select count(*) into c from events where household_id = h and event_type <= 1;
   if c = 3 then passed := passed + 1; else failed := failed || ' [dial1 sees ' || c || ']'; end if;
   select count(*) into c from events where household_id = h and event_type = 2;
   if c = 0 then passed := passed + 1; else failed := failed || ' [dial1 saw summary]'; end if;
 
-  perform set_config('request.jwt.claims', json_build_object('sub', p, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', p, 'role', 'authenticated', 'is_anonymous', true)::text, true);
   update members set dial = 2 where user_id = f;
-  perform set_config('request.jwt.claims', json_build_object('sub', f, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', f, 'role', 'authenticated', 'is_anonymous', true)::text, true);
   select count(*) into c from events where household_id = h and event_type = 2;
   if c = 1 then passed := passed + 1; else failed := failed || ' [dial2 summary]'; end if;
 
@@ -96,15 +95,15 @@ begin
   update members set time_off = false where user_id = f;
 
   -- phone numbers: hidden from others unless the owner shares
-  perform set_config('request.jwt.claims', json_build_object('sub', p, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', p, 'role', 'authenticated', 'is_anonymous', true)::text, true);
   update members set phone = '9876543210' where user_id = f;
-  perform set_config('request.jwt.claims', json_build_object('sub', n, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', n, 'role', 'authenticated', 'is_anonymous', true)::text, true);
   perform accept_invite('TESTBBB2');
   select phone into v from members_public where household_id = h and role = 'family';
   if v is null then passed := passed + 1; else failed := failed || ' [number leaked]'; end if;
-  perform set_config('request.jwt.claims', json_build_object('sub', f, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', f, 'role', 'authenticated', 'is_anonymous', true)::text, true);
   update members set share_contact = true where user_id = f;
-  perform set_config('request.jwt.claims', json_build_object('sub', n, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', n, 'role', 'authenticated', 'is_anonymous', true)::text, true);
   select phone into v from members_public where household_id = h and role = 'family';
   if v = '9876543210' then passed := passed + 1; else failed := failed || ' [shared number hidden]'; end if;
 
@@ -113,7 +112,7 @@ begin
   if c = 0 then passed := passed + 1; else failed := failed || ' [neighbour saw routine]'; end if;
 
   -- a stranger sees nothing at all
-  perform set_config('request.jwt.claims', json_build_object('sub', s, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', s, 'role', 'authenticated', 'is_anonymous', true)::text, true);
   select count(*) into c from events;
   if c = 0 then passed := passed + 1; else failed := failed || ' [stranger sees events ' || c || ']'; end if;
   select count(*) into c from households;
@@ -126,22 +125,77 @@ begin
     insert into events (household_id, event_type, kind) values (h, 0, 'fall');
     failed := failed || ' [stranger wrote event]';
   exception when others then passed := passed + 1; end;
-  begin
-    perform accept_invite('NOSUCHCODE');
-    failed := failed || ' [bad code accepted]';
-  exception when others then passed := passed + 1; end;
+  if accept_invite('NOSUCHCODE') is null then passed := passed + 1; else failed := failed || ' [bad code accepted]'; end if;
 
   -- the person cannot join their own circle, and members cannot read invites
-  perform set_config('request.jwt.claims', json_build_object('sub', p, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', p, 'role', 'authenticated', 'is_anonymous', true)::text, true);
   insert into invites (household_id, name, role, code) values (h, 'Me', 'family', 'TESTCCC3');
   begin
     perform accept_invite('TESTCCC3');
     failed := failed || ' [person joined own circle]';
   exception when others then passed := passed + 1; end;
-  perform set_config('request.jwt.claims', json_build_object('sub', f, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', f, 'role', 'authenticated', 'is_anonymous', true)::text, true);
   select count(*) into c from invites;
   if c = 0 then passed := passed + 1; else failed := failed || ' [member sees invites]'; end if;
 
+
+  -- ---- hardening for free anonymous accounts ----
+  -- one household per account
+  perform set_config('request.jwt.claims', json_build_object('sub', p, 'role', 'authenticated', 'is_anonymous', true)::text, true);
+  begin
+    insert into households (person_user_id, person_name) values (p, 'Second');
+    failed := failed || ' [two households]';
+  exception when others then passed := passed + 1; end;
+  -- over-long text and malformed codes are refused
+  begin
+    insert into events (household_id, event_type, kind, detail) values (h, 1, 'task_done', repeat('x', 121));
+    failed := failed || ' [long detail accepted]';
+  exception when others then passed := passed + 1; end;
+  begin
+    insert into invites (household_id, name, role, code) values (h, 'Bad', 'family', 'ab');
+    failed := failed || ' [bad code format accepted]';
+  exception when others then passed := passed + 1; end;
+  -- an account guessing codes is locked out after ten wrong tries
+  perform set_config('request.jwt.claims', json_build_object('sub', s, 'role', 'authenticated', 'is_anonymous', true)::text, true);
+  c := 0; v := 'no lockout';
+  for i in 1..15 loop
+    begin
+      if accept_invite('GUESS' || i) is null then c := c + 1; end if;
+    exception when others then v := 'locked'; exit; end;
+  end loop;
+  if v = 'locked' and c between 8 and 10 then passed := passed + 1; else failed := failed || ' [no guess lockout: ' || v || ' after ' || c || ']'; end if;
+  -- a signed-out client (role anon) can read nothing and call nothing
+  perform set_config('role', 'anon', true);
+  perform set_config('request.jwt.claims', '', true);
+  begin
+    perform count(*) from events;
+    failed := failed || ' [anon read events]';
+  exception when others then passed := passed + 1; end;
+  begin
+    perform count(*) from members_public;
+    failed := failed || ' [anon read members_public]';
+  exception when others then passed := passed + 1; end;
+  begin
+    perform accept_invite('TESTAAA1');
+    failed := failed || ' [anon called accept_invite]';
+  exception when others then passed := passed + 1; end;
+  perform set_config('role', 'authenticated', true);
+  -- a circle is capped at 30 members, and safety events at 60 an hour
+  perform set_config('request.jwt.claims', json_build_object('sub', p, 'role', 'authenticated', 'is_anonymous', true)::text, true);
+  v := 'no cap';
+  for i in 1..40 loop
+    begin
+      insert into members (household_id, name, role) values (h, 'x' || i, 'family');
+    exception when others then v := 'capped'; exit; end;
+  end loop;
+  if v = 'capped' then passed := passed + 1; else failed := failed || ' [members not capped]'; end if;
+  v := 'no cap';
+  for i in 1..70 loop
+    begin
+      insert into events (household_id, event_type, kind) values (h, 0, 'fall');
+    exception when others then v := 'capped'; exit; end;
+  end loop;
+  if v = 'capped' then passed := passed + 1; else failed := failed || ' [safety events not capped]'; end if;
   -- nothing was kept
   perform set_config('role', 'postgres', true);
   raise exception 'RESULT: % passed, failures:%', passed, case when failed = '' then ' none' else failed end;
