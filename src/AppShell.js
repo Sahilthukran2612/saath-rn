@@ -20,6 +20,7 @@ import PlanScreen from './screens/PlanScreen';
 import MeScreen from './screens/MeScreen';
 import ConsentScreen from './screens/ConsentScreen';
 import LockScreen from './screens/LockScreen';
+import useCloudSync from './state/useCloudSync';
 import { startFallListener } from './services/sensing';
 import { cfgFrom } from './care';
 import { askNotificationPermission, startWatching, stopWatching } from './services/foreground';
@@ -50,6 +51,7 @@ export default function AppShell({ sensing = true }) {
   const [tab, setTab] = useState('today');
   const k = useScale();
   const { impactG, inactiveHours } = state.baseline;
+  useCloudSync();
 
   useEffect(() => {
     if (!sensing || !state.hydrated) return undefined;

@@ -47,3 +47,6 @@ yarn-error.*
 modules/*/android/build/
 modules/*/android/.gradle/
 *.log
+
+.env
+.env.local

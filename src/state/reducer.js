@@ -86,6 +86,9 @@ export const initialState = {
   queue: [], // offline queue of changes waiting to sync
   online: false, // no backend yet (Phase 4): "going online" only simulates a sync
   synced: 0,
+  cloud: emptyCloud(), // sign-in for sync. Tokens sit unencrypted in local storage: a risk, see ARCHITECTURE
+  outbox: [], // events for the circle waiting to be sent. Only when signed in, never more than 200
+  outboxSeq: 0,
   baseline: defaultBaseline(), // personal thresholds, tuned by false-alarm and missed feedback
   careEvents: { lastInsulinAt: null, lastMealAt: null }, // times only. Saath never records or suggests a dose
   meds: { name: 'Metformin (demo)', pillsLeft: 24, perDay: 2 },
@@ -105,6 +108,10 @@ export const initialState = {
   waist: [], // [{ cm, at }]
   risk: null, // { answers, result, at } latest questionnaire
 };
+
+function emptyCloud() {
+  return { phone: '', userId: null, access: null, refresh: null, householdId: null };
+}
 
 // Changes that must reach other phones go through the offline queue.
 const enqueue = (state, a) => ({ ...state, queue: [...state.queue, { op: a.type, at: a.at ?? 0 }] });
@@ -129,7 +136,7 @@ function openAlert(state, { kind, confidence, reason, id }) {
   };
 }
 
-export function reducer(state, a) {
+function baseReducer(state, a) {
   switch (a.type) {
     case 'HYDRATE':
       return { ...state, ...a.saved, alert: null, hydrated: true };
@@ -139,6 +146,9 @@ export function reducer(state, a) {
     case 'SET':
       return { ...state, [a.key]: a.value };
     case 'ACTIVITY':
+      return { ...state, lastActiveMs: a.at };
+    // The person tapped "I'm OK" on Today (not the alert). Counts as activity and tells the circle.
+    case 'CHECK_IN':
       return { ...state, lastActiveMs: a.at };
     case 'TRIGGER_ALERT':
       return openAlert(state, a);
@@ -380,9 +390,46 @@ export function reducer(state, a) {
       if (last && last.viewer === a.viewer && last.item === a.item) return state;
       return { ...state, audit: [...state.audit, { viewer: a.viewer, item: a.item, at: a.at }].slice(-100) };
     }
+    case 'CLOUD_SET':
+      return { ...state, cloud: { ...state.cloud, ...a.patch } };
+    case 'CLOUD_SIGN_OUT':
+      return { ...state, cloud: emptyCloud(), outbox: [] };
+    case 'OUTBOX_SENT':
+      return { ...state, outbox: state.outbox.filter((e) => !a.ids.includes(e.id)) };
     case 'RESET':
       return { ...initialState, hydrated: true };
     default:
       return state;
   }
+}
+
+// What the circle should hear about, as plain events (0 safety, 1 routine). Fixed kinds only, and no
+// dose, amount or reading values: the circle gets "something happened", not medical numbers.
+function eventFor(prev, next, a) {
+  switch (a.type) {
+    case 'TRIGGER_ALERT':
+      return next.alert && !prev.alert ? { eventType: 0, kind: a.kind } : null;
+    case 'IM_OK':
+      return prev.alert ? { eventType: 0, kind: 'im_ok' } : null;
+    case 'CHECK_IN':
+      return { eventType: 1, kind: 'im_ok' };
+    case 'FALSE_ALARM':
+      return prev.alert ? { eventType: 0, kind: 'false_alarm' } : null;
+    case 'TOGGLE_TASK': {
+      const was = prev.tasks.find((t) => t.id === a.id);
+      const now = next.tasks.find((t) => t.id === a.id);
+      return was && now && !was.done && now.done ? { eventType: 1, kind: 'task_done', detail: now.title } : null;
+    }
+    default:
+      return null;
+  }
+}
+
+export function reducer(state, a) {
+  const next = baseReducer(state, a);
+  if (!next.cloud?.access || next === state) return next;
+  const e = eventFor(state, next, a);
+  if (!e) return next;
+  const seq = next.outboxSeq + 1;
+  return { ...next, outboxSeq: seq, outbox: [...next.outbox, { id: seq, ...e }].slice(-200) };
 }

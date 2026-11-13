@@ -129,7 +129,7 @@ function ImOkHero() {
           haptic={false}
           onPress={() => {
             confirm();
-            dispatch({ type: 'ACTIVITY', at: Date.now() });
+            dispatch({ type: 'CHECK_IN', at: Date.now() });
             speak(t('imOk'), state.lang);
             setSent(true);
           }}

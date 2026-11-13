@@ -52,6 +52,13 @@ Supabase Postgres with row-level security that implements the Privacy Dial (a ro
 
 Status: the schema and policies are written in `docs/supabase/schema.sql` (`can_see_event` mirrors `canReceive`; phone numbers only through the `members_public` view; no dose columns; a trigger keeps a guardian at Routine or above). **It has not been applied to a database and the policies are untested.** The app does not call it. Next steps need a Supabase project and an FCM key: apply the schema, write policy tests, add a thin sync adapter that drains `state.queue`, add phone sign-in.
 
+### Sync client (built, tested against a fake server)
+`src/services/cloud.js` talks plain HTTP (Supabase Auth and PostgREST) to a server whose address is configuration (`EXPO_PUBLIC_SAATH_API_URL`, `EXPO_PUBLIC_SAATH_ANON_KEY`), so a blocked domain is fixed by pointing at a custom domain or proxy, not by changing code. India blocked `*.supabase.co` at ISP level from February 2026 and reportedly restored access in October 2026, which is why the address is not hard-coded and why the app stays offline-first: a fall alert, its countdown and tap-to-call never wait for a server.
+
+Flow: the person signs in with a phone code on the Me tab. While signed in, the reducer appends fixed-kind events to `outbox` (fall or quiet alert, answering or false-alarming it, tapping I'm OK, finishing a task; capped at 200). `useCloudSync` sends them in one batch, refreshes an expired token once, and retries every minute. Events carry no readings, doses or amounts (a test checks this). Setup steps and gaps are in `docs/supabase/SETUP.md`.
+
+Not done: the circle's phones do not read events yet, no push, tokens are stored unencrypted, and the whole thing has never talked to a real server.
+
 ## Shared-phone mode (Phase 4, built)
 One phone, several people. `src/profiles.js` holds the pure rules: a registry of profiles, salted and stretched PIN hashes, lockout after five wrong tries (one minute, shared by all profiles so guesses cannot be multiplied by switching profile), and per-profile storage keys (the first profile keeps the original key, so older data is found). `StoreProvider` loads the active profile's state and, after a correct PIN, swaps in another person's state starting from defaults (`LOAD_PROFILE`) so nothing leaks across.
 

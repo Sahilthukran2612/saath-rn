@@ -5,6 +5,7 @@ import { BigButton, Body, Caption, Card, Title } from '../components/ui';
 import { Avatar, Badge, ListGroup, ListRow, Segmented, Toggle } from '../components/kit';
 import { Reveal } from '../components/motion';
 import SharedPhone from '../components/me/SharedPhone';
+import Account from '../components/me/Account';
 import { useStore } from '../state/store';
 import { foregroundAvailable } from '../services/foreground';
 import { colors } from '../theme';
@@ -79,6 +80,8 @@ export default function MeScreen() {
       </Reveal>
 
       <Reveal index={1}>
+        <Account />
+        <View style={{ height: 18 }} />
         <SharedPhone />
         <View style={{ height: 18 }} />
         <Body bold>{t('me.mode')}</Body>

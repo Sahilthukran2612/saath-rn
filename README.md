@@ -39,7 +39,8 @@ None requested yet. The foreground accelerometer needs no permission. Phase 2 ad
 | Per-task times and reminders actually firing | Future (needs local notifications, Phase 2) |
 | Shared-phone mode: profiles with their own data, 4-digit PIN (salted hash), lock on background, 5 wrong tries lock the keypad for a minute, safety alert drawn over the lock screen | Real logic and screens, unit-tested (Jest). **Not run on a phone or emulator yet.** The PIN is a deterrent on a shared phone, not encryption: data on the device is not encrypted |
 | Cloud schema with row-level security that implements the Privacy Dial (`docs/supabase/schema.sql`) | **Written, not run.** Never applied to a Supabase project. Tests only check the file matches the app's rules |
-| Accounts, real roles, push (FCM), sync, SMS and missed-call gateway | Future. Need a Supabase project, an FCM key and a gateway provider, none of which exist yet |
+| Phone sign-in and event sync to a Supabase-compatible server (configurable address, outbox, batch send, token refresh), "Account and sync" card on Me | Written and tested against a **fake server only**. Off unless `.env` has a URL and key. Never run against a real project. See `docs/supabase/SETUP.md` |
+| Real roles on other phones, push (FCM), receiving screens for the circle, accepting invites, SMS and missed-call gateway | Future. Need a Supabase project, an FCM key and a gateway provider, none of which exist yet |
 | Accessibility audit: every control has a name, across 8 role/mode/language homes, all Plan tools and the alert | Automated (Jest). **TalkBack not run on a device** |
 
 ## Known limits

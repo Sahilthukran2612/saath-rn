@@ -133,3 +133,17 @@ Covered by tests: a wrong PIN shows tries left, five wrong tries lock the keypad
 Found by testing: my first alert-takeover test picked the wrong profile (the last active person is the one whose alert it is), which showed the rule works but my test did not set it up right; the test now says so. A Plan-tool audit failed because the Handover tile is teen-only; the audit now runs as a teen.
 
 Not verified: any of this on a device, the camera round trip when the app locks on background, TalkBack, battery use, the signed APK (still blocked on the Windows build limit), and the SQL itself.
+
+## Phone sign-in and sync client (2026-11-13)
+| Check | Result |
+|---|---|
+| `npm test` | 301 passed, 18 suites (adds `cloud`: config, sign-in, household find or create, batch send, token refresh, outbox rules, account card) |
+| `npm run lint` | 0 errors, 0 warnings |
+| `npx expo export --platform android` | Bundles (1165 modules) |
+| Against a real Supabase project | **Not run.** There is no project. Every network test uses a fake `fetch` |
+
+Covered by tests: network failures never throw and keep events for later; a wrong code is reported as a code problem; events go in one request and leave the outbox only when it succeeds; a 401 refreshes once and retries; a second alert while one is open is not queued twice; undoing a task queues nothing; sugar readings, insulin times and budget amounts never enter the outbox; sign-out empties it.
+
+Found while building: the Today "I'm OK" button dispatched `ACTIVITY`, which the fall listener also sends on every movement, so using it for sync would have flooded the circle. It now dispatches its own `CHECK_IN`. A helper declared as a `const` arrow was read before its definition when the initial state was built; it is now a hoisted function (the tests caught it at import).
+
+Context: Supabase was blocked by Indian ISPs from February 2026 and reportedly restored in October 2026 (not confirmed from a primary source). The server address is configuration for that reason; see `docs/supabase/SETUP.md`.
