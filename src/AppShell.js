@@ -6,6 +6,7 @@ import { useStore } from './state/store';
 import { colors, fonts } from './theme';
 import RoleBar from './components/RoleBar';
 import AlertBanner from './components/AlertBanner';
+import CircleAlertBanner from './components/CircleAlertBanner';
 import TabBar from './components/TabBar';
 import { useScale } from './components/ui';
 import { Badge } from './components/kit';
@@ -157,6 +158,7 @@ export default function AppShell({ sensing = true }) {
             )}
           </View>
           <AlertBanner />
+          <CircleAlertBanner />
           <View style={{ flex: 1 }}>
             {state.hydrated ? (
               <Reveal key={tab} style={{ flex: 1 }}>

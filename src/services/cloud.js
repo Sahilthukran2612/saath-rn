@@ -57,7 +57,7 @@ export async function requestOtp(cfg, phone, fetchImpl) {
 }
 
 // Check the SMS code, then find or create this person's household. Returns what to keep in state.
-export async function signIn(cfg, phone, code, fetchImpl) {
+export async function signIn(cfg, phone, code, fetchImpl, personName = '') {
   if (!isConfigured(cfg) || !validPhone(phone)) return { ok: false, reason: 'invalid' };
   const v = await call(
     cfg,
@@ -73,7 +73,7 @@ export async function signIn(cfg, phone, code, fetchImpl) {
     const made = await call(
       cfg,
       '/rest/v1/households',
-      { method: 'POST', token: s.access, prefer: 'return=representation', body: { person_user_id: s.userId } },
+      { method: 'POST', token: s.access, prefer: 'return=representation', body: { person_user_id: s.userId, person_name: personName } },
       fetchImpl
     );
     householdId = made.ok ? made.data?.[0]?.id : null;
@@ -113,4 +113,90 @@ export async function flush(cfg, cloud, outbox, fetchImpl) {
     }
   }
   return { sentIds: r.ok ? batch.map((e) => e.id) : [], session };
+}
+
+// ---- Circle side: join with a code, list the circles I am in, read their events ----
+
+// Run an authorised call; on 401 refresh once and retry. Returns the result and any new tokens.
+async function withAuth(cfg, cloud, run, fetchImpl) {
+  if (!isConfigured(cfg) || !cloud?.access) return { res: { ok: false, status: 0, data: null }, session: null };
+  let res = await run(cloud.access);
+  let session = null;
+  if (res.status === 401 && cloud.refresh) {
+    const n = await refreshSession(cfg, cloud.refresh, fetchImpl);
+    if (n.ok) {
+      session = n.session;
+      res = await run(session.access);
+    }
+  }
+  return { res, session };
+}
+
+// The person's own name, shown to their circle. Best effort.
+export async function setPersonName(cfg, cloud, name, fetchImpl) {
+  const { res, session } = await withAuth(
+    cfg,
+    cloud,
+    (token) =>
+      call(cfg, `/rest/v1/households?id=eq.${cloud.householdId}`, { method: 'PATCH', token, body: { person_name: String(name || '') } }, fetchImpl),
+    fetchImpl
+  );
+  return { ok: res.ok, session };
+}
+
+// Publish an invite made on this phone so the invited person's phone can accept it.
+export async function createInvite(cfg, cloud, inv, fetchImpl) {
+  const { res, session } = await withAuth(
+    cfg,
+    cloud,
+    (token) =>
+      call(
+        cfg,
+        '/rest/v1/invites',
+        { method: 'POST', token, prefer: 'return=minimal', body: { household_id: cloud.householdId, name: inv.name, role: inv.role, code: inv.code } },
+        fetchImpl
+      ),
+    fetchImpl
+  );
+  // 409 means the code is already there (sent before, reply lost): count that as done
+  return { ok: res.ok || res.status === 409, session };
+}
+
+export async function acceptInvite(cfg, cloud, code, fetchImpl) {
+  const clean = String(code || '').trim();
+  if (clean.length < 4) return { ok: false, reason: 'invalid', session: null };
+  const { res, session } = await withAuth(
+    cfg,
+    cloud,
+    (token) => call(cfg, '/rest/v1/rpc/accept_invite', { method: 'POST', token, body: { invite_code: clean } }, fetchImpl),
+    fetchImpl
+  );
+  if (res.ok) return { ok: true, householdId: res.data, session };
+  return { ok: false, reason: res.status === 0 ? 'network' : 'invalid', session };
+}
+
+export async function listCircles(cfg, cloud, fetchImpl) {
+  const { res, session } = await withAuth(
+    cfg,
+    cloud,
+    (token) => call(cfg, '/rest/v1/my_circles?select=household_id,role,dial,time_off,person_name', { token }, fetchImpl),
+    fetchImpl
+  );
+  return { ok: res.ok && Array.isArray(res.data), circles: Array.isArray(res.data) ? res.data : [], session };
+}
+
+export async function fetchFeed(cfg, cloud, householdId, fetchImpl) {
+  const { res, session } = await withAuth(
+    cfg,
+    cloud,
+    (token) =>
+      call(
+        cfg,
+        `/rest/v1/events?household_id=eq.${encodeURIComponent(householdId)}&select=id,event_type,kind,detail,created_at&order=created_at.desc&limit=30`,
+        { token },
+        fetchImpl
+      ),
+    fetchImpl
+  );
+  return { ok: res.ok && Array.isArray(res.data), events: Array.isArray(res.data) ? res.data : [], session };
 }

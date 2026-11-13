@@ -22,6 +22,7 @@ create extension if not exists pgcrypto;
 create table households (
   id uuid primary key default gen_random_uuid(),
   person_user_id uuid not null references auth.users (id) on delete cascade,
+  person_name text not null default '', -- what the circle sees ("Amma"), set by the person
   created_at timestamptz not null default now()
 );
 
@@ -59,6 +60,17 @@ create table consents (
   agreed_at timestamptz not null default now()
 );
 
+-- An invite is made by the person and accepted by the invited member's phone with accept_invite().
+create table invites (
+  id uuid primary key default gen_random_uuid(),
+  household_id uuid not null references households (id) on delete cascade,
+  name text not null,
+  role text not null check (role in ('family', 'neighbour', 'asha', 'clinician')),
+  code text not null unique,
+  status text not null default 'pending' check (status in ('pending', 'accepted')),
+  created_at timestamptz not null default now()
+);
+
 create table audit (
   id uuid primary key default gen_random_uuid(),
   household_id uuid not null references households (id) on delete cascade,
@@ -77,6 +89,13 @@ $$;
 create or replace function my_member(h uuid) returns members
 language sql stable security definer set search_path = public as $$
   select m from members m where m.household_id = h and m.user_id = auth.uid() limit 1;
+$$;
+
+-- Used by the members policy. It must be security definer: a policy on members that queried members
+-- directly would recurse forever.
+create or replace function is_member(h uuid) returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (select 1 from members where household_id = h and user_id = auth.uid());
 $$;
 
 -- The one place the Privacy Dial is decided. Keep it identical to canReceive() in src/logic.js.
@@ -99,16 +118,22 @@ alter table members enable row level security;
 alter table events enable row level security;
 alter table consents enable row level security;
 alter table audit enable row level security;
+alter table invites enable row level security;
 
 create policy households_read on households for select
   using (person_user_id = auth.uid() or exists (
     select 1 from members m where m.household_id = households.id and m.user_id = auth.uid()));
 create policy households_insert on households for insert with check (person_user_id = auth.uid());
+create policy households_person_update on households for update
+  using (person_user_id = auth.uid()) with check (person_user_id = auth.uid());
+
+-- Only the person manages invites. A new member joins through accept_invite(), not by inserting.
+create policy invites_person on invites for all
+  using (is_person(household_id)) with check (is_person(household_id));
 
 -- Members: the person manages their circle; each member can read the circle and edit only Time Off.
 create policy members_read on members for select
-  using (is_person(household_id) or exists (
-    select 1 from members me where me.household_id = members.household_id and me.user_id = auth.uid()));
+  using (is_person(household_id) or is_member(household_id));
 create policy members_person_write on members for all
   using (is_person(household_id)) with check (is_person(household_id));
 create policy members_self_time_off on members for update
@@ -131,6 +156,34 @@ create policy audit_insert on audit for insert
   with check ((my_member(household_id)).id = viewer_member_id);
 
 -- ---------- columns and rules that policies cannot express ----------
+
+-- Join a circle with the code the person shared. Runs as the function owner so it can add the member
+-- row, but it only ever adds auth.uid(). Codes expire after 14 days and work once. A new member starts
+-- at dial 0 (safety only) until the person raises it. Codes are 6 characters and there is no rate
+-- limit here: add one (for example in an edge function) before real use.
+create or replace function accept_invite(invite_code text) returns uuid
+language plpgsql security definer set search_path = public as $$
+declare inv invites;
+begin
+  if auth.uid() is null then raise exception 'sign in first'; end if;
+  select * into inv from invites
+    where code = upper(trim(invite_code)) and status = 'pending'
+      and created_at > now() - interval '14 days'
+    for update;
+  if not found then raise exception 'invalid or expired code'; end if;
+  if is_person(inv.household_id) then raise exception 'you cannot join your own circle'; end if;
+  insert into members (household_id, user_id, name, role, dial)
+    values (inv.household_id, auth.uid(), inv.name, inv.role, 0)
+    on conflict (household_id, user_id) do nothing;
+  update invites set status = 'accepted' where id = inv.id;
+  return inv.household_id;
+end $$;
+
+-- The circles I belong to: whose circle, my role, my dial. The person's name comes from households.
+create view my_circles with (security_invoker = true) as
+  select m.household_id, m.role, m.dial, m.time_off, h.person_name
+  from members m join households h on h.id = m.household_id
+  where m.user_id = auth.uid();
 
 -- Phone numbers: other members see a number only if its owner shares it.
 create view members_public with (security_invoker = true) as

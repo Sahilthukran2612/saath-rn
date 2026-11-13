@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { initialRegistry, stateKey } from '../profiles';
 
 const KEY = 'saath/state/v1';
@@ -24,6 +25,9 @@ const PERSIST = [
   'cloud',
   'outbox',
   'outboxSeq',
+  'circles',
+  'feeds',
+  'seen',
   'baseline',
   'careEvents',
   'meds',
@@ -42,10 +46,40 @@ const PERSIST = [
   'risk',
 ];
 
+// Sign-in tokens live in the phone's secure store (Android Keystore), not in the plain state file.
+const tokenKey = (id) => `saath.tok.${id}`;
+
+async function readTokens(id) {
+  try {
+    const raw = await SecureStore.getItemAsync(tokenKey(id));
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+async function writeTokens(id, cloud) {
+  try {
+    if (cloud?.access) {
+      await SecureStore.setItemAsync(tokenKey(id), JSON.stringify({ access: cloud.access, refresh: cloud.refresh }));
+    } else {
+      await SecureStore.deleteItemAsync(tokenKey(id));
+    }
+  } catch {
+    // no secure store: the person signs in again next time. Never fall back to plain storage.
+  }
+}
+
 export async function load(id) {
   try {
     const raw = await AsyncStorage.getItem(stateKey(KEY, id));
-    return raw ? JSON.parse(raw) : {};
+    const saved = raw ? JSON.parse(raw) : {};
+    if (saved.cloud?.userId) {
+      const tok = await readTokens(id);
+      // older builds kept the tokens in the state file; they are moved on the next save
+      saved.cloud = { ...saved.cloud, ...(tok || {}) };
+    }
+    return saved;
   } catch {
     return {};
   }
@@ -55,12 +89,13 @@ export async function save(state, id) {
   try {
     const out = {};
     PERSIST.forEach((k) => (out[k] = state[k]));
+    if (out.cloud) out.cloud = { ...out.cloud, access: null, refresh: null };
     await AsyncStorage.setItem(stateKey(KEY, id), JSON.stringify(out));
+    await writeTokens(id, state.cloud);
   } catch {
     // offline-first: failing to save must not crash the app
   }
 }
-
 // Who shares this phone, their salted PIN hashes and who is active. Never holds a plain PIN.
 export async function loadRegistry() {
   try {

@@ -147,3 +147,16 @@ Covered by tests: network failures never throw and keep events for later; a wron
 Found while building: the Today "I'm OK" button dispatched `ACTIVITY`, which the fall listener also sends on every movement, so using it for sync would have flooded the circle. It now dispatches its own `CHECK_IN`. A helper declared as a `const` arrow was read before its definition when the initial state was built; it is now a hoisted function (the tests caught it at import).
 
 Context: Supabase was blocked by Indian ISPs from February 2026 and reportedly restored in October 2026 (not confirmed from a primary source). The server address is configuration for that reason; see `docs/supabase/SETUP.md`.
+## Circle side and secure tokens (2026-11-13)
+| Check | Result |
+|---|---|
+| `npm test` | 328 passed, 19 suites (adds `circle-cloud`; schema checks extended) |
+| `npm run lint` | 0 errors, 0 warnings |
+| `npx expo export --platform android` | Bundles (1170 modules) |
+| Real server, two real phones | **Not run.** No Supabase project exists. Every network test uses a fake `fetch` |
+
+Covered by tests: event wording in English and Hindi with no leftover placeholders; which alert needs attention (recent, unseen, not answered afterwards, newest first across circles); join with a code (good, short, rejected, no network, signed out); circles and feed requests; token refresh on circle calls; invites marked as published so they are not sent twice; tokens never in the plain state file, present in the secure store, per profile, removed on sign-out, and an older state file with tokens is read then cleaned; banner appears and clears; list and feed screens; hidden when the build has no server.
+
+Found while building: the first schema draft had a policy on `members` that queried `members`, which Postgres rejects as infinite recursion; it now uses a security-definer `is_member()` and a test guards it (a real database was not available to confirm the original failure, this is from how Postgres row-level security works). One test failed because the feed row on the Circle tab repeats the banner text; the test now checks the banner by its button.
+
+Not verified: everything against a real database; two phones talking to each other; battery cost of polling every 30 s; the secure store on a device; Hindi wording by a native speaker.

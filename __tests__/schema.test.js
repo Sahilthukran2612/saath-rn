@@ -34,4 +34,23 @@ describe('cloud schema (design only, not run)', () => {
   test('a phone number is only exposed through the view that checks share_contact', () => {
     expect(code).toMatch(/case when share_contact then phone else null end/);
   });
-});
+  test('members_read does not query members directly (that would recurse forever)', () => {
+    const policy = code.match(/create policy members_read on members[\s\S]*?;/)[0];
+    expect(policy).toContain('is_member(household_id)');
+    expect(policy).not.toMatch(/from members/);
+    expect(code).toMatch(/function is_member[\s\S]*security definer/);
+  });
+  test('joining goes through accept_invite, which only adds the caller and uses a code once', () => {
+    const fn = code.match(/function accept_invite[\s\S]*?end \$\$;/)[0];
+    expect(fn).toContain('security definer');
+    expect(fn).toContain('auth.uid()');
+    expect(fn).toContain("status = 'pending'");
+    expect(fn).toContain("interval '14 days'");
+    expect(fn).toContain("set status = 'accepted'");
+    expect(fn).toMatch(/values \(inv\.household_id, auth\.uid\(\)/);
+    // no policy lets a user insert themselves into members
+    expect(code).not.toMatch(/create policy \w+ on members for insert/);
+  });
+  test('a new member starts at safety only', () => {
+    expect(code).toMatch(/values \(inv\.household_id, auth\.uid\(\), inv\.name, inv\.role, 0\)/);
+  });});

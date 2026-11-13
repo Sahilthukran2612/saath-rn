@@ -89,6 +89,9 @@ export const initialState = {
   cloud: emptyCloud(), // sign-in for sync. Tokens sit unencrypted in local storage: a risk, see ARCHITECTURE
   outbox: [], // events for the circle waiting to be sent. Only when signed in, never more than 200
   outboxSeq: 0,
+  circles: [], // households I am a member of: { household_id, role, dial, time_off, person_name }
+  feeds: {}, // household_id -> latest events I am allowed to see (kept for offline reading)
+  seen: {}, // household_id -> created_at of the newest event I have looked at
   baseline: defaultBaseline(), // personal thresholds, tuned by false-alarm and missed feedback
   careEvents: { lastInsulinAt: null, lastMealAt: null }, // times only. Saath never records or suggests a dose
   meds: { name: 'Metformin (demo)', pillsLeft: 24, perDay: 2 },
@@ -393,7 +396,15 @@ function baseReducer(state, a) {
     case 'CLOUD_SET':
       return { ...state, cloud: { ...state.cloud, ...a.patch } };
     case 'CLOUD_SIGN_OUT':
-      return { ...state, cloud: emptyCloud(), outbox: [] };
+      return { ...state, cloud: emptyCloud(), outbox: [], circles: [], feeds: {}, seen: {} };
+    case 'CIRCLES_SET':
+      return { ...state, circles: a.circles };
+    case 'FEED_SET':
+      return { ...state, feeds: { ...state.feeds, [a.id]: a.events.slice(0, 30) } };
+    case 'SEEN_SET':
+      return { ...state, seen: { ...state.seen, [a.id]: a.at } };
+    case 'INVITE_SYNCED':
+      return { ...state, invites: state.invites.map((i) => (i.id === a.id ? { ...i, cloud: true } : i)) };
     case 'OUTBOX_SENT':
       return { ...state, outbox: state.outbox.filter((e) => !a.ids.includes(e.id)) };
     case 'RESET':

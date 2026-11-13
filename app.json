@@ -36,7 +36,8 @@
           "photosPermission": false
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-secure-store"
     ]
   }
 }

@@ -6,6 +6,7 @@ import { Avatar, Badge, ListGroup, ListRow, Segmented, Toggle } from '../compone
 import { Reveal } from '../components/motion';
 import InviteSection from '../components/circle/InviteSection';
 import HelpSection from '../components/circle/HelpSection';
+import CirclesSection from '../components/circle/CirclesSection';
 import { useStore } from '../state/store';
 import { canShareItem } from '../logic';
 import { colors } from '../theme';
@@ -111,6 +112,9 @@ export default function CircleScreen() {
         </Reveal>
       ) : null}
       <Reveal index={4}>
+        <CirclesSection />
+      </Reveal>
+      <Reveal index={5}>
         <Body bold>{t('whoViewed')}</Body>
         <View style={{ height: 8 }} />
         {state.audit.length === 0 ? (

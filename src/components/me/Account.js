@@ -35,7 +35,7 @@ export default function Account() {
   const verify = async () => {
     if (busy) return;
     setBusy(true);
-    const r = await signIn(cfg, phone, code);
+    const r = await signIn(cfg, phone, code, undefined, state.profile.name);
     setBusy(false);
     if (!r.ok) return setMsg(r.reason === 'code' ? t('acc.badCode') : t('acc.failed'));
     dispatch({ type: 'CLOUD_SET', patch: r.cloud });

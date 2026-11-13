@@ -27,3 +27,12 @@ jest.mock('expo-haptics', () => ({
   ImpactFeedbackStyle: { Light: 'light' },
   NotificationFeedbackType: { Success: 'success', Warning: 'warning' },
 }));
+
+jest.mock('expo-secure-store', () => {
+  const mem = new Map();
+  return {
+    getItemAsync: jest.fn(async (k) => (mem.has(k) ? mem.get(k) : null)),
+    setItemAsync: jest.fn(async (k, v) => void mem.set(k, v)),
+    deleteItemAsync: jest.fn(async (k) => void mem.delete(k)),
+  };
+});
