@@ -5,38 +5,32 @@ import { PressRow, Glyph } from './ui';
 import { useStore } from '../state/store';
 import { colors, fonts } from '../theme';
 
-const LABEL = {
-  person: 'Person',
-  family: 'Family',
-  neighbour: 'Neighbour',
-  asha: 'ASHA',
-  clinician: 'Clinician',
-};
+const ROLES = ['person', 'family', 'neighbour', 'asha', 'clinician'];
 
 // Demo device only: look at the app as each role. Real roles come from real accounts (Phase 4).
 // It is kept small and quiet so it does not read as part of the product.
 export default function RoleBar() {
-  const { state, dispatch } = useStore();
+  const { state, dispatch, t } = useStore();
   if (!state.demo) return null;
   return (
     <View style={styles.strip}>
       <View style={styles.tag}>
         <Glyph icon={Eye} size={16} color={colors.inkSoft} />
-        <Text style={styles.tagText}>Demo view</Text>
+        <Text style={styles.tagText}>{t('demoMode')}</Text>
       </View>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ gap: 6, paddingRight: 16 }}
       >
-        {Object.keys(LABEL).map((r) => {
+        {ROLES.map((r) => {
           const on = state.role === r;
           return (
             <PressRow
               key={r}
               accessibilityRole="button"
               accessibilityState={{ selected: on }}
-              accessibilityLabel={LABEL[r]}
+              accessibilityLabel={t(`role.${r}`)}
               onPress={() => dispatch({ type: 'SET', key: 'role', value: r })}
               haptic={false}
               style={[styles.chip, on && styles.chipOn]}
@@ -44,7 +38,7 @@ export default function RoleBar() {
               <Text
                 style={{ fontFamily: fonts.semi, fontSize: 15, color: on ? colors.white : colors.indigo }}
               >
-                {LABEL[r]}
+                {t(`role.${r}`)}
               </Text>
             </PressRow>
           );

@@ -106,3 +106,4 @@ export { default as Link } from 'lucide-react-native/icons/link';
 export { default as Pause } from 'lucide-react-native/icons/pause';
 export { default as Play } from 'lucide-react-native/icons/play';
 export { default as Rocket } from 'lucide-react-native/icons/rocket';
+export { default as Smartphone } from 'lucide-react-native/icons/smartphone';

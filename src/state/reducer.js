@@ -133,6 +133,9 @@ export function reducer(state, a) {
   switch (a.type) {
     case 'HYDRATE':
       return { ...state, ...a.saved, alert: null, hydrated: true };
+    // Another person's data replaces everything, starting from defaults so nothing leaks across.
+    case 'LOAD_PROFILE':
+      return { ...initialState, ...a.saved, alert: null, hydrated: true };
     case 'SET':
       return { ...state, [a.key]: a.value };
     case 'ACTIVITY':

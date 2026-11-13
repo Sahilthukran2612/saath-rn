@@ -4,6 +4,7 @@ import { Languages, Eye, RotateCcw, ShieldCheck, Type } from '../components/icon
 import { BigButton, Body, Caption, Card, Title } from '../components/ui';
 import { Avatar, Badge, ListGroup, ListRow, Segmented, Toggle } from '../components/kit';
 import { Reveal } from '../components/motion';
+import SharedPhone from '../components/me/SharedPhone';
 import { useStore } from '../state/store';
 import { foregroundAvailable } from '../services/foreground';
 import { colors } from '../theme';
@@ -78,6 +79,8 @@ export default function MeScreen() {
       </Reveal>
 
       <Reveal index={1}>
+        <SharedPhone />
+        <View style={{ height: 18 }} />
         <Body bold>{t('me.mode')}</Body>
         <View style={{ height: 8 }} />
         <Segmented

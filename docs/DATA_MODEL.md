@@ -2,6 +2,9 @@
 
 Never persisted: `alert` (a stale countdown after restart would be wrong), `hydrated`, `lastActiveMs`, `simNowMs`.
 
+## Shared-phone registry (key `saath/profiles/v1`)
+`{ shared, locked, activeId, tries, lockedUntil, profiles[] { id, name, salt, pinHash } }`. A PIN is stored only as a salted, stretched hash, never as typed. It is a deterrent, not encryption. Each profile's state lives under its own key: the first profile keeps `saath/state/v1`, the others use `saath/state/v1/<id>`. A phone left in shared mode opens locked.
+
 | Field | Shape | Notes |
 |---|---|---|
 | `mode` | `teen` / `elder` / `adult` | Changes the home screen. `teen` requires guardian consent |

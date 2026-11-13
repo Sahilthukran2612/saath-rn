@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, StyleSheet, View, Text } from 'react-native';
+import { AppState, KeyboardAvoidingView, StyleSheet, View, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useStore } from './state/store';
@@ -19,6 +19,7 @@ import CareScreen from './screens/CareScreen';
 import PlanScreen from './screens/PlanScreen';
 import MeScreen from './screens/MeScreen';
 import ConsentScreen from './screens/ConsentScreen';
+import LockScreen from './screens/LockScreen';
 import { startFallListener } from './services/sensing';
 import { cfgFrom } from './care';
 import { askNotificationPermission, startWatching, stopWatching } from './services/foreground';
@@ -45,7 +46,7 @@ const styles = StyleSheet.create({
 });
 
 export default function AppShell({ sensing = true }) {
-  const { state, dispatch, t } = useStore();
+  const { state, dispatch, t, registry, shared } = useStore();
   const [tab, setTab] = useState('today');
   const k = useScale();
   const { impactG, inactiveHours } = state.baseline;
@@ -94,6 +95,28 @@ export default function AppShell({ sensing = true }) {
     const h = setInterval(() => dispatch({ type: 'EXPIRE_DELEGATIONS', now: Date.now() }), 30000);
     return () => clearInterval(h);
   }, [dispatch]);
+
+  // A shared phone locks when the app goes to the background. Sensing keeps running for the
+  // last person, and the alert is drawn over the lock screen, so safety never waits for a PIN.
+  const sharedOn = registry.shared;
+  const { lockNow } = shared;
+  useEffect(() => {
+    if (!sharedOn) return undefined;
+    const sub = AppState.addEventListener('change', (s) => {
+      if (s === 'background') lockNow();
+    });
+    return () => sub.remove();
+  }, [sharedOn, lockNow]);
+
+  if (state.hydrated && registry.shared && registry.locked) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.mist }}>
+        <StatusBar style="dark" />
+        <AlertBanner />
+        <LockScreen />
+      </SafeAreaView>
+    );
+  }
 
   // Under-18 users need a guardian's agreement first (needs legal review).
   if (state.hydrated && state.mode === 'teen' && state.consent.status !== 'granted') {

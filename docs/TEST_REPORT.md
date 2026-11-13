@@ -116,3 +116,20 @@ Bugs found by running it, now fixed:
 7. The adult home still showed fixed demo numbers (12 days, 640); it now reads the real stock, strips and budget.
 
 Not verified: TalkBack, a physical phone, contrast with a measuring tool, a native-speaker read of every Hindi screen, dark mode (not built). See `docs/DESIGN.md`.
+
+## Phase 4 (part) and Phase 5 audit (2026-11-13)
+Built: shared-phone mode (profiles, PIN, lock screen), a cloud schema with row-level security (design only), Hindi labels on the demo role strip, an automated accessibility-name audit.
+
+| Check | Result |
+|---|---|
+| `npm test` | 278 passed, 17 suites (adds `profiles`, `phase4`, `a11y`, `schema`) |
+| `npm run lint` | 0 errors, 0 warnings |
+| `npx expo export --platform android` | Bundles (1161 modules) |
+| On an emulator or phone | **Not run.** Shared-phone mode and the lock screen were tested in Jest only |
+| `docs/supabase/schema.sql` | **Not applied to any database.** Tests only check the file for dose columns, the safety rule, RLS on every table and the phone-number view |
+
+Covered by tests: a wrong PIN shows tries left, five wrong tries lock the keypad for a minute across all profiles, the right PIN opens the right person's data, a safety alert is drawn over the lock screen, another person cannot take over while an alert is open, a new person can be added, the mode cannot be turned off without the PIN, and every control (buttons, switches, tabs, text inputs) has a name on all six tabs for eight role/mode/language combinations, every Plan tool and the alert.
+
+Found by testing: my first alert-takeover test picked the wrong profile (the last active person is the one whose alert it is), which showed the rule works but my test did not set it up right; the test now says so. A Plan-tool audit failed because the Handover tile is teen-only; the audit now runs as a teen.
+
+Not verified: any of this on a device, the camera round trip when the app locks on background, TalkBack, battery use, the signed APK (still blocked on the Windows build limit), and the SQL itself.

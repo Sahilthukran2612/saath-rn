@@ -50,6 +50,19 @@ Raw accelerometer samples stay in memory inside `sensing.js` (8 s buffer) and ar
 ## Phase 4 sync (planned)
 Supabase Postgres with row-level security that implements the Privacy Dial (a row of type safety is visible to every member, routine to dial >= 1, summary to dial = 2), plus FCM for push. The app stays local-first: the existing `queue` is the sync queue.
 
+Status: the schema and policies are written in `docs/supabase/schema.sql` (`can_see_event` mirrors `canReceive`; phone numbers only through the `members_public` view; no dose columns; a trigger keeps a guardian at Routine or above). **It has not been applied to a database and the policies are untested.** The app does not call it. Next steps need a Supabase project and an FCM key: apply the schema, write policy tests, add a thin sync adapter that drains `state.queue`, add phone sign-in.
+
+## Shared-phone mode (Phase 4, built)
+One phone, several people. `src/profiles.js` holds the pure rules: a registry of profiles, salted and stretched PIN hashes, lockout after five wrong tries (one minute, shared by all profiles so guesses cannot be multiplied by switching profile), and per-profile storage keys (the first profile keeps the original key, so older data is found). `StoreProvider` loads the active profile's state and, after a correct PIN, swaps in another person's state starting from defaults (`LOAD_PROFILE`) so nothing leaks across.
+
+Decisions that matter for safety:
+- The lock screen renders `AlertBanner` next to it, so a fall alert shows over the lock and needs no PIN.
+- While an alert is open, another person cannot take over the phone ("Answer the safety alert first").
+- Sensing and the foreground service keep running for the last active person when the phone is locked.
+- The app locks when it goes to the background. Opening the camera (foot photo) backgrounds the app, so the person re-enters their PIN afterwards.
+
+Limits: the PIN is not encryption. State is stored unencrypted in AsyncStorage, so someone with the phone and developer tools can read it. Removing a person is not built. A new person starts with demo data when Demo mode is on. Not run on a phone or an emulator, only in Jest.
+
 ## Build blocker (Windows)
 `./gradlew assembleDebug` compiles the Kotlin, resolves dependencies and installs SDK platform 37, Build-Tools 36 and the NDK, then fails in `:app:buildCMakeDebug` with `ninja: error: mkdir(...): No such file or directory`. React Native builds the generated C++ for libraries such as `react-native-safe-area-context` and `react-native-svg`, and CMake mirrors each source path under the build folder. The longest object path is about 327 characters, and Windows stops at 260. The project path appears twice in it, so even a very short folder (`D:\s`) plus a short build folder only reaches about 278.
 
