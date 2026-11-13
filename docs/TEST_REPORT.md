@@ -150,7 +150,7 @@ Context: Supabase was blocked by Indian ISPs from February 2026 and reportedly r
 ## Circle side and secure tokens (2026-11-13)
 | Check | Result |
 |---|---|
-| `npm test` | 328 passed, 19 suites (adds `circle-cloud`; schema checks extended) |
+| `npm test` | 330 passed, 19 suites (adds `circle-cloud`; schema checks extended) |
 | `npm run lint` | 0 errors, 0 warnings |
 | `npx expo export --platform android` | Bundles (1170 modules) |
 | Real server, two real phones | **Not run.** No Supabase project exists. Every network test uses a fake `fetch` |
