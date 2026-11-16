@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView, View } from 'react-native';
-import { Languages, Eye, RotateCcw, ShieldCheck, Type } from '../components/icons';
+import { Languages, Eye, MessageCircle, RotateCcw, ShieldCheck, Type } from '../components/icons';
 import { BigButton, Body, Caption, Card, Title } from '../components/ui';
 import { Avatar, Badge, ListGroup, ListRow, Segmented, Toggle } from '../components/kit';
 import { Reveal } from '../components/motion';
@@ -8,6 +8,7 @@ import SharedPhone from '../components/me/SharedPhone';
 import Account from '../components/me/Account';
 import { useStore } from '../state/store';
 import { foregroundAvailable } from '../services/foreground';
+import { askSmsPermission, smsAvailable } from '../services/sms';
 import { colors } from '../theme';
 
 // The label gets the full width and the selector sits underneath, so neither is squeezed at large text.
@@ -76,6 +77,31 @@ export default function MeScreen() {
           <Caption>{t('bg.note')}</Caption>
           {!foregroundAvailable ? <Body bold>{t('bg.unavailable')}</Body> : null}
           {state.backgroundDenied ? <Body bold>{t('bg.denied')}</Body> : null}
+        </Card>
+        <View style={{ height: 12 }} />
+        <Card tone="tint" style={{ gap: 12 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <MessageCircle size={24} color={colors.indigo} />
+            <Body bold style={{ flex: 1 }}>
+              {t('sms.title')}
+            </Body>
+            <Toggle
+              value={state.autoSms}
+              label={t('sms.title')}
+              onValueChange={async (on) => {
+                set('autoSmsDenied', false);
+                if (!on) return set('autoSms', false);
+                if (await askSmsPermission()) set('autoSms', true);
+                else {
+                  set('autoSms', false);
+                  set('autoSmsDenied', true);
+                }
+              }}
+            />
+          </View>
+          <Caption>{t('sms.note')}</Caption>
+          {!smsAvailable ? <Body bold>{t('sms.unavailable')}</Body> : null}
+          {state.autoSmsDenied ? <Body bold>{t('sms.denied')}</Body> : null}
         </Card>
       </Reveal>
 

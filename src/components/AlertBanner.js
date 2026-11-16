@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Linking, Modal, StyleSheet, Text, View } from 'react-native';
 import { callLink, escalationMessage, smsLink, whatsappLink } from '../care';
 import { CFG } from '../logic';
@@ -10,6 +10,7 @@ import { colors, fonts, radii } from '../theme';
 import { useStore } from '../state/store';
 import { speak } from '../services/voice';
 import { warn } from '../services/haptics';
+import { sendSms, smsAvailable } from '../services/sms';
 
 // Ticks the countdown. Only depends on the alert id and phase, and dispatches without
 // reading state, so there is no stale closure and each transition is counted once in the reducer.
@@ -95,6 +96,19 @@ export default function AlertBanner() {
     }
   }, [al?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // After the countdown, with nobody answering, text each contact in turn without a tap (only when the
+  // person turned this on and the installed app can). One message per alert and step.
+  const texted = useRef(new Set());
+  const [autoSent, setAutoSent] = useState({ key: '', ok: null, name: '' });
+  const step = al ? al.chain[al.stepIndex] : null;
+  useEffect(() => {
+    if (!al || al.phase !== 'escalating' || !state.autoSms || !smsAvailable || !step?.phone) return;
+    const key = `:`;
+    if (texted.current.has(key)) return;
+    texted.current.add(key);
+    sendSms(step.phone, msg).then((ok) => setAutoSent({ key, ok, name: step.name }));
+  }, [al?.id, al?.phase, al?.stepIndex, state.autoSms]); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!al) return null;
   const who = al.phase === 'escalating' ? al.chain[al.stepIndex] : null;
   const total = al.phase === 'countdown' ? CFG.countdownSec : CFG.stepSec;
@@ -179,6 +193,11 @@ export default function AlertBanner() {
                 </View>
               ) : null}
             </View>
+          ) : null}
+          {autoSent.ok !== null && autoSent.key.startsWith(`:`) ? (
+            <Caption style={{ color: colors.white, textAlign: 'center' }}>
+              {autoSent.ok ? t('sms.sentTo').replace('{name}', autoSent.name) : t('sms.failed')}
+            </Caption>
           ) : null}
           {al.phase === 'done' ? (
             <Body style={{ color: colors.white, textAlign: 'center' }}>{t('nobodyReached')}</Body>

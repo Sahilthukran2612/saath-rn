@@ -98,6 +98,8 @@ export const initialState = {
   testPlan: { perDay: 2, strips: 20 }, // set by the clinician; Saath only counts
   budget: demoBudget(),
   background: false, // "keep watching in the background" (visible foreground service)
+  autoSms: false, // send the alert SMS by itself when nobody answers (installed app only)
+  autoSmsDenied: false, // the SMS permission was refused
   backgroundDenied: false, // the notification permission was refused, so the service did not start
   // Phase 3
   profile: { name: '', condition: '', allergies: '', emergencyId: 'm1' },

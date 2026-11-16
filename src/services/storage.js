@@ -34,6 +34,7 @@ const PERSIST = [
   'testPlan',
   'budget',
   'background',
+  'autoSms',
   'profile',
   'ladder',
   'ladderApproval',

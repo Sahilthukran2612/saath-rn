@@ -1,0 +1,5 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- Used only to text a contact when a safety alert has gone unanswered, and only if the person
+       turned "Send the alert SMS by itself" on. It is never used to read messages. -->
+  <uses-permission android:name="android.permission.SEND_SMS" />
+</manifest>
