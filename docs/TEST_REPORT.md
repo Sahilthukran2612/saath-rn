@@ -238,3 +238,20 @@ All eight test accounts (and their households) were deleted afterwards by ID, an
 One earlier run failed at "household" even though the household had been created: the response did not arrive inside the client's 8-second timeout. The client treats that as "try again later" and the retry finds the household (one per account), so nothing is duplicated, but the timeout may be tight on a slow connection. Not changed.
 
 Still not run: the app on a phone doing this, two real phones, and the circle member seeing the banner from real server data (the demo stand-ins show that screen).
+
+## Reminders, loud alarm, dial sync, icons, version fixes (2026-11-16)
+| Check | Result |
+|---|---|
+| `npm test` | 437 passed, 26 suites (adds `reminders`, `siren`, `dial-sync`) |
+| `npm run lint` | 0 errors, 0 warnings |
+| `npx expo-doctor` | 20/20 (it was 18/20 until the two fixes below) |
+
+Found by `expo-doctor`, not by tests: `expo-audio` (the siren) needs `expo-asset` as a peer dependency, and without it the installed app could crash even though Expo Go works; it is now installed. The `expo-audio` plugin could also have added a microphone permission, so it is configured with `microphonePermission: false` (the app never records). Eleven SDK 58 patch versions were out of date and were aligned with `npx expo install --fix`.
+
+Tested: reminder rules (whole hours only, nothing inside the 22:00 to 07:00 sleep window, stepping an hour at a time and clearing at the ends), the reminder toggle (permission asked, refused path, schedule rebuilt when a time changes, Hindi wording), the siren (silent during the countdown, plays when nobody answers, stops when answered, the sound file is a valid, loud, unclipped 1.6 s mono wav under 100 KB), and the dial on the server (member list, exactly the new level sent, bad levels never sent, refusal reverts the screen and says so, Time Off targets only my own row, token refresh).
+
+Real server check (the dial): in the earlier live run a member at dial 0 saw only the fall; after the person raised the dial the same member saw fall, task and "I'm OK"; a member trying to raise their own dial was refused (400); a stranger saw nothing. The screen that sets the dial calls the same code.
+
+Not run on a phone: a reminder actually appearing, the siren heard, the icon and splash on a real launcher, the dial screen against the live server from the app UI.
+
+A bug of mine caught on the way: the first release-build line in `scripts/build-apk.ps1` had a quoting error, so no build ran at all; the script now parses (checked) and the argument is quoted.

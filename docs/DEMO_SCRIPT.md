@@ -3,7 +3,7 @@
 About 12 minutes. Works in **Expo Go** (no build needed) or in the installed APK. Everything below is in the app. Where a feature needs hardware or a server we do not have on stage, the app has a **demo simulation** that goes through the same screens and the same logic, and says on screen that it is a demo.
 
 ## Before you start
-1. On the PC: `npx expo start` in `Z:\Projects\saath-rn`, open the app in Expo Go (same Wi-Fi). Or install `dist\saath-debug.apk`.
+1. Easiest: install `dist\saath.apk` (the standalone release build; it needs no PC). Or on the PC run `npx expo start` in `Z:\Projects\saath-rn` and open the app in Expo Go (same Wi-Fi). `dist\saath-debug.apk` is a development build and only works while the PC server is running.
 2. **Me** tab: make sure **Demo mode** is on (it is by default). Scroll down and tap **Reset app data** for a clean start. Set **Who is this for** to **Elder**.
 3. Turn on Do Not Disturb. Turn the volume up (the app speaks).
 4. Optional, for the live sensor part: keep the phone in your hand.
@@ -51,6 +51,14 @@ About 12 minutes. Works in **Expo Go** (no build needed) or in the installed APK
 5. Tap **Demo: they may have fallen**. A red banner appears at the top of the screen on every tab: "Amma (demo) may have fallen. Please call them." Switch to another tab to show it stays.
 6. Tap **Got it**. Open **Amma (demo)** to show the feed worded in plain language and "You see: Routine". Tap **Demo: they say they are OK**.
 - Say: with the real server, the database itself enforces the dial (we tested 33 policy checks against it). The demo buttons only replace the second phone.
+
+### 6b. Who sees what, really (1 min)
+1. Still on **Circle**, scroll to **Joined on their own phones**. Tap **Demo: someone joins with my invite**: "Asha (demo) sees: Safety only".
+2. Tap **Routine**, then **Full**; the line under her name changes each time. Say: "With the server, this is the control the database checks before it shows that person anything. We verified it on the live project: at 'safety only' a member saw only the fall; after I raised it they saw all three events."
+
+## 6c. Reminders and the loud alarm (1 min)
+1. **Today** → **Edit routine** → turn on **Remind me at these times**. Each task has a time with **Earlier** and **Later** buttons. A time in the sleep window (22:00 to 07:00) says no reminder will show. Say: "These are local notifications: no server, no internet."
+2. **Me** → turn on **Loud alarm when no one answers**. Say: "If nobody answers an alert, the phone plays a loud siren so people nearby hear it, even with no signal." Warn the room before you run an alert with this on, and keep the volume sensible. It stops the moment you tap **I'm OK** or **False alarm**.
 
 ## 7. Care, diabetes layer (1 min)
 1. **Care** → **Add sugar reading** `65`: the low-sugar steps appear ("follow your clinician's plan, or call family, a clinic or an ASHA").

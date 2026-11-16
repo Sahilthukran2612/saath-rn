@@ -238,7 +238,12 @@ A heart-rate band never makes Saath diagnose. The app only says the rate "has st
 | Automatic SMS, foreground service | Kotlin written; **needs an installed build, not yet run** |
 | Bluetooth heart-rate band | Built and tested without hardware; **not yet run on a band**. A labelled demo simulation exists for the presentation |
 | Demo simulations (band, SMS, a person I look after) | Built and tested; for the presentation |
-| Push notifications (FCM) | **Not built.** Needs a Firebase project |
+| Daily task reminders (local notifications) | Built and tested with the notification layer mocked; not seen firing on a phone |
+| Loud alarm when nobody answers | Built; sound file and logic tested; not heard on a phone |
+| Dial written to the server for joined members; member-side Time Off | Dial verified against the live server in a two-account run; screen tested; Time Off against a fake server |
+| App icon, themed icon, splash | Generated in the Saath identity; not yet seen on a phone |
+| Standalone release APK (no PC needed) | Build script supports it; see TEST_REPORT for whether it has built |
+| Push notifications (FCM) | **Not built, skipped on purpose.** Needs a Firebase project. Circle members see alerts while the app is open |
 | Signed release APK | **Not built.** See section 12 |
 
 ---

@@ -9,10 +9,11 @@ project is copied to a very short folder ($Short) and the C++ build folder is mo
 Usage (PowerShell, from anywhere):
   .\scripts\build-apk.ps1            # copy, build, copy the APK to dist\
   .\scripts\build-apk.ps1 -Prebuild  # also regenerate android\ (needed after a native dependency or app.json change)
+  .\scripts\build-apk.ps1 -Release   # standalone APK (dist\saath.apk) that works without a PC running
 
 Edit the four paths below for your machine. Takes about 8 minutes.
 #>
-param([switch]$Prebuild)
+param([switch]$Prebuild, [switch]$Release)
 
 $ErrorActionPreference = 'Stop'
 $Project = Split-Path -Parent $PSScriptRoot
@@ -69,7 +70,12 @@ try {
   Push-Location "$Short\android"
   # Gradle writes harmless warnings to stderr; judge success by its exit code, not by stderr text
   $ErrorActionPreference = 'Continue'
-  try { .\gradlew.bat assembleDebug --console=plain } finally { Pop-Location }
+  # -Release builds a standalone APK with the app's JavaScript inside (it needs no PC running), for the two
+  # CPU types real phones use. It is signed with the debug key, so it installs fine but is not a Play Store build.
+  try {
+    if ($Release) { .\gradlew.bat assembleRelease '-PreactNativeArchitectures=arm64-v8a,armeabi-v7a' --console=plain }
+    else { .\gradlew.bat assembleDebug --console=plain }
+  } finally { Pop-Location }
   $gradleExit = $LASTEXITCODE
   $ErrorActionPreference = 'Stop'
   if ($gradleExit -ne 0) { throw "Gradle failed ($gradleExit)" }
@@ -78,6 +84,8 @@ try {
 }
 
 New-Item -ItemType Directory -Force "$Project\dist" | Out-Null
-Copy-Item "$Short\android\app\build\outputs\apk\debug\app-debug.apk" "$Project\dist\saath-debug.apk" -Force
-Write-Host "Done: $Project\dist\saath-debug.apk"
-Write-Host 'Install: copy it to the phone and open it, or: adb install -r dist\saath-debug.apk'
+if ($Release) { $from = "$Short\android\app\build\outputs\apk\release\app-release.apk"; $name = 'saath.apk' }
+else { $from = "$Short\android\app\build\outputs\apk\debug\app-debug.apk"; $name = 'saath-debug.apk' }
+Copy-Item $from "$Project\dist\$name" -Force
+Write-Host "Done: $Project\dist\$name"
+Write-Host "Install: copy it to the phone and open it, or: adb install -r dist\$name"
