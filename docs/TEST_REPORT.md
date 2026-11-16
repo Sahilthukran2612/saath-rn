@@ -255,3 +255,14 @@ Real server check (the dial): in the earlier live run a member at dial 0 saw onl
 Not run on a phone: a reminder actually appearing, the siren heard, the icon and splash on a real launcher, the dial screen against the live server from the app UI.
 
 A bug of mine caught on the way: the first release-build line in `scripts/build-apk.ps1` had a quoting error, so no build ran at all; the script now parses (checked) and the argument is quoted.
+
+## Standalone release APK (2026-11-16)
+| Check | Result |
+|---|---|
+| `scripts\build-apk.ps1 -Release` | **BUILD SUCCESSFUL in 8m 48s** (third attempt) |
+| Output | `dist\saath.apk`, 37.3 MB; native libraries for `arm64-v8a` and `armeabi-v7a`; `assets/index.android.bundle` (the app's JavaScript) and the siren sound inside |
+| Installed or run on a phone | **Not yet** |
+
+Three attempts: (1) failed because my release line in the script had a quoting error, so Gradle never ran; (2) failed at "createBundleReleaseJsAndAssets" with `Unable to resolve "./dist/abort-controller"`, because the script's copy step excluded every folder named `dist` and so also dropped `dist` folders inside installed libraries (debug builds do not bundle the JavaScript, which is why this only showed in a release build); fixed by excluding only the project's own `dist` by full path; (3) succeeded.
+
+Permissions, read from the built APK with `aapt2`: the first release build still carried "draw over other apps", activity recognition, biometric and fingerprint, and the Firebase receive permission, all added by libraries and none used by Saath. They are now blocked in `app.json` and absent from the rebuilt APK, as are microphone and storage. What remains: camera (foot photo), Bluetooth (heart-rate band, and location only up to Android 11 where the system requires it for any Bluetooth scan), SMS send (automatic alert SMS, opt-in), notifications, vibration, internet, foreground service, wake lock and boot-completed (so reminders survive a restart), and audio settings (siren). The APK is signed with the debug key: it installs, but it is not a Play Store build, and Google Play would also reject the SMS permission.
