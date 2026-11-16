@@ -1,0 +1,7 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- CALL_PHONE places a call to an emergency contact when an alert has gone unanswered, only if the person
+       turned "Call my contacts automatically" on. READ_PHONE_STATE only tells Saath when that call has ended,
+       so it can move to the next contact. Saath never reads call history, numbers or contacts. -->
+  <uses-permission android:name="android.permission.CALL_PHONE" />
+  <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+</manifest>

@@ -1,5 +1,5 @@
 import { addReading } from '../heart';
-import { CFG, clampDial, escalationChain, isDelegationActive, isInactive } from '../logic';
+import { CFG, clampDial, escalationChain, isDelegationActive, isInactive, validPhone } from '../logic';
 import { adjustBaseline, cfgFrom, defaultBaseline } from '../care';
 import { addCheckin, approveAdvance, declineAdvance, initialLadder, requestAdvance, stepBack } from '../plan';
 
@@ -118,7 +118,29 @@ export const initialState = {
   footPhotos: [], // [{ uri, at }] stay on the phone, never analysed
   waist: [], // [{ cm, at }]
   risk: null, // { answers, result, at } latest questionnaire
+  onboarded: true, // false on a fresh install: the setup flow runs once (see productionState)
+  autoCall: false, // dial the contacts one by one when nobody answers an alert (installed app only)
+  autoCallDenied: false, // the phone permissions for calling were refused
 };
+
+// What a real install starts with: no demo people, no fake phone numbers, no invented readings or costs.
+// A fake number must never be reachable by the automatic calls, so the real list starts empty and the
+// person adds their own contacts in the setup flow. Demo mode (Me) can still load demo data for a
+// presentation, and removes it again. Tests and the Expo Go development build keep `initialState`.
+export const productionState = {
+  ...initialState,
+  demo: false,
+  onboarded: false,
+  members: [],
+  readings: [],
+  budget: [],
+  meds: { name: '', pillsLeft: 0, perDay: 0 },
+  testPlan: { perDay: 0, strips: 0 },
+  profile: { name: '', condition: '', allergies: '', emergencyId: null },
+};
+
+// `__DEV__` is false in an installed release build, true in Expo Go and in tests.
+export const startState = __DEV__ ? initialState : productionState;
 
 function emptyCloud() {
   return { phone: '', userId: null, access: null, refresh: null, householdId: null };
@@ -128,6 +150,26 @@ function emptyCloud() {
 const enqueue = (state, a) => ({ ...state, queue: [...state.queue, { op: a.type, at: a.at ?? 0 }] });
 
 const bump = (tally, key) => ({ ...tally, [key]: tally[key] + 1 });
+
+// After a call to the contact being reached ends. A call that lasted long enough is taken as someone
+// answering, and the chain stops; anything shorter (no answer, busy, declined) moves on to the next contact.
+// Android does not tell an app whether an outgoing call was answered, so this length is a stated guess.
+function afterCall(state, seconds) {
+  const al = state.alert;
+  if (!al || al.phase !== 'escalating') return state;
+  const clear = { hold: false, heldFor: 0, calling: null };
+  if (seconds >= CFG.callReachedSec) {
+    return { ...state, alert: { ...al, ...clear, phase: 'done', remaining: 0, reached: al.chain[al.stepIndex]?.id ?? null } };
+  }
+  const next = al.stepIndex + 1;
+  return {
+    ...state,
+    alert:
+      next >= al.chain.length
+        ? { ...al, ...clear, phase: 'done', remaining: 0 }
+        : { ...al, ...clear, stepIndex: next, remaining: CFG.stepSec },
+  };
+}
 
 function openAlert(state, { kind, confidence, reason, id }) {
   if (state.alert) return state; // one alert at a time: no double counting
@@ -153,7 +195,7 @@ function baseReducer(state, a) {
       return { ...state, ...a.saved, alert: null, hydrated: true };
     // Another person's data replaces everything, starting from defaults so nothing leaks across.
     case 'LOAD_PROFILE':
-      return { ...initialState, ...a.saved, alert: null, hydrated: true };
+      return { ...startState, ...a.saved, alert: null, hydrated: true };
     case 'SET':
       return { ...state, [a.key]: a.value };
     case 'ACTIVITY':
@@ -175,6 +217,11 @@ function baseReducer(state, a) {
     case 'TICK': {
       const al = state.alert;
       if (!al || al.phase === 'done') return state;
+      if (al.hold) {
+        // a call is in progress: the clock waits for it to end, but never forever
+        const held = (al.heldFor || 0) + 1;
+        return held >= CFG.callMaxHoldSec ? afterCall(state, 0) : { ...state, alert: { ...al, heldFor: held } };
+      }
       if (al.remaining > 1) return { ...state, alert: { ...al, remaining: al.remaining - 1 } };
       if (al.phase === 'countdown') {
         // person did not answer: this is the one place "escalated" is counted
@@ -457,6 +504,76 @@ function baseReducer(state, a) {
       return state.heart.device
         ? { ...state, heart: { ...state.heart, readings: addReading(state.heart.readings, a.bpm, a.at), contact: a.contact } }
         : state;
+    case 'CALL_START':
+      return state.alert && state.alert.phase === 'escalating'
+        ? {
+            ...state,
+            alert: { ...state.alert, hold: true, heldFor: 0, calling: state.alert.chain[state.alert.stepIndex]?.id ?? null },
+          }
+        : state;
+    case 'CALL_END':
+      return afterCall(state, Number(a.seconds) || 0);
+    case 'CONTACT_ADD': {
+      const name = String(a.name || '').trim();
+      const digits = String(a.phone || '').replace(/\D/g, '').slice(-10);
+      const role = ['family', 'neighbour', 'asha', 'clinician'].includes(a.role) ? a.role : 'family';
+      const real = state.members.filter((m) => !m.demo);
+      if (name.length < 2 || !validPhone(digits) || real.length >= 12) return state;
+      if (real.some((m) => String(m.phone).replace(/\D/g, '').slice(-10) === digits)) return state;
+      const member = { id: a.id, name, role, dial: 0, timeOff: false, phone: digits, shareContact: true };
+      return {
+        ...state,
+        members: [...state.members.filter((m) => !m.demo), member],
+        profile: state.profile.emergencyId && !state.members.find((m) => m.id === state.profile.emergencyId)?.demo
+          ? state.profile
+          : { ...state.profile, emergencyId: a.id },
+      };
+    }
+    case 'CONTACT_REMOVE': {
+      const members = state.members.filter((m) => m.id !== a.id);
+      return {
+        ...state,
+        members,
+        profile:
+          state.profile.emergencyId === a.id
+            ? { ...state.profile, emergencyId: members.find((m) => !m.demo)?.id ?? null }
+            : state.profile,
+      };
+    }
+    // Presentation data on request. It is flagged, so DEMO_OFF removes exactly what DEMO_ON added, and real
+    // contacts, readings and costs the person entered are never touched. While demo is on, no call or SMS is
+    // ever really placed (see AlertBanner), so a demo contact's fake number can never be dialled.
+    case 'DEMO_ON': {
+      const hasReal = state.members.some((m) => !m.demo);
+      return {
+        ...state,
+        demo: true,
+        members: hasReal ? state.members : SEED.members.map((m) => ({ ...m, demo: true })),
+        readings: state.readings.length ? state.readings : SEED.readings,
+        budget: state.budget.length ? state.budget : demoBudget(),
+        meds: state.meds.name ? state.meds : { name: 'Metformin (demo)', pillsLeft: 24, perDay: 2, demo: true },
+        testPlan: state.testPlan.perDay ? state.testPlan : { perDay: 2, strips: 20, demo: true },
+      };
+    }
+    case 'DEMO_OFF': {
+      const keep = (obj) => Object.fromEntries(Object.entries(obj).filter(([k]) => !k.startsWith('demo-')));
+      return {
+        ...state,
+        demo: false,
+        role: 'person',
+        members: state.members.filter((m) => !m.demo),
+        readings: state.readings.filter((r) => !r.demo),
+        budget: state.budget.filter((b) => !b.demo),
+        meds: state.meds.demo ? productionState.meds : state.meds,
+        testPlan: state.testPlan.demo ? productionState.testPlan : state.testPlan,
+        joined: state.joined.filter((m) => !String(m.id).startsWith('demo-')),
+        circles: state.circles.filter((c) => !String(c.household_id).startsWith('demo-')),
+        feeds: keep(state.feeds),
+        profile: state.members.find((m) => m.id === state.profile.emergencyId)?.demo
+          ? { ...state.profile, emergencyId: null }
+          : state.profile,
+      };
+    }
     case 'CLOUD_SET':
       return { ...state, cloud: { ...state.cloud, ...a.patch } };
     case 'CLOUD_SIGN_OUT':
@@ -488,7 +605,7 @@ function baseReducer(state, a) {
     case 'OUTBOX_SENT':
       return { ...state, outbox: state.outbox.filter((e) => !a.ids.includes(e.id)) };
     case 'RESET':
-      return { ...initialState, hydrated: true };
+      return { ...startState, hydrated: true };
     default:
       return state;
   }

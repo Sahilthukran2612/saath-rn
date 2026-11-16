@@ -12,6 +12,8 @@ import { speak } from '../services/voice';
 import { warn } from '../services/haptics';
 import { sendSms, smsAvailable } from '../services/sms';
 import { startSiren, stopSiren } from '../services/siren';
+import { callsAvailable, placeCall } from '../services/calls';
+import { clearAlert, raiseAlert } from '../services/foreground';
 
 // Ticks the countdown. Only depends on the alert id and phase, and dispatches without
 // reading state, so there is no stale closure and each transition is counted once in the reducer.
@@ -94,6 +96,10 @@ export default function AlertBanner() {
     if (al) {
       warn();
       speak(`${t('areYouOk')} ${t('areYouOkSub')}`, state.lang);
+      // with the phone locked or in a pocket, bring this screen up (full-screen notification)
+      raiseAlert(t('areYouOk'), t('areYouOkSub'));
+    } else {
+      clearAlert();
     }
   }, [al?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -109,6 +115,19 @@ export default function AlertBanner() {
     texted.current.add(key);
     sendSms(step.phone, msg).then((ok) => setAutoSent({ key, ok, name: step.name }));
   }, [al?.id, al?.phase, al?.stepIndex, state.autoSms]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Dial the contacts one by one, without a tap, once the countdown has ended with no answer. The clock waits
+  // while a call is up (CALL_START), and the next contact is dialled when it ends (CALL_END). Demo mode never
+  // places a real call: a demo contact's number is fake.
+  const called = useRef(new Set());
+  useEffect(() => {
+    if (!al || al.phase !== 'escalating' || !state.autoCall || state.demo || !callsAvailable || !step?.phone) return;
+    const key = `${al.id}:${al.stepIndex}`;
+    if (called.current.has(key)) return;
+    called.current.add(key);
+    dispatch({ type: 'CALL_START' });
+    placeCall(step.phone, (seconds) => dispatch({ type: 'CALL_END', seconds }));
+  }, [al?.id, al?.phase, al?.stepIndex, state.autoCall]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // A loud wail once nobody has answered, only if the person turned it on. It plays on this phone so
   // people nearby can hear it, and works with no signal. It stops the moment the alert is answered.
@@ -214,8 +233,22 @@ export default function AlertBanner() {
               {autoSent.ok ? t('sms.sentTo').replace('{name}', autoSent.name) : t('sms.failed')}
             </Caption>
           ) : null}
+          {al.calling && who && al.calling === who.id ? (
+            <Body bold style={{ color: colors.white, textAlign: 'center' }}>
+              {t('call.calling').replace('{name}', who.name)}
+            </Body>
+          ) : null}
+          {state.autoCall && state.demo && who?.phone ? (
+            <Caption style={{ color: colors.white, textAlign: 'center' }}>
+              {t('call.simulated').replace('{name}', who.name)}
+            </Caption>
+          ) : null}
           {al.phase === 'done' ? (
-            <Body style={{ color: colors.white, textAlign: 'center' }}>{t('nobodyReached')}</Body>
+            <Body style={{ color: colors.white, textAlign: 'center' }}>
+              {al.reached
+                ? t('call.reached').replace('{name}', al.chain.find((m) => m.id === al.reached)?.name ?? '')
+                : t('nobodyReached')}
+            </Body>
           ) : null}
           <Caption style={{ color: colors.white, opacity: 0.85, textAlign: 'center' }}>
             {t('confidence')}: {Math.round(al.confidence * 100)}% ({al.reason})

@@ -67,6 +67,7 @@
         }
       ],
       "expo-asset",
+      "./plugins/withShowWhenLocked",
       "expo-status-bar"
     ]
   }

@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
+import android.os.PowerManager
 
 /**
  * Keeps the app process alive while the person has "keep watching in the background" turned on.
@@ -16,6 +17,10 @@ import android.os.IBinder
  * JavaScript detector keeps running in the same process.
  */
 class SaathForegroundService : Service() {
+  // Holds the CPU awake while watching, so the motion sensor keeps reporting with the screen off.
+  // It has a 12 hour limit and is renewed each time the service starts; the person can turn watching off.
+  private var wakeLock: PowerManager.WakeLock? = null
+
   override fun onBind(intent: Intent?): IBinder? = null
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -27,11 +32,18 @@ class SaathForegroundService : Service() {
     } else {
       startForeground(NOTIFICATION_ID, notification)
     }
+    if (wakeLock == null) {
+      val pm = getSystemService(POWER_SERVICE) as PowerManager
+      wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "saath:watching").apply { setReferenceCounted(false) }
+    }
+    wakeLock?.acquire(12 * 60 * 60 * 1000L)
     running = true
     return START_STICKY
   }
 
   override fun onDestroy() {
+    wakeLock?.let { if (it.isHeld) it.release() }
+    wakeLock = null
     running = false
     super.onDestroy()
   }

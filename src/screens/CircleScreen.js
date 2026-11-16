@@ -1,13 +1,14 @@
 import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Eye, Lock, Phone, ShieldCheck } from '../components/icons';
-import { Body, Caption, Card, Glyph, Title } from '../components/ui';
+import { Eye, Lock, Phone, ShieldCheck, X } from '../components/icons';
+import { Body, Caption, Card, Chip, Glyph, Title } from '../components/ui';
 import { Avatar, Badge, ListGroup, ListRow, Segmented, Toggle } from '../components/kit';
 import { Reveal } from '../components/motion';
 import InviteSection from '../components/circle/InviteSection';
 import HelpSection from '../components/circle/HelpSection';
 import CirclesSection from '../components/circle/CirclesSection';
 import JoinedSection from '../components/circle/JoinedSection';
+import ContactsSection from '../components/circle/ContactsSection';
 import { useStore } from '../state/store';
 import { canShareItem } from '../logic';
 import { colors } from '../theme';
@@ -50,6 +51,15 @@ function MemberRow({ m, last }) {
         <Glyph icon={visible ? Phone : Lock} size={18} color={colors.inkSoft} />
         <Caption>{visible ? m.phone : t('contactHidden')}</Caption>
       </View>
+      {isPerson && !m.demo ? (
+        <View style={{ flexDirection: 'row' }}>
+          <Chip
+            label={t('ct.remove').replace('{name}', base)}
+            icon={X}
+            onPress={() => dispatch({ type: 'CONTACT_REMOVE', id: m.id })}
+          />
+        </View>
+      ) : null}
       {state.role === m.role ? (
         <View style={styles.inlineToggle}>
           <Body>{t('shareMyNumber')}</Body>
@@ -104,6 +114,8 @@ export default function CircleScreen() {
       </Reveal>
       {isPerson ? (
         <Reveal index={2}>
+          <ContactsSection />
+          <View style={{ height: 18 }} />
           <InviteSection />
         </Reveal>
       ) : null}

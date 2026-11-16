@@ -82,6 +82,9 @@ export default function SafetyScreen() {
             <View style={{ flex: 1 }}>
               <Title style={{ fontSize: 22 }}>{t('trialTitle')}</Title>
               <Caption>{t('trialNote')}</Caption>
+              {(state.autoCall || state.autoSms) && !state.demo ? (
+                <Caption style={{ color: colors.madder }}>{t('trial.realWarn')}</Caption>
+              ) : null}
             </View>
           </View>
           <BigButton

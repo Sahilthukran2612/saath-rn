@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView, View } from 'react-native';
-import { Languages, Eye, MessageCircle, RotateCcw, ShieldCheck, Siren, Type } from '../components/icons';
+import { Languages, Eye, MessageCircle, Phone, RotateCcw, ShieldCheck, Siren, Type } from '../components/icons';
 import { BigButton, Body, Caption, Card, Title } from '../components/ui';
 import { Avatar, Badge, ListGroup, ListRow, Segmented, Toggle } from '../components/kit';
 import { Reveal } from '../components/motion';
@@ -9,6 +9,8 @@ import Account from '../components/me/Account';
 import { useStore } from '../state/store';
 import { foregroundAvailable } from '../services/foreground';
 import { askSmsPermission, smsAvailable } from '../services/sms';
+import { callsAvailable } from '../services/calls';
+import useChoices from '../state/useChoices';
 import { colors } from '../theme';
 
 // The label gets the full width and the selector sits underneath, so neither is squeezed at large text.
@@ -45,6 +47,7 @@ function LanguageRow({ lang, onChange, label }) {
 export default function MeScreen() {
   const { state, dispatch, t } = useStore();
   const set = (key, value) => dispatch({ type: 'SET', key, value });
+  const choices = useChoices();
   return (
     <ScrollView
       keyboardShouldPersistTaps="handled"
@@ -77,6 +80,19 @@ export default function MeScreen() {
           <Caption>{t('bg.note')}</Caption>
           {!foregroundAvailable ? <Body bold>{t('bg.unavailable')}</Body> : null}
           {state.backgroundDenied ? <Body bold>{t('bg.denied')}</Body> : null}
+        </Card>
+        <View style={{ height: 12 }} />
+        <Card tone="tint" style={{ gap: 12 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <Phone size={24} color={colors.indigo} />
+            <Body bold style={{ flex: 1 }}>
+              {t('call.title')}
+            </Body>
+            <Toggle value={state.autoCall} label={t('call.title')} onValueChange={choices.autoCall} />
+          </View>
+          <Caption>{t('call.note')}</Caption>
+          {!callsAvailable ? <Body bold>{t(state.demo ? 'call.demoNote' : 'call.unavailable')}</Body> : null}
+          {state.autoCallDenied ? <Body bold>{t('call.denied')}</Body> : null}
         </Card>
         <View style={{ height: 12 }} />
         <Card tone="tint" style={{ gap: 12 }}>
@@ -162,10 +178,7 @@ export default function MeScreen() {
               <Toggle
                 value={state.demo}
                 label={t('demoMode')}
-                onValueChange={(v) => {
-                  set('demo', v);
-                  if (!v) set('role', 'person');
-                }}
+                onValueChange={(v) => dispatch({ type: v ? 'DEMO_ON' : 'DEMO_OFF' })}
               />
             }
           />

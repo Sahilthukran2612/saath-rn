@@ -8,6 +8,8 @@ export const CFG = {
   minSamplesAfterSpike: 5, // fewer samples than this means a sensor gap: do not guess
   countdownSec: 30, // "Are you OK?" countdown before escalating
   stepSec: 20, // time given to each escalation step
+  callReachedSec: 50, // an automatic call this long is taken as someone answering (a stated guess)
+  callMaxHoldSec: 180, // never wait longer than this for a call to report that it ended
   inactiveHours: 6, // default quiet period that is worth a check-in
   quietWindow: { startHour: 22, endHour: 7 }, // sleep window: inactivity is expected
 };

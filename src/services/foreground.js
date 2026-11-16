@@ -37,3 +37,23 @@ export function stopWatching() {
 }
 
 export const isWatching = () => (foregroundAvailable ? !!Native.isRunning() : false);
+
+// Opens the alert over the lock screen and wakes the screen (a full-screen notification). A no-op without the
+// native module. The person may have to allow "full screen notifications" for Saath in the phone's settings.
+export function raiseAlert(title, text) {
+  if (!foregroundAvailable) return false;
+  try {
+    return Native.raiseAlert(title, text) === true;
+  } catch {
+    return false;
+  }
+}
+
+export function clearAlert() {
+  if (!foregroundAvailable) return;
+  try {
+    Native.clearAlert();
+  } catch {
+    // nothing to clear
+  }
+}

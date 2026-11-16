@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useReducer, useState } from 'react';
-import { initialState, reducer } from './reducer';
+import { initialState, startState, reducer } from './reducer';
 import { load, save, loadRegistry, saveRegistry } from '../services/storage';
 import { t as translate } from '../i18n/strings';
 import { initialRegistry, enableShared, addProfile, lock, unlock, disableShared } from '../profiles';
@@ -11,7 +11,7 @@ const salt = () => Math.random().toString(36).slice(2, 10);
 export function StoreProvider({ children, preload, preloadRegistry }) {
   const [state, dispatch] = useReducer(
     reducer,
-    preload ? { ...initialState, ...preload, hydrated: true } : initialState
+    preload ? { ...initialState, ...preload, hydrated: true } : startState
   );
   const [registry, setRegistry] = useState(() => ({ ...initialRegistry(), ...preloadRegistry }));
   const { activeId } = registry;
@@ -70,7 +70,7 @@ export function StoreProvider({ children, preload, preloadRegistry }) {
       const id = `p${Date.now().toString(36)}`;
       const next = addProfile(registry, { id, name, pin, salt: salt() });
       if (next === registry) return false;
-      dispatch({ type: 'LOAD_PROFILE', saved: { profile: { ...initialState.profile, name: String(name).trim() } },
+      dispatch({ type: 'LOAD_PROFILE', saved: { profile: { ...startState.profile, name: String(name).trim() } },
       });
       setRegistry(next);
       return true;

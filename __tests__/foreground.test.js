@@ -10,6 +10,8 @@ jest.mock('../src/services/foreground', () => ({
   startWatching: jest.fn(() => true),
   stopWatching: jest.fn(),
   isWatching: jest.fn(() => false),
+  raiseAlert: jest.fn(() => true),
+  clearAlert: jest.fn(),
 }));
 
 const mount = (preload) =>

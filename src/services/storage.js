@@ -2,7 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { initialRegistry, stateKey } from '../profiles';
 
-const KEY = 'saath/state/v1';
+// v2: a fresh start for installed builds, so state saved while the app still held demo people and fake
+// numbers is not carried into production.
+const KEY = 'saath/state/v2';
 const REG_KEY = 'saath/profiles/v1';
 // Alert state is never persisted: a stale countdown after a restart would be wrong.
 const PERSIST = [
@@ -36,6 +38,8 @@ const PERSIST = [
   'budget',
   'background',
   'autoSms',
+  'autoCall',
+  'onboarded',
   'reminders',
   'siren',
   'profile',

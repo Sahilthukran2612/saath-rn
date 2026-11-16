@@ -187,7 +187,7 @@ describe('tokens stay out of the plain state file', () => {
       cloud: { phone: '9876543210', userId: 'u', access: 'SECRET-A', refresh: 'SECRET-R', householdId: 'h' },
     };
     await save(state, 'p1');
-    const plain = await AsyncStorage.getItem('saath/state/v1');
+    const plain = await AsyncStorage.getItem('saath/state/v2');
     expect(plain).not.toContain('SECRET-A');
     expect(plain).not.toContain('SECRET-R');
     expect(await SecureStore.getItemAsync('saath.tok.p1')).toContain('SECRET-A');
@@ -203,13 +203,13 @@ describe('tokens stay out of the plain state file', () => {
   });
   test('an old state file that still holds tokens is read, then cleaned on the next save', async () => {
     await AsyncStorage.setItem(
-      'saath/state/v1/p9',
+      'saath/state/v2/p9',
       JSON.stringify({ cloud: { userId: 'u', access: 'OLD-A', refresh: 'OLD-R', householdId: 'h' } })
     );
     const loaded = await load('p9');
     expect(loaded.cloud.access).toBe('OLD-A');
     await save({ ...initialState, ...loaded }, 'p9');
-    expect(await AsyncStorage.getItem('saath/state/v1/p9')).not.toContain('OLD-A');
+    expect(await AsyncStorage.getItem('saath/state/v2/p9')).not.toContain('OLD-A');
   });
 });
 

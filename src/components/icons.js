@@ -108,3 +108,4 @@ export { default as Play } from 'lucide-react-native/icons/play';
 export { default as Rocket } from 'lucide-react-native/icons/rocket';
 export { default as Smartphone } from 'lucide-react-native/icons/smartphone';
 export { default as Cloud } from 'lucide-react-native/icons/cloud';
+export { default as ArrowRight } from 'lucide-react-native/icons/arrow-right';

@@ -22,6 +22,7 @@ import PlanScreen from './screens/PlanScreen';
 import MeScreen from './screens/MeScreen';
 import ConsentScreen from './screens/ConsentScreen';
 import LockScreen from './screens/LockScreen';
+import OnboardingScreen from './screens/OnboardingScreen';
 import useCloudSync from './state/useCloudSync';
 import useReminders from './state/useReminders';
 import { startFallListener } from './services/sensing';
@@ -120,6 +121,17 @@ export default function AppShell({ sensing = true }) {
         <StatusBar style="dark" />
         <AlertBanner />
         <LockScreen />
+      </SafeAreaView>
+    );
+  }
+
+  // A fresh install runs the setup once: who uses the phone, a name, the people to reach, the alert choices.
+  if (state.hydrated && !state.onboarded) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.mist }}>
+        <StatusBar style="dark" />
+        <AlertBanner />
+        <OnboardingScreen />
       </SafeAreaView>
     );
   }
