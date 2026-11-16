@@ -216,3 +216,25 @@ Bugs found by reading the code back, not by tests: an edit of mine had silently 
 Demo simulations (labelled on screen, only in Demo mode): a simulated heart-rate band, the automatic SMS shown instead of sent when the SMS module is absent, and stand-in buttons for a family member's phone. They go through the real feed, banner, wording and heart-rate logic.
 
 Not run: automatic SMS, the foreground service and the Bluetooth band on a phone; the app against a real band; two real phones.
+
+## Live end-to-end check with anonymous sign-in (2026-11-16)
+Anonymous sign-in was switched on in the project (a real sign-up returned an anonymous account and a token). The app's own client code (`src/services/cloud.js`) was then run against the live server in plain Node (not the jest-expo setup, which replaces `fetch` with a stub), with three throwaway anonymous accounts: a person, a circle member and a stranger.
+
+| Step | Result |
+|---|---|
+| Person signs in anonymously, household created | ok |
+| Three events sent in one batch (fall, task_done, im_ok) | all 3 accepted |
+| Person publishes an invite; member tries a wrong code | published; wrong code reads as "invalid" |
+| Member joins with the code; reusing the code | joined; reuse refused |
+| Member's circle list | one circle, the person's name, role family, dial 0 (safety only) |
+| Member's feed at dial 0 | only the fall |
+| Person raises the member's dial to 1 | accepted (204) |
+| Member's feed at dial 1 | fall, task_done, im_ok |
+| Member tries to raise their own dial to 2 | refused (400) |
+| A stranger reads the household's feed | 0 events |
+
+All eight test accounts (and their households) were deleted afterwards by ID, and the leftover wrong-code counters were cleared. The project was left empty.
+
+One earlier run failed at "household" even though the household had been created: the response did not arrive inside the client's 8-second timeout. The client treats that as "try again later" and the retry finds the household (one per account), so nothing is duplicated, but the timeout may be tight on a slow connection. Not changed.
+
+Still not run: the app on a phone doing this, two real phones, and the circle member seeing the banner from real server data (the demo stand-ins show that screen).

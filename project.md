@@ -233,7 +233,7 @@ A heart-rate band never makes Saath diagnose. The app only says the rate "has st
 | Privacy Dial, Time Off, consent for contact numbers, audit log | Built and unit-tested |
 | Care layer (sugar, stock, strips, budget), handover ladder, passport, check-in, food, body check, school card | Built and run on an emulator |
 | Shared-phone mode with PIN | Built; tested in Jest only |
-| Cloud sync, invites, circle feed and banner | Built; tested against a fake server; policies tested live; **anonymous sign-in not yet switched on** |
+| Cloud sync, invites, circle feed and banner | Built; policies tested live; the app's own client code ran end to end against the live server (two throwaway accounts: sign-in, events, invite, join, feed under the dial). **Not yet run from the app on a phone or with two real phones** |
 | WhatsApp / SMS / Call buttons on the alert | Built; not run on a phone |
 | Automatic SMS, foreground service | Kotlin written; **needs an installed build, not yet run** |
 | Bluetooth heart-rate band | Built and tested without hardware; **not yet run on a band**. A labelled demo simulation exists for the presentation |

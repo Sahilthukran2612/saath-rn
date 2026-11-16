@@ -34,7 +34,11 @@ Push-Location $Short
 try {
   if ($Prebuild -or -not (Test-Path "$Short\android\gradlew.bat")) {
     Write-Host 'Generating android\ ...'
+    $ErrorActionPreference = 'Continue'
     npx expo prebuild --platform android --no-install
+    $prebuildExit = $LASTEXITCODE
+    $ErrorActionPreference = 'Stop'
+    if ($prebuildExit -ne 0) { throw "expo prebuild failed ($prebuildExit)" }
   }
 
   # local settings that prebuild overwrites: use the local Gradle zip, and a short C++ build folder
@@ -63,8 +67,12 @@ try {
   $env:ANDROID_HOME = $Sdk
   $env:ANDROID_SDK_ROOT = $Sdk
   Push-Location "$Short\android"
+  # Gradle writes harmless warnings to stderr; judge success by its exit code, not by stderr text
+  $ErrorActionPreference = 'Continue'
   try { .\gradlew.bat assembleDebug --console=plain } finally { Pop-Location }
-  if ($LASTEXITCODE -ne 0) { throw "Gradle failed ($LASTEXITCODE)" }
+  $gradleExit = $LASTEXITCODE
+  $ErrorActionPreference = 'Stop'
+  if ($gradleExit -ne 0) { throw "Gradle failed ($gradleExit)" }
 } finally {
   Pop-Location
 }
