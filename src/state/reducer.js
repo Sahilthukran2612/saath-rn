@@ -1,3 +1,4 @@
+import { addReading } from '../heart';
 import { CFG, clampDial, escalationChain, isDelegationActive, isInactive } from '../logic';
 import { adjustBaseline, cfgFrom, defaultBaseline } from '../care';
 import { addCheckin, approveAdvance, declineAdvance, initialLadder, requestAdvance, stepBack } from '../plan';
@@ -98,6 +99,7 @@ export const initialState = {
   testPlan: { perDay: 2, strips: 20 }, // set by the clinician; Saath only counts
   budget: demoBudget(),
   background: false, // "keep watching in the background" (visible foreground service)
+  heart: { device: null, readings: [], contact: true }, // Bluetooth heart-rate band. In memory only: never stored or sent
   autoSms: false, // send the alert SMS by itself when nobody answers (installed app only)
   autoSmsDenied: false, // the SMS permission was refused
   backgroundDenied: false, // the notification permission was refused, so the service did not start
@@ -395,6 +397,12 @@ function baseReducer(state, a) {
       if (last && last.viewer === a.viewer && last.item === a.item) return state;
       return { ...state, audit: [...state.audit, { viewer: a.viewer, item: a.item, at: a.at }].slice(-100) };
     }
+    case 'HEART_DEVICE':
+      return { ...state, heart: { device: a.device, readings: [], contact: true } };
+    case 'HEART_READING':
+      return state.heart.device
+        ? { ...state, heart: { ...state.heart, readings: addReading(state.heart.readings, a.bpm, a.at), contact: a.contact } }
+        : state;
     case 'CLOUD_SET':
       return { ...state, cloud: { ...state.cloud, ...a.patch } };
     case 'CLOUD_SIGN_OUT':

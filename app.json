@@ -37,7 +37,15 @@
         }
       ],
       "expo-font",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "react-native-ble-plx",
+        {
+          "isBackgroundEnabled": false,
+          "neverForLocation": true,
+          "bluetoothAlwaysPermission": "Saath uses Bluetooth only to read your heart-rate band. Nothing is stored or sent."
+        }
+      ]
     ]
   }
 }
