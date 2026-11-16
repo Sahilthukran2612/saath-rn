@@ -143,3 +143,49 @@ describe('the note when the rate stays unusual while still', () => {
     expect(screen.queryByText(/stayed high/)).toBeNull();
   });
 });
+
+describe('demo: the simulated band (no Bluetooth needed)', () => {
+  const openSim = async () => {
+    await mount({ demo: true });
+    await openSafety();
+    await fireEvent.press(screen.getByLabelText('Try a simulated band'));
+    await waitFor(() => expect(screen.getByText('Connected to Simulated band')).toBeTruthy());
+  };
+
+  test('connects at once, says the readings are made up, and never touches Bluetooth', async () => {
+    await openSim();
+    expect(screen.getByText('Demo: these readings are made up to show the screen.')).toBeTruthy();
+    expect(ble.scanForBands).not.toHaveBeenCalled();
+    expect(ble.connectBand).not.toHaveBeenCalled();
+  });
+
+  test('a high rate while resting shows the calm note at once, then a normal rate clears it', async () => {
+    await openSim();
+    await fireEvent.press(screen.getByLabelText('High while resting'));
+    await waitFor(() => expect(screen.getAllByText('Your heart rate has stayed high while you were still.').length).toBeGreaterThan(0));
+    expect(screen.getAllByText(strings.en.clinicianPlan).length).toBeGreaterThan(0);
+    await fireEvent.press(screen.getByLabelText('Resting'));
+    await waitFor(() => expect(screen.queryByText(/stayed (high|low)/)).toBeNull());
+    expect(screen.getByText('Steady while you rest.')).toBeTruthy();
+  });
+
+  test('a low rate while resting', async () => {
+    await openSim();
+    await fireEvent.press(screen.getByLabelText('Low while resting'));
+    await waitFor(() => expect(screen.getAllByText('Your heart rate has stayed low while you were still.').length).toBeGreaterThan(0));
+  });
+
+  test('the live rate shown follows the button pressed', async () => {
+    await openSim();
+    await fireEvent.press(screen.getByLabelText('High while resting'));
+    await waitFor(() => expect(screen.getByText('136')).toBeTruthy()); // the last of 135 with a little jitter
+  });
+
+  test('disconnect returns to the find screen, and the demo button is only there in demo mode', async () => {
+    await openSim();
+    await fireEvent.press(screen.getByLabelText('Disconnect'));
+    await waitFor(() => expect(screen.getByLabelText('Find my band')).toBeTruthy());
+    await mount({ demo: false });
+    expect(screen.queryByLabelText('Try a simulated band')).toBeNull();
+  });
+});

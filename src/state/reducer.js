@@ -397,6 +397,51 @@ function baseReducer(state, a) {
       if (last && last.viewer === a.viewer && last.item === a.item) return state;
       return { ...state, audit: [...state.audit, { viewer: a.viewer, item: a.item, at: a.at }].slice(-100) };
     }
+    // Demo only: a simulated band. Readings are back-dated and the person is marked as still, so the
+    // "high or low while still" note can be shown at once instead of after minutes of waiting.
+    case 'HEART_SIM':
+      return {
+        ...state,
+        lastActiveMs: a.at - 10 * 60 * 1000,
+        heart: {
+          device: state.heart.device || { id: 'sim', name: 'Simulated band' },
+          contact: true,
+          readings: [0, 2, -1, 1].map((jitter, i) => ({ bpm: a.bpm + jitter, at: a.at - (3 - i) * 30000 })),
+        },
+      };
+    // Demo only: a person I look after, and what they send. It goes through the same feed, banner and
+    // wording as the real server data, so the screens shown are the real ones.
+    case 'DEMO_CIRCLE_ADD': {
+      if (state.circles.some((c) => c.household_id === 'demo-amma')) return state;
+      const iso = (min) => new Date(a.at - min * 60000).toISOString();
+      return {
+        ...state,
+        circles: [
+          ...state.circles,
+          { household_id: 'demo-amma', role: 'family', dial: 1, time_off: false, person_name: 'Amma (demo)' },
+        ],
+        feeds: {
+          ...state.feeds,
+          'demo-amma': [
+            { id: 'demo-2', event_type: 1, kind: 'task_done', detail: 'Lunch', created_at: iso(25) },
+            { id: 'demo-1', event_type: 1, kind: 'im_ok', detail: null, created_at: iso(180) },
+          ],
+        },
+      };
+    }
+    case 'DEMO_CIRCLE_EVENT': {
+      const feed = state.feeds['demo-amma'];
+      if (!feed) return state;
+      const safety = a.kind === 'fall' || a.kind === 'quiet' || a.kind === 'false_alarm';
+      const e = {
+        id: `demo-${a.at}`,
+        event_type: safety || a.kind === 'im_ok' ? 0 : 1,
+        kind: a.kind,
+        detail: null,
+        created_at: new Date(a.at).toISOString(),
+      };
+      return { ...state, feeds: { ...state.feeds, 'demo-amma': [e, ...feed].slice(0, 30) } };
+    }
     case 'HEART_DEVICE':
       return { ...state, heart: { device: a.device, readings: [], contact: true } };
     case 'HEART_READING':

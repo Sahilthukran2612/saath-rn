@@ -6,6 +6,7 @@ import { Avatar, Badge, Field, ListGroup, ListRow, ScreenHeader } from '../kit';
 import { useStore } from '../../state/store';
 import { useNow } from '../useNow';
 import { colors } from '../../theme';
+import { nowMs } from '../../services/clock';
 import { acceptInvite, cloudConfig, isConfigured, listCircles } from '../../services/cloud';
 import { ago, describeEvent, fmt, isAlert, newest, pendingAlert } from '../../circleFeed';
 
@@ -19,7 +20,7 @@ export default function CirclesSection() {
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
   const cfg = cloudConfig();
-  if (!isConfigured(cfg)) return null;
+  if (!isConfigured(cfg) && !state.demo) return null;
 
   const signedIn = Boolean(state.cloud.access);
   const nameOf = (c) => c.person_name || t('cf.someone');
@@ -98,6 +99,30 @@ export default function CirclesSection() {
           })}
         </ListGroup>
       )}
+      {state.demo ? (
+        <Card tone="haldi" style={{ gap: 10 }}>
+          <Caption style={{ color: colors.ink }}>{t('demo.circleNote')}</Caption>
+          <BigButton
+            kind="quiet"
+            label={t('demo.circleAdd')}
+            onPress={() => dispatch({ type: 'DEMO_CIRCLE_ADD', at: nowMs() })}
+          />
+          {state.circles.some((c) => c.household_id === 'demo-amma') ? (
+            <>
+              <BigButton
+                kind="quiet"
+                label={t('demo.circleFall')}
+                onPress={() => dispatch({ type: 'DEMO_CIRCLE_EVENT', kind: 'fall', at: nowMs() })}
+              />
+              <BigButton
+                kind="quiet"
+                label={t('demo.circleOk')}
+                onPress={() => dispatch({ type: 'DEMO_CIRCLE_EVENT', kind: 'im_ok', at: nowMs() })}
+              />
+            </>
+          ) : null}
+        </Card>
+      ) : null}
       <Card style={{ gap: 12 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
           <Users size={24} color={colors.indigo} />

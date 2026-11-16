@@ -166,7 +166,7 @@ In Expo Go and in tests these modules are absent, so each wrapper in `src/servic
 | **Firebase Cloud Messaging** (planned) | Free push, the right automatic channel for members. |
 
 ### 6.4 Quality tooling
-Jest with jest-expo and Testing Library (hundreds of automated tests; 356 at the last full run), ESLint (including React hooks purity rules), Prettier, `expo-doctor`, and SQL policy tests that run against the real database.
+Jest with jest-expo and Testing Library (hundreds of automated tests; 400 at the last full run), ESLint (including React hooks purity rules), Prettier, `expo-doctor`, and SQL policy tests that run against the real database.
 
 ---
 
@@ -181,6 +181,17 @@ Jest with jest-expo and Testing Library (hundreds of automated tests; 356 at the
 | **Bluetooth heart-rate band** (an IoT device) | Live heart rate, and a prompt only if it stays unusual while the person is still | Logic and screen built and tested without hardware. **Not yet run against a real band.** A phone running a BLE tester app can stand in as a band for a demo. |
 | **Mobile network** (SMS, calls) | Reaching contacts | Call and SMS via the phone's own app: built. Automatic SMS: built, **not yet run on a phone**. |
 | **Not used, on purpose** | Microphone, GPS, contacts, other apps' notifications, glucose | The phone cannot sense blood sugar. Location and microphone are blocked or unused. (Android 11 and earlier require the location permission for any Bluetooth scan; Saath never reads the location.) |
+
+### 7.1 Demo simulations (for the presentation)
+Three things need hardware or a server that is not available on a stage. Each has a clearly labelled demo that goes through the *same* screens, wording and logic as the real thing, and says on screen that it is a demo. They appear only while **Demo mode** is on (the default).
+
+| Real thing | Demo stand-in | What it shows |
+|---|---|---|
+| A Bluetooth heart-rate band | **Try a simulated band** on Safety, with Resting, High while resting, Low while resting | The live rate, and the calm note that appears only when the rate stays unusual while the person is still |
+| An SMS sent without a tap | Turn on **Send the alert SMS by itself** in Expo Go: the alert screen shows "Demo: would send to Asha: ..." | The exact message and the contact order, with nothing actually sent |
+| A family member's phone, receiving the alert | **Demo: add a person I look after**, **they may have fallen**, **they say they are OK** on Circle | The red banner on every tab, the feed worded in plain language, the dial level, and how an answer clears it |
+
+The demo buttons replace only the second phone and the hardware. The detector, the privacy rule, the escalation and the wording are the real code.
 
 A heart-rate band never makes Saath diagnose. The app only says the rate "has stayed high/low while you were still" and points to the clinician's plan. The default limits (120 and 40 beats a minute, while still for two minutes) are placeholders a clinician must set.
 
@@ -225,7 +236,8 @@ A heart-rate band never makes Saath diagnose. The app only says the rate "has st
 | Cloud sync, invites, circle feed and banner | Built; tested against a fake server; policies tested live; **anonymous sign-in not yet switched on** |
 | WhatsApp / SMS / Call buttons on the alert | Built; not run on a phone |
 | Automatic SMS, foreground service | Kotlin written; **needs an installed build, not yet run** |
-| Bluetooth heart-rate band | Built and tested without hardware; **not yet run on a band** |
+| Bluetooth heart-rate band | Built and tested without hardware; **not yet run on a band**. A labelled demo simulation exists for the presentation |
+| Demo simulations (band, SMS, a person I look after) | Built and tested; for the presentation |
 | Push notifications (FCM) | **Not built.** Needs a Firebase project |
 | Signed release APK | **Not built.** See section 12 |
 

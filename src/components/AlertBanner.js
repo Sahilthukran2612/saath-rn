@@ -103,7 +103,7 @@ export default function AlertBanner() {
   const step = al ? al.chain[al.stepIndex] : null;
   useEffect(() => {
     if (!al || al.phase !== 'escalating' || !state.autoSms || !smsAvailable || !step?.phone) return;
-    const key = `:`;
+    const key = `${al.id}:${al.stepIndex}`;
     if (texted.current.has(key)) return;
     texted.current.add(key);
     sendSms(step.phone, msg).then((ok) => setAutoSent({ key, ok, name: step.name }));
@@ -194,7 +194,12 @@ export default function AlertBanner() {
               ) : null}
             </View>
           ) : null}
-          {autoSent.ok !== null && autoSent.key.startsWith(`:`) ? (
+          {/* Demo (Expo Go, no SMS module): show what would be sent instead of sending it */}
+          {state.autoSms && !smsAvailable && state.demo && who?.phone ? (
+            <Caption style={{ color: colors.white, textAlign: 'center' }}>
+              {t('sms.simulated').replace('{name}', who.name).replace('{text}', msg)}
+            </Caption>
+          ) : autoSent.ok !== null && autoSent.key.startsWith(`${al.id}:`) ? (
             <Caption style={{ color: colors.white, textAlign: 'center' }}>
               {autoSent.ok ? t('sms.sentTo').replace('{name}', autoSent.name) : t('sms.failed')}
             </Caption>

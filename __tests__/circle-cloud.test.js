@@ -278,7 +278,7 @@ describe('screens', () => {
 
   test('without a server in the build the circle side stays hidden', async () => {
     delete process.env.EXPO_PUBLIC_SAATH_API_URL;
-    await mount({});
+    await mount({ demo: false }); // in demo mode the section shows, with stand-in buttons
     await fireEvent.press(screen.getByLabelText('Circle'));
     expect(screen.queryByText('People I look after')).toBeNull();
   });

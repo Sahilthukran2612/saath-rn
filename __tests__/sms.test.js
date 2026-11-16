@@ -1,11 +1,14 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
-import { StoreProvider } from '../src/state/store';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native';
+import { StoreProvider, useStore } from '../src/state/store';
 import AppShell from '../src/AppShell';
 import * as sms from '../src/services/sms';
 
+let mockAvailable = true;
 jest.mock('../src/services/sms', () => ({
-  smsAvailable: true,
+  get smsAvailable() {
+    return mockAvailable;
+  },
   askSmsPermission: jest.fn(async () => true),
   hasSmsPermission: jest.fn(async () => true),
   sendSms: jest.fn(async () => true),
@@ -32,7 +35,25 @@ const alert = (over = {}) => ({
   ...over,
 });
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockAvailable = true;
+});
+
+// Lets a test push actions (like the countdown ticking) into the same store the app uses.
+const holder = {};
+function Capture({ onReady }) {
+  const { dispatch } = useStore();
+  React.useEffect(() => onReady(dispatch), [dispatch, onReady]);
+  return null;
+}
+const mountWithDispatch = (preload) =>
+  render(
+    <StoreProvider preload={preload}>
+      <AppShell sensing={false} />
+      <Capture onReady={(d) => (holder.dispatch = d)} />
+    </StoreProvider>
+  );
 
 describe('automatic SMS when nobody answers', () => {
   test('off by default: nothing is sent, even when an alert reaches the escalation step', async () => {
@@ -73,19 +94,45 @@ describe('automatic SMS when nobody answers', () => {
     await waitFor(() => expect(screen.getByText(/Could not send a message by itself/)).toBeTruthy());
   });
 
-  test('the next contact is texted at the next step, and each step only once', async () => {
-    await mount({ autoSms: true, alert: alert() });
+  test('the next contact is texted when the escalation moves on, and each step only once', async () => {
+    await mountWithDispatch({ autoSms: true, alert: alert({ remaining: 2 }) });
     await waitFor(() => expect(sms.sendSms).toHaveBeenCalledTimes(1));
-    // same step re-rendered (the countdown ticks): still one message
-    await mount({ autoSms: true, alert: alert({ remaining: 10 }) });
-    // a different alert on a fresh mount is a new message, so just check the second contact separately
-    sms.sendSms.mockClear();
-    await mount({ autoSms: true, alert: alert({ id: 'b', stepIndex: 1 }) });
-    await waitFor(() => expect(sms.sendSms).toHaveBeenCalled());
-    expect(sms.sendSms.mock.calls.at(-1)[0]).toBe('9000000002');
+    expect(sms.sendSms.mock.calls[0][0]).toBe('9000000001');
+    // the same step ticking down must not send again
+    await act(async () => holder.dispatch({ type: 'TICK' }));
+    expect(sms.sendSms).toHaveBeenCalledTimes(1);
+    // the step ends: the next contact is texted, once
+    await act(async () => holder.dispatch({ type: 'TICK' }));
+    await waitFor(() => expect(sms.sendSms).toHaveBeenCalledTimes(2));
+    expect(sms.sendSms.mock.calls[1][0]).toBe('9000000002');
+    await act(async () => holder.dispatch({ type: 'TICK' }));
+    expect(sms.sendSms).toHaveBeenCalledTimes(2);
   });
 });
 
+describe('demo: the automatic SMS is shown, not sent, when the SMS module is absent (Expo Go)', () => {
+  test('the message that would be sent is shown on the alert screen and nothing is sent', async () => {
+    mockAvailable = false;
+    await mount({ autoSms: true, demo: true, profile: { name: 'Amma' }, alert: alert() });
+    await waitFor(() => expect(screen.getByText(/Demo: would send to Asha \(daughter\): Saath: Amma may have had a fall/)).toBeTruthy());
+    expect(sms.sendSms).not.toHaveBeenCalled();
+  });
+  test('the switch can be turned on in demo mode without the permission, and says it is a demo', async () => {
+    mockAvailable = false;
+    await mount({ demo: true });
+    await fireEvent.press(screen.getByLabelText('Me'));
+    expect(screen.getByText('Demo: the message is shown on screen, not sent.')).toBeTruthy();
+    await fireEvent.press(screen.getByLabelText('Send the alert SMS by itself: off'));
+    await waitFor(() => expect(screen.getByLabelText('Send the alert SMS by itself: on')).toBeTruthy());
+    expect(sms.askSmsPermission).not.toHaveBeenCalled();
+  });
+  test('outside demo mode, without the module, nothing is simulated', async () => {
+    mockAvailable = false;
+    await mount({ demo: false, autoSms: true, alert: alert() });
+    expect(screen.queryByText(/Demo: would send/)).toBeNull();
+    expect(sms.sendSms).not.toHaveBeenCalled();
+  });
+});
 describe('the setting on the Me tab', () => {
   const openMe = async () => fireEvent.press(screen.getByLabelText('Me'));
 

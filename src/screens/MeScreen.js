@@ -91,6 +91,7 @@ export default function MeScreen() {
               onValueChange={async (on) => {
                 set('autoSmsDenied', false);
                 if (!on) return set('autoSms', false);
+                if (!smsAvailable && state.demo) return set('autoSms', true); // demo: shown on screen, not sent
                 if (await askSmsPermission()) set('autoSms', true);
                 else {
                   set('autoSms', false);
@@ -100,7 +101,7 @@ export default function MeScreen() {
             />
           </View>
           <Caption>{t('sms.note')}</Caption>
-          {!smsAvailable ? <Body bold>{t('sms.unavailable')}</Body> : null}
+          {!smsAvailable ? <Body bold>{t(state.demo ? 'sms.demoNote' : 'sms.unavailable')}</Body> : null}
           {state.autoSmsDenied ? <Body bold>{t('sms.denied')}</Body> : null}
         </Card>
       </Reveal>

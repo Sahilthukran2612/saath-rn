@@ -199,3 +199,20 @@ Still true: the limits stop casual abuse, not a determined one. Anyone can still
 The contact card on the alert screen now shows Call, WhatsApp and SMS as three labelled buttons of at least 56 px (the old round buttons were 52 px). The WhatsApp button is hidden when the stored number cannot be a phone number. Numbers are normalised for India (10 digits, +91, 91 or a leading 0 all reach the same chat). The message text is the existing one and still avoids claiming a diagnosis, and now uses the person's profile name when there is one.
 
 Limits: it is one tap by a person, not an automatic message. Free automatic alerting needs push notifications, which are not built (see `docs/supabase/SETUP.md`).
+
+
+## Sensors, native build and demo simulations (2026-11-16)
+| Check | Result |
+|---|---|
+| `npm test` | 400 passed, 23 suites (adds `sms`, `heart`, `heart-ui`, `demo`) |
+| `npm run lint` | 0 errors, 0 warnings |
+| `npx expo export --platform android` | Bundles (1185 modules) |
+| Debug APK (`assembleDebug`) | **Builds**, twice: 159 MB, then 160 MB with the SMS module and Bluetooth library. Not installed or run on a phone |
+
+The Windows build problem is worked around, not fixed: building from a copy at `Z:\s` with the C++ build folder at `Z:/c` keeps every path under 260 characters (`scripts/build-apk.ps1`). Replacing the SDK's Ninja with a newer one was refused as unsafe and not done.
+
+Bugs found by reading the code back, not by tests: an edit of mine had silently removed the alert and step from the key that makes each contact get one SMS (it was just a colon, so only one contact would ever have been texted per app session), and the same edit damaged the check that shows the "message sent" line. Both are fixed. A test now advances the escalation with the countdown and checks each contact is texted once. The earlier test had passed with the bug because it never advanced a step.
+
+Demo simulations (labelled on screen, only in Demo mode): a simulated heart-rate band, the automatic SMS shown instead of sent when the SMS module is absent, and stand-in buttons for a family member's phone. They go through the real feed, banner, wording and heart-rate logic.
+
+Not run: automatic SMS, the foreground service and the Bluetooth band on a phone; the app against a real band; two real phones.
