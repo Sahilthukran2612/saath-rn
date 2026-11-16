@@ -13,7 +13,7 @@ Usage (PowerShell, from anywhere):
 
 Edit the four paths below for your machine. Takes about 8 minutes.
 #>
-param([switch]$Prebuild, [switch]$Release)
+param([switch]$Prebuild, [switch]$Release, [int]$GradleMemoryMB = 4096)
 
 $ErrorActionPreference = 'Stop'
 $Project = Split-Path -Parent $PSScriptRoot
@@ -58,12 +58,14 @@ try {
     [IO.File]::WriteAllText($gradle, $g, (New-Object Text.UTF8Encoding $false))
   }
 
+  # Memory for the build. The generated default (2 GB) is small for a release build with native code; this machine
+  # has plenty. Edit $GradleMemoryMB for a smaller PC. -Djava.net.preferIPv4Stack avoids an IPv6 timeout downloading.
   $props = "$Short\android\gradle.properties"
   $p = [IO.File]::ReadAllText($props)
-  if (-not $p.Contains('preferIPv4Stack')) {
-    $p = [regex]::Replace($p, '(org\.gradle\.jvmargs=[^\r\n]*)', '$1 -Djava.net.preferIPv4Stack=true')
-    [IO.File]::WriteAllText($props, $p, (New-Object Text.UTF8Encoding $false))
-  }
+  $jvm = "org.gradle.jvmargs=-Xmx$($GradleMemoryMB)m -XX:MaxMetaspaceSize=1024m -Djava.net.preferIPv4Stack=true"
+  $p = [regex]::Replace($p, 'org\.gradle\.jvmargs=[^\r\n]*', $jvm)
+  if ($p -notmatch 'kotlin\.daemon\.jvmargs') { $p = $p.TrimEnd() + "`nkotlin.daemon.jvmargs=-Xmx2048m`n" }
+  [IO.File]::WriteAllText($props, $p, (New-Object Text.UTF8Encoding $false))
 
   $env:JAVA_HOME = $jdk.FullName
   $env:GRADLE_USER_HOME = $GradleHome
@@ -72,6 +74,15 @@ try {
   Push-Location "$Short\android"
   # Gradle writes harmless warnings to stderr; judge success by its exit code, not by stderr text
   $ErrorActionPreference = 'Continue'
+  # Stop Gradle helper processes left over from an earlier build, so the new one starts with the memory free.
+  if (Test-Path "$Short\android\gradlew.bat") {
+    $before = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    Push-Location "$Short\android"
+    try { .\gradlew.bat --stop *> $null } finally { Pop-Location }
+    $ErrorActionPreference = $before # put it back as it was: the build below relies on 'Continue'
+  }
+
   # -Release builds a standalone APK with the app's JavaScript inside (it needs no PC running), for the two
   # CPU types real phones use. It is signed with the debug key, so it installs fine but is not a Play Store build.
   try {
@@ -79,7 +90,11 @@ try {
     else { .\gradlew.bat assembleDebug --console=plain }
   } finally { Pop-Location }
   $gradleExit = $LASTEXITCODE
+  # Release the build's memory straight away: a Gradle daemon would otherwise stay resident for hours.
+  Push-Location "$Short\android"
+  try { .\gradlew.bat --stop *> $null } finally { Pop-Location }
   $ErrorActionPreference = 'Stop'
+  # (the 'Stop' above is correct here: the build has finished, so errors from now on should stop the script)
   if ($gradleExit -ne 0) { throw "Gradle failed ($gradleExit)" }
 } finally {
   Pop-Location
