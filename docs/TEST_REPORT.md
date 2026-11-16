@@ -281,3 +281,17 @@ What the tests cover: a real install starts empty with no fake number anywhere i
 Found while doing it: the first sync pass was skipped in tests because the app-state check treated "not active" as background; it now skips only a real background, which also means the sync pass now runs in signed-in tests (two dial tests assumed their request was the first one and now look for it by method). The storage key moved to `saath/state/v2` so state saved while the app held demo people is not carried into production (two token tests used the old key). A bare regular expression in the schema test treated `create table if not exists` as a table called "if". An earlier burst of 15 failures in one run was the machine being overloaded while a build ran; rerunning with fewer workers showed only the real failures.
 
 Not tested: any of the native pieces on a phone (calling, call-end detection, lock-screen launch, wake lock), the phone sign-up against the real server (the Phone provider is off: the project still answers `phone provider enabled: false`), and any message through Firebase.
+
+## Firebase and the push function, live (2026-11-17)
+| Check | Result |
+|---|---|
+| Firebase credentials | Service account for project `saath-62a9e`: Google issued an access token (200); FCM `validate_only` of a message to a made-up address answered 400 `INVALID_ARGUMENT` "not a valid FCM registration token", which shows the project, the API and the key are all accepted and only the fake address was refused. Nothing was sent to anyone |
+| `google-services.json` | In the project folder; project `saath-62a9e`; package `com.anonymous.saathrn`. Git-ignored |
+| Secrets on the server | `PUSH_SECRET` and `FCM_SERVICE_ACCOUNT` set on project `saath-rn` (names confirmed; values never printed; the temporary file that held them was deleted) |
+| Function `push` | Deployed, `ACTIVE`, `verify_jwt: false`. No secret: 403. Wrong secret: 403. Right secret, unknown household: 200 "no recipients". Routine event: 200 "skipped" |
+| Trigger `events_push` | Enabled. `notify_push()` is not executable by `authenticated` or `anon`. The filled-in SQL (which contains the secret) was removed from disk after it was applied |
+| Live data | Unchanged: 1 account, 1 household, 2 events |
+
+Not tested: a notification reaching a real phone, the rebuilt app registering its address, how phone-brand battery savers treat a closed app.
+
+Still off on the server: **phone confirmations and email confirmation**. `phone_autoconfirm` and `mailer_autoconfirm` still read false although the Phone provider is on, so sign-up with a number and password would try to send a text. Phone sign-up has therefore not been tested against the real server.

@@ -1,8 +1,15 @@
 # Push notifications (Firebase): setup
 
-Push is what makes an alert reach a circle member's phone when Saath is closed. Status: the app code, the database
-table, the trigger and the server function are written and tested without Firebase (21 tests; 40 live policy checks).
-**Nothing has been sent through Firebase yet**: it needs the steps below. Firebase's Cloud Messaging is free.
+Push is what makes an alert reach a circle member's phone when Saath is closed.
+
+**Status (2026-11-16/17).** Done and verified: the Firebase project `saath-62a9e` exists and `google-services.json`
+(package `com.anonymous.saathrn`) is in the project folder; the service-account key was checked with Google and FCM
+(a token was issued and FCM validated a message, rejecting only a deliberately fake phone address); the key and the
+shared secret are stored as Supabase secrets; the `push` function is deployed (`ACTIVE`, refuses calls without the
+secret, skips routine events, returns "no recipients" for an unknown household); the database trigger is on and cannot be
+called by app users; the `device_tokens` table is live. **Not yet done:** a notification actually delivered to a real
+phone. That needs the rebuilt app installed on two phones (steps below), and it has not been tried.
+Firebase Cloud Messaging is free. The steps below are kept as the record of how it was set up.
 
 ## 1. Create the Firebase project (about five minutes)
 1. Go to https://console.firebase.google.com and click **Add project**. Name it `saath`. Turn Google Analytics off.

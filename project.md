@@ -254,7 +254,7 @@ A heart-rate band never makes Saath diagnose. The app only says the rate "has st
 | Production mode: empty first run, setup flow, real contacts, demo only on request | Built and tested (Jest); not run on a phone |
 | Automatic calls one by one, lock-screen alert, wake lock while watching | Kotlin and logic written; logic tested with the native layer mocked; compiles in the release build; **not run on a phone** |
 | Account with phone number and password; roles enforced by the database | Client tested against a fake server; roles and limits verified live (40 policy checks); **the phone sign-in switch on the server must be turned on by the owner** |
-| Push notifications (FCM) | Client, table, trigger and server function written and tested without Firebase; **nothing sent through Firebase yet: needs the Firebase project** (`docs/PUSH.md`) |
+| Push notifications (FCM) | Firebase project set up and credentials verified; server function deployed and tested; trigger on; **not yet delivered to a real phone** (`docs/PUSH.md`) |
 | Signed release APK | **Not built.** See section 12 |
 
 ---
