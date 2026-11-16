@@ -28,7 +28,9 @@ if (-not (Test-Path "$GradleHome\gradle-9.4.1-bin.zip")) { throw "Missing $Gradl
 
 Write-Host "Copying project to $Short ..."
 New-Item -ItemType Directory -Force $Short | Out-Null
-robocopy $Project $Short /MIR /XD '.git' '.expo' '.claude' 'dist' "$Project\android" "$Short\android" /XF '*.log' /NFL /NDL /NJH /NJS /NP /R:1 /W:1 | Out-Null
+# Exclude only the project's own dist\ (the APK output) by full path. A bare name 'dist' would also skip the
+# dist\ folder inside installed libraries (for example node_modules\abort-controller\dist) and break bundling.
+robocopy $Project $Short /MIR /XD "$Project\.git" "$Project\.expo" "$Project\.claude" "$Project\dist" "$Project\android" "$Short\android" "$Short\dist" /XF '*.log' /NFL /NDL /NJH /NJS /NP /R:1 /W:1 | Out-Null
 if ($LASTEXITCODE -ge 8) { throw "robocopy failed ($LASTEXITCODE)" }
 
 Push-Location $Short
