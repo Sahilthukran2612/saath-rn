@@ -90,6 +90,7 @@ export const initialState = {
   cloud: emptyCloud(), // sign-in for sync. Tokens sit unencrypted in local storage: a risk, see ARCHITECTURE
   outbox: [], // events for the circle waiting to be sent. Only when signed in, never more than 200
   outboxSeq: 0,
+  joined: [], // people who joined my household from their own phones: { id, name, role, dial, time_off, share_contact }
   circles: [], // households I am a member of: { household_id, role, dial, time_off, person_name }
   feeds: {}, // household_id -> latest events I am allowed to see (kept for offline reading)
   seen: {}, // household_id -> created_at of the newest event I have looked at
@@ -459,7 +460,23 @@ function baseReducer(state, a) {
     case 'CLOUD_SET':
       return { ...state, cloud: { ...state.cloud, ...a.patch } };
     case 'CLOUD_SIGN_OUT':
-      return { ...state, cloud: emptyCloud(), outbox: [], circles: [], feeds: {}, seen: {} };
+      return { ...state, cloud: emptyCloud(), outbox: [], joined: [], circles: [], feeds: {}, seen: {} };
+    case 'JOINED_SET':
+      return { ...state, joined: a.members };
+    case 'JOINED_DIAL':
+      return {
+        ...state,
+        joined: state.joined.map((m) => (m.id === a.id && [0, 1, 2].includes(a.dial) ? { ...m, dial: a.dial } : m)),
+      };
+    case 'CIRCLE_TIMEOFF':
+      return {
+        ...state,
+        circles: state.circles.map((c) => (c.household_id === a.id ? { ...c, time_off: !!a.on } : c)),
+      };
+    case 'DEMO_JOINED_ADD':
+      return state.joined.some((m) => m.id === 'demo-asha')
+        ? state
+        : { ...state, joined: [...state.joined, { id: 'demo-asha', name: 'Asha (demo)', role: 'family', dial: 0, time_off: false, share_contact: false }] };
     case 'CIRCLES_SET':
       return { ...state, circles: a.circles };
     case 'FEED_SET':

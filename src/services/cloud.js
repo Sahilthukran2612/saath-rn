@@ -224,3 +224,62 @@ export async function fetchFeed(cfg, cloud, householdId, fetchImpl) {
   );
   return { ok: res.ok && Array.isArray(res.data), events: Array.isArray(res.data) ? res.data : [], session };
 }
+
+// ---- The dial on the server: who joined, and what each may see ----
+
+// People who joined this household from their own phones (rows with a user). The person's phone reads
+// them so the Circle screen shows real members and can set what each one sees.
+export async function listMembers(cfg, cloud, fetchImpl) {
+  const { res, session } = await withAuth(
+    cfg,
+    cloud,
+    (token) =>
+      call(
+        cfg,
+        `/rest/v1/members?household_id=eq.${encodeURIComponent(cloud.householdId)}&user_id=not.is.null&select=id,name,role,dial,time_off,share_contact&order=created_at.asc`,
+        { token },
+        fetchImpl
+      ),
+    fetchImpl
+  );
+  return { ok: res.ok && Array.isArray(res.data), members: Array.isArray(res.data) ? res.data : [], session };
+}
+
+const isDial = (d) => Number.isInteger(d) && d >= 0 && d <= 2;
+
+// The person sets what a joined member sees: 0 safety only, 1 routine, 2 full. The database also
+// enforces who may do this (only the person) and keeps a guardian at Routine or above.
+export async function setMemberDial(cfg, cloud, memberId, dial, fetchImpl) {
+  if (!isDial(dial)) return { ok: false, session: null };
+  const { res, session } = await withAuth(
+    cfg,
+    cloud,
+    (token) =>
+      call(
+        cfg,
+        `/rest/v1/members?id=eq.${encodeURIComponent(memberId)}`,
+        { method: 'PATCH', token, prefer: 'return=minimal', body: { dial } },
+        fetchImpl
+      ),
+    fetchImpl
+  );
+  return { ok: res.ok, session };
+}
+
+// A member pauses routine updates from one person (Time Off). Safety alerts are never paused: the
+// database rule `can_see_event` lets safety events through whatever this is set to.
+export async function setMyTimeOff(cfg, cloud, householdId, on, fetchImpl) {
+  const { res, session } = await withAuth(
+    cfg,
+    cloud,
+    (token) =>
+      call(
+        cfg,
+        `/rest/v1/members?household_id=eq.${encodeURIComponent(householdId)}&user_id=eq.${encodeURIComponent(cloud.userId)}`,
+        { method: 'PATCH', token, prefer: 'return=minimal', body: { time_off: !!on } },
+        fetchImpl
+      ),
+    fetchImpl
+  );
+  return { ok: res.ok, session };
+}

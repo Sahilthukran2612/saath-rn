@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { View } from 'react-native';
 import { Users } from '../icons';
 import { BigButton, Body, Caption, Card } from '../ui';
-import { Avatar, Badge, Field, ListGroup, ListRow, ScreenHeader } from '../kit';
+import { Avatar, Badge, Field, ListGroup, ListRow, ScreenHeader, Toggle } from '../kit';
 import { useStore } from '../../state/store';
 import { useNow } from '../useNow';
 import { colors } from '../../theme';
 import { nowMs } from '../../services/clock';
-import { acceptInvite, cloudConfig, isConfigured, listCircles } from '../../services/cloud';
+import { acceptInvite, cloudConfig, isConfigured, listCircles, setMyTimeOff } from '../../services/cloud';
 import { ago, describeEvent, fmt, isAlert, newest, pendingAlert } from '../../circleFeed';
 
 // The other half of the circle: the people I look after. I only ever see what the server lets me see
@@ -42,6 +42,15 @@ export default function CirclesSection() {
     setBusy(false);
   };
 
+  // Time Off: stop routine updates from one person. The server still lets safety alerts through.
+  const pause = async (c, on) => {
+    dispatch({ type: 'CIRCLE_TIMEOFF', id: c.household_id, on });
+    if (!signedIn || c.household_id.startsWith('demo-')) return;
+    const r = await setMyTimeOff(cfg, state.cloud, c.household_id, on);
+    if (r.session) dispatch({ type: 'CLOUD_SET', patch: r.session });
+    if (!r.ok) dispatch({ type: 'CIRCLE_TIMEOFF', id: c.household_id, on: !on });
+  };
+
   const circle = state.circles.find((c) => c.household_id === open);
   if (circle) {
     const feed = state.feeds[circle.household_id] || [];
@@ -49,6 +58,13 @@ export default function CirclesSection() {
       <View style={{ gap: 14 }}>
         <ScreenHeader title={nameOf(circle)} onBack={() => setOpen(null)} backLabel={t('back')} />
         <Caption>{fmt(t('cf.sees'), { level: t(`dial${circle.dial}`) })}</Caption>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <View style={{ flex: 1 }}>
+            <Body>{t('cf.timeOff')}</Body>
+            <Caption>{t('cf.timeOffNote')}</Caption>
+          </View>
+          <Toggle value={!!circle.time_off} label={t('cf.timeOff')} onValueChange={(on) => pause(circle, on)} />
+        </View>
         {feed.length === 0 ? (
           <Body>{t('cf.empty')}</Body>
         ) : (

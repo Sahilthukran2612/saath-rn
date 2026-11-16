@@ -8,6 +8,7 @@ import {
   flush,
   isConfigured,
   listCircles,
+  listMembers,
   setPersonName,
 } from '../services/cloud';
 
@@ -67,6 +68,12 @@ export default function useCloudSync() {
         const r = await setPersonName(cfg, cloud, nm);
         keep(r.session);
         if (r.ok) keep({ sentName: nm });
+      }
+
+      if (householdId) {
+        const m = await listMembers(cfg, cloud);
+        keep(m.session);
+        if (m.ok) dispatch({ type: 'JOINED_SET', members: m.members });
       }
 
       const c = await listCircles(cfg, cloud);

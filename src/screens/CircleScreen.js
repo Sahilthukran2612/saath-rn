@@ -7,6 +7,7 @@ import { Reveal } from '../components/motion';
 import InviteSection from '../components/circle/InviteSection';
 import HelpSection from '../components/circle/HelpSection';
 import CirclesSection from '../components/circle/CirclesSection';
+import JoinedSection from '../components/circle/JoinedSection';
 import { useStore } from '../state/store';
 import { canShareItem } from '../logic';
 import { colors } from '../theme';
@@ -109,6 +110,11 @@ export default function CircleScreen() {
       {isPerson || state.role === 'family' ? (
         <Reveal index={3}>
           <HelpSection />
+        </Reveal>
+      ) : null}
+      {isPerson ? (
+        <Reveal index={4}>
+          <JoinedSection />
         </Reveal>
       ) : null}
       <Reveal index={4}>

@@ -25,6 +25,7 @@ const PERSIST = [
   'cloud',
   'outbox',
   'outboxSeq',
+  'joined',
   'circles',
   'feeds',
   'seen',
