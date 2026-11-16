@@ -196,6 +196,44 @@ begin
     exception when others then v := 'capped'; exit; end;
   end loop;
   if v = 'capped' then passed := passed + 1; else failed := failed || ' [safety events not capped]'; end if;
+  -- ---- push addresses (device_tokens) ----
+  perform set_config('role', 'authenticated', true);
+  perform set_config('request.jwt.claims', json_build_object('sub', f, 'role', 'authenticated', 'is_anonymous', false)::text, true);
+  insert into device_tokens (token, lang) values ('TESTTOKEN-F1', 'hi');
+  select count(*) into c from device_tokens;
+  if c = 1 then passed := passed + 1; else failed := failed || ' [own token not visible]'; end if;
+  begin
+    insert into device_tokens (token, user_id) values ('TESTTOKEN-FAKE', p);
+    failed := failed || ' [token for another user]';
+  exception when others then passed := passed + 1; end;
+  perform set_config('request.jwt.claims', json_build_object('sub', s, 'role', 'authenticated', 'is_anonymous', true)::text, true);
+  select count(*) into c from device_tokens;
+  if c = 0 then passed := passed + 1; else failed := failed || ' [stranger sees tokens]'; end if;
+  begin
+    update device_tokens set lang = 'en' where token = 'TESTTOKEN-F1';
+    get diagnostics c = row_count;
+    if c = 0 then passed := passed + 1; else failed := failed || ' [stranger changed a token]'; end if;
+  exception when others then passed := passed + 1; end;
+  begin
+    delete from device_tokens where token = 'TESTTOKEN-F1';
+    get diagnostics c = row_count;
+    if c = 0 then passed := passed + 1; else failed := failed || ' [stranger deleted a token]'; end if;
+  exception when others then passed := passed + 1; end;
+  perform set_config('request.jwt.claims', json_build_object('sub', f, 'role', 'authenticated', 'is_anonymous', false)::text, true);
+  v := 'no cap';
+  for i in 1..12 loop
+    begin
+      insert into device_tokens (token) values ('TESTTOKEN-CAP-' || i);
+    exception when others then v := 'capped'; exit; end;
+  end loop;
+  if v = 'capped' then passed := passed + 1; else failed := failed || ' [tokens not capped]'; end if;
+  perform set_config('role', 'anon', true);
+  perform set_config('request.jwt.claims', '', true);
+  begin
+    perform count(*) from device_tokens;
+    failed := failed || ' [anon read tokens]';
+  exception when others then passed := passed + 1; end;
+  perform set_config('role', 'authenticated', true);
   -- nothing was kept
   perform set_config('role', 'postgres', true);
   raise exception 'RESULT: % passed, failures:%', passed, case when failed = '' then ' none' else failed end;

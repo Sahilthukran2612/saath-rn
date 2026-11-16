@@ -128,6 +128,14 @@ Push notifications through Firebase Cloud Messaging are free and would wake a me
 
 ---
 
+### 5.7 Production mode, accounts, calls and push (added 2026-11-16)
+- **Production mode.** An installed (release) build starts empty: no demo people, no fake phone numbers, no invented readings or costs. A first-run setup asks who uses the phone, a name, the people to reach (real numbers) and how alerts should work. Demo data is loaded only on request (Me, Demo mode) and removed again, and **demo mode never places a real call or message**, so a demo contact's fake number can never be dialled. The Expo Go development build keeps the demo data.
+- **Automatic calls.** After the countdown, Saath dials contact 1; when that call ends it dials contact 2, and so on. Android does not say whether an outgoing call was answered, so a call that lasts about 50 seconds is taken as someone answering and the chain stops; shorter ones move on. The clock waits while a call is up. With the phone locked, a full-screen notification brings Saath up first (the phone may ask the person to allow "full screen notifications"). **Not tested on a phone.**
+- **Accounts and roles.** An account is a phone number and a password (no text message, so no cost; the same login works on a second phone; a forgotten password cannot be reset). Roles are enforced by the database: see `docs/RBAC.md`.
+- **Push.** Code, table, trigger and server function are written and tested without Firebase; it needs your Firebase project: see `docs/PUSH.md`.
+
+---
+
 ## 6. Technologies, and why each was chosen
 
 ### 6.1 The app
@@ -243,7 +251,10 @@ A heart-rate band never makes Saath diagnose. The app only says the rate "has st
 | Dial written to the server for joined members; member-side Time Off | Dial verified against the live server in a two-account run; screen tested; Time Off against a fake server |
 | App icon, themed icon, splash | Generated in the Saath identity; not yet seen on a phone |
 | Standalone release APK (no PC needed) | **Builds** (`dist\saath.apk`, 37.3 MB, arm64-v8a and armeabi-v7a, app code and siren inside). Signed with the debug key, so it installs but is not a Play Store build. **Not yet installed or run on a phone** |
-| Push notifications (FCM) | **Not built, skipped on purpose.** Needs a Firebase project. Circle members see alerts while the app is open |
+| Production mode: empty first run, setup flow, real contacts, demo only on request | Built and tested (Jest); not run on a phone |
+| Automatic calls one by one, lock-screen alert, wake lock while watching | Kotlin and logic written; logic tested with the native layer mocked; compiles in the release build; **not run on a phone** |
+| Account with phone number and password; roles enforced by the database | Client tested against a fake server; roles and limits verified live (40 policy checks); **the phone sign-in switch on the server must be turned on by the owner** |
+| Push notifications (FCM) | Client, table, trigger and server function written and tested without Firebase; **nothing sent through Firebase yet: needs the Firebase project** (`docs/PUSH.md`) |
 | Signed release APK | **Not built.** See section 12 |
 
 ---

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { useStore } from './store';
+import { setupPush } from '../services/push';
 import {
   cloudConfig,
   createInvite,
@@ -9,6 +10,7 @@ import {
   isConfigured,
   listCircles,
   listMembers,
+  saveDeviceToken,
   setPersonName,
 } from '../services/cloud';
 
@@ -24,6 +26,7 @@ export default function useCloudSync() {
   const unsent = state.invites.filter((i) => i.status === 'pending' && !i.cloud).length;
   const name = state.profile.name;
   const busy = useRef(false);
+  const pushTried = useRef('');
   const latest = useRef(state);
   const [tick, setTick] = useState(0);
 
@@ -40,7 +43,7 @@ export default function useCloudSync() {
   useEffect(() => {
     const cfg = cloudConfig();
     if (!state.hydrated || !isConfigured(cfg) || !access || busy.current) return;
-    if (AppState.currentState && AppState.currentState !== 'active') return;
+    if (AppState.currentState === 'background') return; // only skip while the app is truly in the background
     busy.current = true;
     (async () => {
       let cloud = latest.current.cloud;
@@ -74,6 +77,20 @@ export default function useCloudSync() {
         const m = await listMembers(cfg, cloud);
         keep(m.session);
         if (m.ok) dispatch({ type: 'JOINED_SET', members: m.members });
+      }
+
+      // This phone's push address, once per app run and language: so alerts arrive with Saath closed.
+      const lang = latest.current.lang;
+      if (pushTried.current !== lang) {
+        pushTried.current = lang;
+        const p = await setupPush();
+        if (p.ok) {
+          const saved = await saveDeviceToken(cfg, cloud, p.token, lang);
+          keep(saved.session);
+          keep(saved.ok ? { pushToken: p.token, pushState: 'on' } : { pushState: 'error' });
+        } else {
+          keep({ pushState: p.reason });
+        }
       }
 
       const c = await listCircles(cfg, cloud);

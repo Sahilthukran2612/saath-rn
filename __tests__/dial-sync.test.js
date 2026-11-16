@@ -143,8 +143,9 @@ describe('on the Circle screen', () => {
     await mount({ demo: false, ...live });
     await openCircle();
     await fireEvent.press(screen.getAllByLabelText('Full').at(-1));
-    await waitFor(() => expect(global.fetch).toHaveBeenCalled());
-    const [url, init] = global.fetch.mock.calls[0];
+    const patch = () => global.fetch.mock.calls.find(([, i]) => i.method === 'PATCH');
+    await waitFor(() => expect(patch()).toBeTruthy());
+    const [url, init] = patch();
     expect(url).toContain('/rest/v1/members?id=eq.m9');
     expect(JSON.parse(init.body)).toEqual({ dial: 2 });
     expect(screen.getByText('Asha (joined) sees: Full')).toBeTruthy();
@@ -177,8 +178,9 @@ describe('on the Circle screen', () => {
     await fireEvent.press(screen.getByLabelText('Amma'));
     expect(screen.getByText('Safety alerts still reach you.')).toBeTruthy();
     await fireEvent.press(screen.getByLabelText('Pause routine updates from them: off'));
-    await waitFor(() => expect(global.fetch).toHaveBeenCalled());
-    const [url, init] = global.fetch.mock.calls[0];
+    const patch = () => global.fetch.mock.calls.find(([, i]) => i.method === 'PATCH');
+    await waitFor(() => expect(patch()).toBeTruthy());
+    const [url, init] = patch();
     expect(url).toContain('household_id=eq.hx');
     expect(url).toContain('user_id=eq.u1');
     expect(JSON.parse(init.body)).toEqual({ time_off: true });

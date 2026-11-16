@@ -27,7 +27,7 @@ describe('cloud schema (design only, not run)', () => {
     expect(canReceive(2, EVENT_TYPE.summary)).toBe(true);
   });
   test('every table has row level security turned on', () => {
-    const tables = [...code.matchAll(/create table (\w+)/g)].map((m) => m[1]);
+    const tables = [...code.matchAll(/create table (?:if not exists )?(\w+)/g)].map((m) => m[1]);
     expect(tables.length).toBeGreaterThan(3);
     tables.forEach((t) => expect(code).toContain(`alter table ${t} enable row level security`));
   });

@@ -58,18 +58,18 @@ export async function requestOtp(cfg, phone, fetchImpl) {
 
 // Find this person's household, or make it. Shared by both ways of signing in.
 async function ensureHousehold(cfg, s, personName, fetchImpl) {
-  const found = await call(cfg, `/rest/v1/households?select=id&person_user_id=eq.${s.userId}`, { token: s.access }, fetchImpl);
-  let householdId = found.ok ? found.data?.[0]?.id : null;
-  if (!householdId) {
+  const found = await call(cfg, `/rest/v1/households?select=id,person_name&person_user_id=eq.${s.userId}`, { token: s.access }, fetchImpl);
+  let household = found.ok ? found.data?.[0] : null;
+  if (!household?.id) {
     const made = await call(
       cfg,
       '/rest/v1/households',
       { method: 'POST', token: s.access, prefer: 'return=representation', body: { person_user_id: s.userId, person_name: personName } },
       fetchImpl
     );
-    householdId = made.ok ? made.data?.[0]?.id : null;
+    household = made.ok ? made.data?.[0] : null;
   }
-  return householdId;
+  return household?.id ? { id: household.id, name: household.person_name || '' } : null;
 }
 
 // Check the SMS code, then find or create this person's household. Returns what to keep in state.
@@ -84,9 +84,9 @@ export async function signIn(cfg, phone, code, fetchImpl, personName = '') {
   );
   if (!v.ok || !v.data?.access_token) return { ok: false, reason: v.status === 0 ? 'network' : 'code' };
   const s = sessionOf(v.data);
-  const householdId = await ensureHousehold(cfg, s, personName, fetchImpl);
-  if (!householdId) return { ok: false, reason: 'household' };
-  return { ok: true, cloud: { phone: String(phone).replace(/\D/g, '').slice(-10), ...s, householdId } };
+  const h = await ensureHousehold(cfg, s, personName, fetchImpl);
+  if (!h) return { ok: false, reason: 'household' };
+  return { ok: true, cloud: { phone: String(phone).replace(/\D/g, '').slice(-10), ...s, householdId: h.id }, personName: h.name };
 }
 
 // Free sign-in with no phone number and no SMS: the server makes an anonymous account for this
@@ -98,9 +98,9 @@ export async function signInAnonymous(cfg, fetchImpl, personName = '') {
   const v = await call(cfg, '/auth/v1/signup', { method: 'POST', body: {} }, fetchImpl);
   if (!v.ok || !v.data?.access_token) return { ok: false, reason: v.status === 0 ? 'network' : 'disabled' };
   const s = sessionOf(v.data);
-  const householdId = await ensureHousehold(cfg, s, personName, fetchImpl);
-  if (!householdId) return { ok: false, reason: 'household' };
-  return { ok: true, cloud: { phone: '', ...s, householdId } };
+  const h = await ensureHousehold(cfg, s, personName, fetchImpl);
+  if (!h) return { ok: false, reason: 'household' };
+  return { ok: true, cloud: { phone: '', ...s, householdId: h.id }, personName: h.name };
 }
 export async function refreshSession(cfg, refresh, fetchImpl) {
   const r = await call(cfg, '/auth/v1/token?grant_type=refresh_token', { method: 'POST', body: { refresh_token: refresh } }, fetchImpl);
@@ -279,6 +279,89 @@ export async function setMyTimeOff(cfg, cloud, householdId, on, fetchImpl) {
         { method: 'PATCH', token, prefer: 'return=minimal', body: { time_off: !!on } },
         fetchImpl
       ),
+    fetchImpl
+  );
+  return { ok: res.ok, session };
+}
+
+// ---- Account with a phone number and a password (recoverable, works on a second phone, costs nothing) ----
+// The phone number is the account name; no text message is ever sent, so there is no SMS bill. This needs the
+// project's Phone provider switched on with "Enable phone confirmations" switched OFF. The trade-off, stated
+// plainly: with no SMS or email, a forgotten password cannot be reset by the app.
+
+export const PASSWORD_MIN = 8;
+export const passwordOk = (p) => typeof p === 'string' && p.length >= PASSWORD_MIN;
+
+async function finishSignIn(cfg, data, phone, personName, fetchImpl) {
+  const s = sessionOf(data);
+  const h = await ensureHousehold(cfg, s, personName, fetchImpl);
+  if (!h) return { ok: false, reason: 'household' };
+  return {
+    ok: true,
+    cloud: { phone: String(phone).replace(/\D/g, '').slice(-10), ...s, householdId: h.id },
+    personName: h.name,
+  };
+}
+
+// New account. reason: 'invalid' (bad number or short password), 'exists' (already registered),
+// 'confirm' (the server still wants a confirmation text: the provider switch is not set), 'network', 'household'.
+export async function signUpPassword(cfg, phone, password, fetchImpl, personName = '') {
+  if (!isConfigured(cfg) || !validPhone(phone) || !passwordOk(password)) return { ok: false, reason: 'invalid' };
+  const r = await call(cfg, '/auth/v1/signup', { method: 'POST', body: { phone: toE164(phone), password } }, fetchImpl);
+  if (r.status === 0) return { ok: false, reason: 'network' };
+  if (!r.ok) {
+    const msg = String(r.data?.msg || r.data?.message || r.data?.error_description || '');
+    return { ok: false, reason: /already|registered|exists/i.test(msg) ? 'exists' : 'rejected' };
+  }
+  if (!r.data?.access_token) return { ok: false, reason: 'confirm' };
+  return finishSignIn(cfg, r.data, phone, personName, fetchImpl);
+}
+
+// Existing account, on this or another phone. reason: 'invalid', 'wrong' (number or password), 'network'.
+export async function signInPassword(cfg, phone, password, fetchImpl) {
+  if (!isConfigured(cfg) || !validPhone(phone) || !passwordOk(password)) return { ok: false, reason: 'invalid' };
+  const r = await call(
+    cfg,
+    '/auth/v1/token?grant_type=password',
+    { method: 'POST', body: { phone: toE164(phone), password } },
+    fetchImpl
+  );
+  if (r.status === 0) return { ok: false, reason: 'network' };
+  if (!r.ok || !r.data?.access_token) return { ok: false, reason: 'wrong' };
+  return finishSignIn(cfg, r.data, phone, '', fetchImpl);
+}
+
+// ---- Push: this phone's address, so the server can send it a notification ----
+
+export async function saveDeviceToken(cfg, cloud, token, lang, fetchImpl) {
+  if (!token) return { ok: false, session: null };
+  const { res, session } = await withAuth(
+    cfg,
+    cloud,
+    (access) =>
+      call(
+        cfg,
+        '/rest/v1/device_tokens?on_conflict=token',
+        {
+          method: 'POST',
+          token: access,
+          prefer: 'resolution=merge-duplicates,return=minimal',
+          body: { token, lang: lang === 'hi' ? 'hi' : 'en', user_id: cloud.userId, updated_at: new Date().toISOString() },
+        },
+        fetchImpl
+      ),
+    fetchImpl
+  );
+  return { ok: res.ok, session };
+}
+
+// On sign-out, so a phone that left the account stops getting its alerts. Best effort.
+export async function deleteDeviceToken(cfg, cloud, token, fetchImpl) {
+  if (!token) return { ok: true, session: null };
+  const { res, session } = await withAuth(
+    cfg,
+    cloud,
+    (access) => call(cfg, `/rest/v1/device_tokens?token=eq.${encodeURIComponent(token)}`, { method: 'DELETE', token: access, prefer: 'return=minimal' }, fetchImpl),
     fetchImpl
   );
   return { ok: res.ok, session };

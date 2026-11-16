@@ -1,0 +1,24 @@
+-- Run AFTER the push function is deployed (see docs/PUSH.md). Replace the two placeholders first:
+--   <PROJECT_REF>  your project reference, for example hothcnoyrfelsagiagwi
+--   <PUSH_SECRET>  the same long random string you set as the function secret PUSH_SECRET
+-- Sends each new safety event (type 0) to the function, which notifies the members allowed to see it.
+-- Routine events are not pushed: they would be noise. The secret sits inside this database function, which no
+-- app user can read or call (execute is revoked), so keep the filled-in copy out of git.
+-- A failed push never blocks the event itself: net.http_post only queues the request.
+create extension if not exists pg_net with schema extensions;
+
+create or replace function notify_push() returns trigger language plpgsql security definer set search_path = public, extensions as $$
+begin
+  if new.event_type = 0 then
+    perform net.http_post(
+      url := 'https://<PROJECT_REF>.supabase.co/functions/v1/push',
+      headers := jsonb_build_object('Content-Type', 'application/json', 'x-push-secret', '<PUSH_SECRET>'),
+      body := jsonb_build_object('record', to_jsonb(new))
+    );
+  end if;
+  return new;
+end $$;
+revoke all on function notify_push() from public, anon, authenticated;
+
+drop trigger if exists events_push on events;
+create trigger events_push after insert on events for each row execute function notify_push();
