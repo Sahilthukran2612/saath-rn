@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
-import { Bell, BellRing, Pencil, Plus, RefreshCw, X } from './icons';
-import { BigButton, Card, Chip, Title } from './ui';
+import { Bell, BellRing, Minus, Pencil, Plus, RefreshCw, X } from './icons';
+import { BigButton, Caption, Card, Chip, Title } from './ui';
+import { formatHour, reminderPlan, stepHour, validHour } from '../reminders';
+import { askReminderPermission } from '../services/reminders';
 import { Field, ListGroup, ListRow, Toggle } from './kit';
 import { useStore } from '../state/store';
 import { useNow } from './useNow';
@@ -13,23 +15,38 @@ import { colors } from '../theme';
 // One task name. The text is local while typing and saved when the person finishes, so the offline
 // queue gets one change per edit, not one per letter.
 function TaskField({ task, label, removeLabel }) {
-  const { dispatch } = useStore();
+  const { dispatch, t } = useStore();
   const [value, setValue] = useState(task.title);
   const save = () => {
     const v = value.trim();
     if (v && v !== task.title) dispatch({ type: 'TASK_EDIT', id: task.id, title: v, at: nowMs() });
     else setValue(task.title);
   };
+  const move = (delta) =>
+    dispatch({ type: 'TASK_HOUR', id: task.id, hour: stepHour(task.hour, delta), at: nowMs() });
+  const asleep = validHour(task.hour) && reminderPlan([task]).length === 0;
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8 }}>
-      <View style={{ flex: 1 }}>
-        <Field label={label} value={value} onChangeText={setValue} onEndEditing={save} />
+    <View style={{ gap: 8 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8 }}>
+        <View style={{ flex: 1 }}>
+          <Field label={label} value={value} onChangeText={setValue} onEndEditing={save} />
+        </View>
+        <Chip
+          label={removeLabel}
+          icon={X}
+          onPress={() => dispatch({ type: 'TASK_DELETE', id: task.id, at: nowMs() })}
+        />
       </View>
-      <Chip
-        label={removeLabel}
-        icon={X}
-        onPress={() => dispatch({ type: 'TASK_DELETE', id: task.id, at: nowMs() })}
-      />
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <Caption style={{ flex: 1 }}>
+          {validHour(task.hour)
+            ? t('rem.at').replace('{time}', formatHour(task.hour))
+            : t('rem.none')}
+        </Caption>
+        <Chip label={t('rem.earlier')} icon={Minus} onPress={() => move(-1)} />
+        <Chip label={t('rem.later')} icon={Plus} onPress={() => move(1)} />
+      </View>
+      {asleep ? <Caption>{t('rem.sleep')}</Caption> : null}
     </View>
   );
 }
@@ -61,6 +78,26 @@ export default function RoutineEditor() {
           iconBg={nudge.ok ? colors.leafTint : colors.haldiTint}
           iconColor={nudge.ok ? colors.leafDeep : colors.haldiDeep}
           title={nudge.ok ? t('remindersOn') : `${t('remindersPaused')} (${nudge.reason})`}
+        />
+        <ListRow
+          icon={Bell}
+          title={t('rem.toggle')}
+          subtitle={state.remindersDenied ? t('rem.denied') : t('rem.note')}
+          trailing={
+            <Toggle
+              value={state.reminders}
+              label={t('rem.toggle')}
+              onValueChange={async (on) => {
+                dispatch({ type: 'SET', key: 'remindersDenied', value: false });
+                if (on && !(await askReminderPermission())) {
+                  dispatch({ type: 'SET', key: 'reminders', value: false });
+                  dispatch({ type: 'SET', key: 'remindersDenied', value: true });
+                  return;
+                }
+                dispatch({ type: 'SET', key: 'reminders', value: on });
+              }}
+            />
+          }
         />
         <ListRow
           icon={RefreshCw}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView, View } from 'react-native';
-import { Languages, Eye, MessageCircle, RotateCcw, ShieldCheck, Type } from '../components/icons';
+import { Languages, Eye, MessageCircle, RotateCcw, ShieldCheck, Siren, Type } from '../components/icons';
 import { BigButton, Body, Caption, Card, Title } from '../components/ui';
 import { Avatar, Badge, ListGroup, ListRow, Segmented, Toggle } from '../components/kit';
 import { Reveal } from '../components/motion';
@@ -103,6 +103,17 @@ export default function MeScreen() {
           <Caption>{t('sms.note')}</Caption>
           {!smsAvailable ? <Body bold>{t(state.demo ? 'sms.demoNote' : 'sms.unavailable')}</Body> : null}
           {state.autoSmsDenied ? <Body bold>{t('sms.denied')}</Body> : null}
+        </Card>
+        <View style={{ height: 12 }} />
+        <Card tone="tint" style={{ gap: 12 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <Siren size={24} color={colors.indigo} />
+            <Body bold style={{ flex: 1 }}>
+              {t('siren.title')}
+            </Body>
+            <Toggle value={state.siren} label={t('siren.title')} onValueChange={(on) => set('siren', on)} />
+          </View>
+          <Caption>{t('siren.note')}</Caption>
         </Card>
       </Reveal>
 

@@ -11,6 +11,7 @@ import { useStore } from '../state/store';
 import { speak } from '../services/voice';
 import { warn } from '../services/haptics';
 import { sendSms, smsAvailable } from '../services/sms';
+import { startSiren, stopSiren } from '../services/siren';
 
 // Ticks the countdown. Only depends on the alert id and phase, and dispatches without
 // reading state, so there is no stale closure and each transition is counted once in the reducer.
@@ -108,6 +109,15 @@ export default function AlertBanner() {
     texted.current.add(key);
     sendSms(step.phone, msg).then((ok) => setAutoSent({ key, ok, name: step.name }));
   }, [al?.id, al?.phase, al?.stepIndex, state.autoSms]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // A loud wail once nobody has answered, only if the person turned it on. It plays on this phone so
+  // people nearby can hear it, and works with no signal. It stops the moment the alert is answered.
+  const ringing = !!al && state.siren && (al.phase === 'escalating' || al.phase === 'done');
+  useEffect(() => {
+    if (ringing) startSiren();
+    else stopSiren();
+    return () => stopSiren();
+  }, [ringing]);
 
   if (!al) return null;
   const who = al.phase === 'escalating' ? al.chain[al.stepIndex] : null;

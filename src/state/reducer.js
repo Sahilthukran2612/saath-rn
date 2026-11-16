@@ -57,10 +57,10 @@ export const SEED = {
     },
   ],
   tasks: [
-    { id: 't1', icon: '💊', title: 'Morning medicine', done: false },
-    { id: 't2', icon: '🍚', title: 'Lunch', done: false },
-    { id: 't3', icon: '🚶', title: 'Evening walk', done: false },
-    { id: 't4', icon: '🩸', title: 'Sugar check', done: false },
+    { id: 't1', icon: '💊', title: 'Morning medicine', done: false, hour: 8 },
+    { id: 't2', icon: '🍚', title: 'Lunch', done: false, hour: 13 },
+    { id: 't3', icon: '🚶', title: 'Evening walk', done: false, hour: 18 },
+    { id: 't4', icon: '🩸', title: 'Sugar check', done: false, hour: 20 },
   ],
   readings: [{ id: 'r0', mgdl: 112, at: 0, demo: true }],
 };
@@ -100,6 +100,9 @@ export const initialState = {
   budget: demoBudget(),
   background: false, // "keep watching in the background" (visible foreground service)
   heart: { device: null, readings: [], contact: true }, // Bluetooth heart-rate band. In memory only: never stored or sent
+  siren: false, // a loud wail on this phone when nobody answers an alert (opt-in)
+  reminders: false, // daily reminders on the phone, at each task's hour (opt-in)
+  remindersDenied: false,
   autoSms: false, // send the alert SMS by itself when nobody answers (installed app only)
   autoSmsDenied: false, // the SMS permission was refused
   backgroundDenied: false, // the notification permission was refused, so the service did not start
@@ -281,6 +284,11 @@ function baseReducer(state, a) {
             t.id === a.id ? { ...t, title: a.title, hour: a.hour ?? t.hour } : t
           ),
         },
+        a
+      );
+    case 'TASK_HOUR':
+      return enqueue(
+        { ...state, tasks: state.tasks.map((t) => (t.id === a.id ? { ...t, hour: a.hour } : t)) },
         a
       );
     case 'TASK_DELETE':

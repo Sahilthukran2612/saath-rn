@@ -35,6 +35,8 @@ const PERSIST = [
   'budget',
   'background',
   'autoSms',
+  'reminders',
+  'siren',
   'profile',
   'ladder',
   'ladderApproval',

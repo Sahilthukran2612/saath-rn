@@ -45,7 +45,14 @@
           "neverForLocation": true,
           "bluetoothAlwaysPermission": "Saath uses Bluetooth only to read your heart-rate band. Nothing is stored or sent."
         }
-      ]
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false
+        }
+      ],
+      "expo-notifications"
     ]
   }
 }
