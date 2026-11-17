@@ -56,3 +56,5 @@ google-services.json
 fcm-service-account*.json
 *-firebase-adminsdk-*.json
 docs/supabase/migrations/003_push_trigger.sql
+
+tsconfig.json

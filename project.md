@@ -253,8 +253,8 @@ A heart-rate band never makes Saath diagnose. The app only says the rate "has st
 | Standalone release APK (no PC needed) | **Builds** (`dist\saath.apk`, 37.3 MB, arm64-v8a and armeabi-v7a, app code and siren inside). Signed with the debug key, so it installs but is not a Play Store build. **Not yet installed or run on a phone** |
 | Production mode: empty first run, setup flow, real contacts, demo only on request | Built and tested (Jest); not run on a phone |
 | Automatic calls one by one, lock-screen alert, wake lock while watching | Kotlin and logic written; logic tested with the native layer mocked; compiles in the release build; **not run on a phone** |
-| Account with phone number and password; roles enforced by the database | Client tested against a fake server; roles and limits verified live (40 policy checks); **the phone sign-in switch on the server must be turned on by the owner** |
-| Push notifications (FCM) | Firebase project set up and credentials verified; server function deployed and tested; trigger on; **not yet delivered to a real phone** (`docs/PUSH.md`) |
+| Account with phone number and password; roles enforced by the database | Client tested against a fake server; roles and limits verified live (40 policy checks); phone confirmations are off and sign-up, second-phone sign-in and joining a circle were verified against the live server (not yet from the app on a phone) |
+| Push notifications (FCM) | Firebase project set up and credentials verified; server function deployed; a safety event went through the live chain to Google (a fake address was refused and removed); **not yet delivered to a real phone** (`docs/PUSH.md`) |
 | Signed release APK | **Not built.** See section 12 |
 
 ---

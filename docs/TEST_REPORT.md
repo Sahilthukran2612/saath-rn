@@ -295,3 +295,20 @@ Not tested: any of the native pieces on a phone (calling, call-end detection, lo
 Not tested: a notification reaching a real phone, the rebuilt app registering its address, how phone-brand battery savers treat a closed app.
 
 Still off on the server: **phone confirmations and email confirmation**. `phone_autoconfirm` and `mailer_autoconfirm` still read false although the Phone provider is on, so sign-up with a number and password would try to send a text. Phone sign-up has therefore not been tested against the real server.
+
+## Phone and password accounts, and the push chain, against the live project (2026-11-17)
+The owner switched off phone confirmations (`phone_autoconfirm` now reads true; `mailer_autoconfirm` still false, which does not matter because Saath has no email accounts). The app's own cloud code was then run against the real project in plain Node with two throwaway accounts, which were deleted afterwards by id. No text message is sent: confirmations are off.
+
+| Step | Result |
+|---|---|
+| Sign up with a phone number and password | ok; household created with the person's name |
+| Sign up with the same number again | refused: "exists" |
+| Sign in from a "second phone" with the same number and password | ok; same household; the person's name came over |
+| Sign in with a wrong password | refused: "wrong" |
+| A member signs up, joins with an invite code, sees the circle | ok |
+| The member's phone address is saved, then a safety event (fall) is sent by the person | event accepted; the member's feed shows the fall |
+| The push chain: trigger, function, Firebase | within 12 seconds the member's (deliberately fake) address was **removed**, which only happens after the function ran, reached Google's FCM, and was told the address is invalid |
+
+So the server side of push is proven up to Google: trigger, function, credentials and cleanup. **Not proven:** a notification arriving on a real phone (that needs a real address from the installed app). After the test the database was exactly as before: 1 account, 1 household, 2 events, 0 invites, 0 members, 0 device addresses.
+
+A stray `tsconfig.json`, which Expo creates when it sees the TypeScript push function, was removed and is now git-ignored.
