@@ -68,6 +68,7 @@ create table invites (
   name text not null check (char_length(name) <= 60),
   role text not null check (role in ('family', 'neighbour', 'asha', 'clinician')),
   code text not null unique check (code ~ '^[A-Z0-9]{6,12}$'),
+  phone text check (phone is null or phone ~ '^[0-9]{10}$'), -- the number this invite was made for
   status text not null default 'pending' check (status in ('pending', 'accepted')),
   created_at timestamptz not null default now()
 );
@@ -168,15 +169,19 @@ create policy audit_insert on audit for insert to authenticated
 
 -- Join a circle with the code the person shared. Runs as the function owner so it can add the member
 -- row, but it only ever adds auth.uid(). Codes expire after 14 days and work once. A new member starts
--- at dial 0 (safety only) until the person raises it. A wrong code returns null (not an error, so the
--- attempt is kept) and ten wrong codes in 15 minutes lock that account out for a while. Anonymous
--- accounts are free to make, so this limit is per account and Supabase's own sign-up rate limit
--- per IP is what stops someone making accounts to get more guesses.
+-- at dial 0 (safety only) until the person raises it.
+-- An invite made for a phone number can only be accepted by an account that signed up with that same
+-- number, so a code that is forwarded or overheard is useless to anyone else. An invite with no number
+-- (older ones) can be accepted by any signed-in account. A wrong code, or one made for another number,
+-- returns null (not an error, so the attempt is kept), and ten of those in 15 minutes lock that account
+-- out for a while. Anonymous accounts are free to make, so this limit is per account and Supabase's own
+-- sign-up rate limit per IP is what stops someone making accounts to get more guesses.
 create or replace function accept_invite(invite_code text) returns uuid
 language plpgsql security definer set search_path = public as $$
 declare
   inv invites;
   clean text := upper(trim(invite_code));
+  caller_phone text := right(regexp_replace(coalesce(auth.jwt() ->> 'phone', ''), '[^0-9]', '', 'g'), 10);
 begin
   if auth.uid() is null then raise exception 'sign in first'; end if;
   delete from invite_attempts where at < now() - interval '1 day';
@@ -187,7 +192,7 @@ begin
     where code = clean and status = 'pending'
       and created_at > now() - interval '14 days'
     for update;
-  if not found then
+  if not found or (inv.phone is not null and inv.phone <> caller_phone) then
     insert into invite_attempts (user_id) values (auth.uid());
     return null;
   end if;

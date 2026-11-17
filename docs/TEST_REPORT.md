@@ -312,3 +312,20 @@ The owner switched off phone confirmations (`phone_autoconfirm` now reads true; 
 So the server side of push is proven up to Google: trigger, function, credentials and cleanup. **Not proven:** a notification arriving on a real phone (that needs a real address from the installed app). After the test the database was exactly as before: 1 account, 1 household, 2 events, 0 invites, 0 members, 0 device addresses.
 
 A stray `tsconfig.json`, which Expo creates when it sees the TypeScript push function, was removed and is now git-ignored.
+
+## Care-giver accounts, roles and number-bound invites (2026-11-17)
+Prompted by a real gap: every install used to be shown the *person's* setup, so a family member, neighbour, ASHA or clinician had no path of their own and nothing explained how they got a role.
+
+| Check | Result |
+|---|---|
+| `npm test` | 556 passed, 30 suites (adds `roles`, `contrast`; `production` updated) |
+| `npm run lint` | 0 errors |
+| Live policy tests | **45 passed, 0 failed** (adds: a different number cannot use a numbered invite, an anonymous account cannot, the right number joins with the invited role at safety only, the code is then used up) |
+| Migration | `004_invite_phone.sql` applied to the live project (additive column and a replaced function) |
+| Live scenario (4 throwaway accounts, deleted afterwards) | Person invited a neighbour for a number. An account with another number: refused. An anonymous account: refused. The invited number's account: joined as **neighbour**, dial 0, saw the person's name and, after a fall, the fall. Code reused: refused. A non-member saw nothing. The member signed in again with the same number and password |
+| Contrast audit (computed WCAG ratios) | All text pairs meet 4.5:1 and the shapes meet 3:1. One real failure found and fixed: the text-field border, the switch's off state and the empty check circle were 1.6:1; they now use a stronger colour (3.4:1 or more) |
+| Your own data on the live project | Untouched throughout |
+
+What changed in the app: a first question ("I need care" / "I look after someone"); a separate care-giver setup (name, own account, invite code); a care-giver has only Today, Circle and Me, no motion sensing and no background service; Me has "How I use Saath" (I need care, I look after someone, Both); each person they look after is shown with their role ("You are their neighbour."); the invite form says the invited person must use the same number.
+
+Not tested: the care-giver setup on a phone; a real clinician or ASHA (roles are the person's choice and are not verified).

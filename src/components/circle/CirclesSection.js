@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
-import { Users } from '../icons';
 import { BigButton, Body, Caption, Card } from '../ui';
-import { Avatar, Badge, Field, ListGroup, ListRow, ScreenHeader, Toggle } from '../kit';
+import { Avatar, Badge, ListGroup, ListRow, ScreenHeader, Toggle } from '../kit';
+import JoinCard from './JoinCard';
 import { useStore } from '../../state/store';
 import { useNow } from '../useNow';
 import { colors } from '../../theme';
 import { nowMs } from '../../services/clock';
-import { acceptInvite, cloudConfig, isConfigured, listCircles, setMyTimeOff } from '../../services/cloud';
+import { cloudConfig, isConfigured, setMyTimeOff } from '../../services/cloud';
 import { ago, describeEvent, fmt, isAlert, newest, pendingAlert } from '../../circleFeed';
 
 // The other half of the circle: the people I look after. I only ever see what the server lets me see
@@ -16,31 +16,11 @@ export default function CirclesSection() {
   const { state, dispatch, t } = useStore();
   const now = useNow();
   const [open, setOpen] = useState(null); // household id
-  const [code, setCode] = useState('');
-  const [msg, setMsg] = useState('');
-  const [busy, setBusy] = useState(false);
   const cfg = cloudConfig();
   if (!isConfigured(cfg) && !state.demo) return null;
 
   const signedIn = Boolean(state.cloud.access);
   const nameOf = (c) => c.person_name || t('cf.someone');
-
-  const join = async () => {
-    if (busy) return;
-    if (!signedIn) return setMsg(t('join.needSignIn'));
-    setBusy(true);
-    const r = await acceptInvite(cfg, state.cloud, code);
-    if (r.session) dispatch({ type: 'CLOUD_SET', patch: r.session });
-    if (r.ok) {
-      const c = await listCircles(cfg, { ...state.cloud, ...(r.session || {}) });
-      if (c.ok) dispatch({ type: 'CIRCLES_SET', circles: c.circles });
-      setCode('');
-      setMsg(t('join.ok'));
-    } else {
-      setMsg(r.reason === 'network' ? t('join.net') : r.reason === 'limit' ? t('join.limit') : t('join.bad'));
-    }
-    setBusy(false);
-  };
 
   // Time Off: stop routine updates from one person. The server still lets safety alerts through.
   const pause = async (c, on) => {
@@ -57,6 +37,7 @@ export default function CirclesSection() {
     return (
       <View style={{ gap: 14 }}>
         <ScreenHeader title={nameOf(circle)} onBack={() => setOpen(null)} backLabel={t('back')} />
+        <Body bold>{t('cf.youAre').replace('{role}', t(`role.${circle.role}`))}</Body>
         <Caption>{fmt(t('cf.sees'), { level: t(`dial${circle.dial}`) })}</Caption>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <View style={{ flex: 1 }}>
@@ -139,17 +120,7 @@ export default function CirclesSection() {
           ) : null}
         </Card>
       ) : null}
-      <Card style={{ gap: 12 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <Users size={24} color={colors.indigo} />
-          <Body bold style={{ flex: 1 }}>
-            {t('join.title')}
-          </Body>
-        </View>
-        <Field label={t('join.code')} value={code} onChangeText={(v) => setCode(v.toUpperCase())} />
-        {msg ? <Body>{msg}</Body> : null}
-        <BigButton kind="primary" label={t('join.button')} onPress={join} />
-      </Card>
+      <JoinCard />
     </View>
   );
 }

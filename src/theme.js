@@ -21,7 +21,8 @@ export const colors = {
   inkFaint: '#626780',
   white: '#FFFFFF',
   line: '#E1E3EE',
-  lineStrong: '#C9CDDF',
+  lineStrong: '#C9CDDF', // decorative lines and ring tracks only: too faint to identify a control
+  control: '#7F86A0', // borders and off-states of controls (field border, switch off, empty check): 3.4:1 or more
 };
 
 // Mukta carries Devanagari and Latin in one voice, so Hindi and English sit together.

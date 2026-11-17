@@ -173,7 +173,15 @@ export async function createInvite(cfg, cloud, inv, fetchImpl) {
       call(
         cfg,
         '/rest/v1/invites',
-        { method: 'POST', token, prefer: 'return=minimal', body: { household_id: cloud.householdId, name: inv.name, role: inv.role, code: inv.code } },
+        { method: 'POST', token, prefer: 'return=minimal', body: {
+            household_id: cloud.householdId,
+            name: inv.name,
+            role: inv.role,
+            code: inv.code,
+            // only an account with this number can accept it
+            phone: inv.phone ? String(inv.phone).replace(/\D/g, '').slice(-10) : null,
+          },
+        },
         fetchImpl
       ),
     fetchImpl

@@ -64,6 +64,7 @@ export default function InviteSection() {
       </View>
       <Field label={t('inviteName')} value={name} onChangeText={setName} />
       <Field label={t('invitePhone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+      <Caption>{t('inv.sameNumber')}</Caption>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
         {ROLES.map((r) => (
           <Chip key={r} label={t(`role.${r}`)} active={role === r} onPress={() => setRole(r)} />

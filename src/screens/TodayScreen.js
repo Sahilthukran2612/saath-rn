@@ -1,3 +1,4 @@
+import CirclesSection from '../components/circle/CirclesSection';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Check, ChevronRight, Droplet, ShieldCheck, Wallet, Pill, Siren } from '../components/icons';
@@ -390,8 +391,37 @@ function ProHome() {
   );
 }
 
+// The home of someone who looks after a person: who they look after and what role they have, then the list.
+function MemberHome() {
+  const { state, t } = useStore();
+  return (
+    <View style={{ gap: 14 }}>
+      {state.circles.length === 0 ? (
+        <Card tone="haldi" style={{ gap: 6 }}>
+          <Body bold>{t('mh.empty')}</Body>
+          <Caption style={{ color: colors.ink }}>{t('mo.noCode')}</Caption>
+        </Card>
+      ) : (
+        state.circles.map((c) => (
+          <Caption key={c.household_id}>
+            {t('mh.line').replace('{name}', c.person_name || t('cf.someone')).replace('{role}', t(`role.${c.role}`))}
+          </Caption>
+        ))
+      )}
+      <CirclesSection />
+    </View>
+  );
+}
+
 export default function TodayScreen() {
   const { state, t } = useStore();
+  if (state.usage === 'member')
+    return (
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 20, paddingTop: 8, gap: 18 }}>
+        <Greeting />
+        <MemberHome />
+      </ScrollView>
+    );
   let body;
   if (state.role === 'person')
     body = (

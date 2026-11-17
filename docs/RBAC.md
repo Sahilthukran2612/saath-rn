@@ -6,7 +6,7 @@ and checked by `docs/supabase/policy_tests.sql` (40 checks, run against the live
 
 **How roles are assigned.** The person (the account that owns a household) invites someone with a code and picks their
 role: family, neighbour, ASHA or clinician. The invited person signs in on their own phone and joins with the code
-(`accept_invite`). A joined member starts at **safety only** and the person raises it. Nobody can add themselves to a
+(`accept_invite`) **with the same phone number the person entered for them**: an invite is made for one number and only an account with that number can accept it (an anonymous account cannot). See `docs/ROLES.md` for the step-by-step. A joined member starts at **safety only** and the person raises it. Nobody can add themselves to a
 circle, change their own role, or change their own dial.
 
 | | Person | Family | Neighbour | ASHA | Clinician | Not in the circle |

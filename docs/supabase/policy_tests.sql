@@ -12,6 +12,8 @@ declare
   f uuid := gen_random_uuid();  -- a family member
   n uuid := gen_random_uuid();  -- a neighbour
   s uuid := gen_random_uuid();  -- a stranger
+  x uuid := gen_random_uuid();  -- an account with a phone number
+  y uuid := gen_random_uuid();  -- an anonymous account
   h uuid;
   c int;
   i int;
@@ -21,7 +23,8 @@ declare
 
 begin
   insert into auth.users (id, email) values
-    (p, p || '@test.invalid'), (f, f || '@test.invalid'), (n, n || '@test.invalid'), (s, s || '@test.invalid');
+    (p, p || '@test.invalid'), (f, f || '@test.invalid'), (n, n || '@test.invalid'), (s, s || '@test.invalid'),
+    (x, x || '@test.invalid'), (y, y || '@test.invalid');
 
   -- Each block below acts as one user: role 'authenticated' plus a JWT claim with that user's id, so
   -- row-level security applies exactly as it does for the app.
@@ -139,6 +142,22 @@ begin
   if c = 0 then passed := passed + 1; else failed := failed || ' [member sees invites]'; end if;
 
 
+  -- ---- invites made for a phone number ----
+  perform set_config('request.jwt.claims', json_build_object('sub', p, 'role', 'authenticated', 'is_anonymous', false)::text, true);
+  insert into invites (household_id, name, role, code, phone) values (h, 'Meena', 'neighbour', 'TESTPH01', '9876543210');
+  -- an account with a different number cannot use it (the answer is null, like a wrong code)
+  perform set_config('request.jwt.claims', json_build_object('sub', x, 'role', 'authenticated', 'phone', '919000000001')::text, true);
+  if accept_invite('TESTPH01') is null then passed := passed + 1; else failed := failed || ' [wrong number joined]'; end if;
+  -- an anonymous account, which has no number, cannot either
+  perform set_config('request.jwt.claims', json_build_object('sub', y, 'role', 'authenticated', 'is_anonymous', true)::text, true);
+  if accept_invite('TESTPH01') is null then passed := passed + 1; else failed := failed || ' [anonymous joined a numbered invite]'; end if;
+  -- the right number can, whether the claim carries 91 in front or not
+  perform set_config('request.jwt.claims', json_build_object('sub', x, 'role', 'authenticated', 'phone', '919876543210')::text, true);
+  if accept_invite('TESTPH01') = h then passed := passed + 1; else failed := failed || ' [right number could not join]'; end if;
+  select count(*) into c from members where household_id = h and user_id = x and role = 'neighbour' and dial = 0;
+  if c = 1 then passed := passed + 1; else failed := failed || ' [joined with the wrong role or dial]'; end if;
+  -- and the code is used up
+  if accept_invite('TESTPH01') is null then passed := passed + 1; else failed := failed || ' [numbered code reusable]'; end if;
   -- ---- hardening for free anonymous accounts ----
   -- one household per account
   perform set_config('request.jwt.claims', json_build_object('sub', p, 'role', 'authenticated', 'is_anonymous', true)::text, true);

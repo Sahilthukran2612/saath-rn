@@ -118,6 +118,7 @@ export const initialState = {
   footPhotos: [], // [{ uri, at }] stay on the phone, never analysed
   waist: [], // [{ cm, at }]
   risk: null, // { answers, result, at } latest questionnaire
+  usage: 'person', // 'person' (I need care), 'member' (I look after someone), 'both'. null until chosen on a fresh install
   onboarded: true, // false on a fresh install: the setup flow runs once (see productionState)
   autoCall: false, // dial the contacts one by one when nobody answers an alert (installed app only)
   autoCallDenied: false, // the phone permissions for calling were refused
@@ -130,6 +131,7 @@ export const initialState = {
 export const productionState = {
   ...initialState,
   demo: false,
+  usage: null, // the first screen asks: I need care, or I look after someone
   onboarded: false,
   members: [],
   readings: [],

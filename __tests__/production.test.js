@@ -129,12 +129,12 @@ describe('demo mode on a real install', () => {
 
 describe('the first-run setup', () => {
   test('a fresh install shows the setup, not the app', async () => {
-    await mount({ ...productionState });
+    await mount({ ...productionState, usage: 'person' });
     expect(screen.getByText('Welcome to Saath')).toBeTruthy();
     expect(screen.queryByLabelText('Circle')).toBeNull();
   });
   test('it runs through: language and role, name, a contact, choices, finish', async () => {
-    await mount({ ...productionState });
+    await mount({ ...productionState, usage: 'person' });
     await fireEvent.press(screen.getByLabelText('Next'));
     expect(screen.getByText('About you')).toBeTruthy();
     await fireEvent.changeText(screen.getByLabelText('Your name'), 'Amma');
@@ -152,7 +152,7 @@ describe('the first-run setup', () => {
     await waitFor(() => expect(screen.getByLabelText('Circle')).toBeTruthy());
   });
   test('a bad contact is refused with a clear message', async () => {
-    await mount({ ...productionState });
+    await mount({ ...productionState, usage: 'person' });
     await fireEvent.press(screen.getByLabelText('Next'));
     await fireEvent.press(screen.getByLabelText('Next'));
     await fireEvent.changeText(screen.getByLabelText('Name'), 'A');
@@ -161,7 +161,7 @@ describe('the first-run setup', () => {
     expect(screen.getByText('Enter a name and a 10-digit mobile number.')).toBeTruthy();
   });
   test('the setup is in Hindi when Hindi is chosen', async () => {
-    await mount({ ...productionState });
+    await mount({ ...productionState, usage: 'person' });
     await fireEvent.press(screen.getByLabelText('हिन्दी'));
     expect(screen.getByText('साथ में आपका स्वागत है')).toBeTruthy();
   });

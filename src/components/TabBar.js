@@ -16,16 +16,16 @@ export const TABS = [
 
 // A pill follows the selected tab with a critically damped spring. It starts moving on touch,
 // can be redirected mid-flight, and is replaced by an instant jump when reduced motion is on.
-export default function TabBar({ tab, onChange, t }) {
+export default function TabBar({ tab, onChange, t, tabs = TABS }) {
   const k = useScale();
   const reduced = useReducedMotion();
   const [width, setWidth] = useState(0);
   const [x] = useState(() => new Animated.Value(0));
   const index = Math.max(
     0,
-    TABS.findIndex((tb) => tb[0] === tab)
+    tabs.findIndex((tb) => tb[0] === tab)
   );
-  const slot = width / TABS.length;
+  const slot = width / tabs.length;
 
   useEffect(() => {
     if (!slot) return undefined;
@@ -47,7 +47,7 @@ export default function TabBar({ tab, onChange, t }) {
             style={[styles.pill, { width: slot - 6, transform: [{ translateX: x }] }]}
           />
         )}
-        {TABS.map(([id, key, Icon]) => {
+        {tabs.map(([id, key, Icon]) => {
           const on = tab === id;
           return (
             <PressRow

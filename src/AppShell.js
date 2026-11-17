@@ -8,7 +8,7 @@ import RoleBar from './components/RoleBar';
 import AlertBanner from './components/AlertBanner';
 import CircleAlertBanner from './components/CircleAlertBanner';
 import HeartNotice from './components/HeartNotice';
-import TabBar from './components/TabBar';
+import TabBar, { TABS } from './components/TabBar';
 import { useScale } from './components/ui';
 import { Badge } from './components/kit';
 import { SaathMark } from './components/art';
@@ -23,6 +23,8 @@ import MeScreen from './screens/MeScreen';
 import ConsentScreen from './screens/ConsentScreen';
 import LockScreen from './screens/LockScreen';
 import OnboardingScreen from './screens/OnboardingScreen';
+import RoleChoiceScreen from './screens/RoleChoiceScreen';
+import MemberOnboardingScreen from './screens/MemberOnboardingScreen';
 import useCloudSync from './state/useCloudSync';
 import useReminders from './state/useReminders';
 import { startFallListener } from './services/sensing';
@@ -59,7 +61,8 @@ export default function AppShell({ sensing = true }) {
   useReminders();
 
   useEffect(() => {
-    if (!sensing || !state.hydrated) return undefined;
+    // a phone used only to look after someone else has no one to watch: no motion sensing
+    if (!sensing || !state.hydrated || state.usage === 'member') return undefined;
     return startFallListener({
       cfg: cfgFrom({ impactG, inactiveHours }),
       onFall: (r) =>
@@ -72,14 +75,14 @@ export default function AppShell({ sensing = true }) {
         }),
       onActivity: (at) => dispatch({ type: 'ACTIVITY', at }),
     });
-  }, [sensing, state.hydrated, dispatch, impactG, inactiveHours]);
+  }, [sensing, state.hydrated, state.usage, dispatch, impactG, inactiveHours]);
 
   // "Keep watching in the background": a visible foreground service keeps the app alive.
   // Without the notification permission it does not start, and the setting turns itself off.
   const { background, lang } = state;
   useEffect(() => {
     if (!state.hydrated) return undefined;
-    if (!background) {
+    if (!background || state.usage === 'member') {
       stopWatching();
       return undefined;
     }
@@ -95,7 +98,7 @@ export default function AppShell({ sensing = true }) {
     return () => {
       cancelled = true;
     };
-  }, [state.hydrated, background, lang, dispatch]);
+  }, [state.hydrated, background, state.usage, lang, dispatch]);
 
   // Delegations and help requests expire by themselves.
   useEffect(() => {
@@ -131,7 +134,7 @@ export default function AppShell({ sensing = true }) {
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.mist }}>
         <StatusBar style="dark" />
         <AlertBanner />
-        <OnboardingScreen />
+        {state.usage == null ? <RoleChoiceScreen /> : state.usage === 'member' ? <MemberOnboardingScreen /> : <OnboardingScreen />}
       </SafeAreaView>
     );
   }
@@ -146,7 +149,10 @@ export default function AppShell({ sensing = true }) {
     );
   }
 
-  const Screen = SCREENS[tab];
+  // A care-giver (family, neighbour, ASHA, clinician) has three tabs: their people, their circle, and Me.
+  const tabs = state.usage === 'member' ? TABS.filter(([id]) => ['today', 'circle', 'me'].includes(id)) : TABS;
+  const current = tabs.some(([id]) => id === tab) ? tab : 'today';
+  const Screen = SCREENS[current];
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.mist }}>
       <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
@@ -177,12 +183,12 @@ export default function AppShell({ sensing = true }) {
           <HeartNotice />
           <View style={{ flex: 1 }}>
             {state.hydrated ? (
-              <Reveal key={tab} style={{ flex: 1 }}>
+              <Reveal key={current} style={{ flex: 1 }}>
                 <Screen />
               </Reveal>
             ) : null}
           </View>
-          <TabBar tab={tab} onChange={setTab} t={t} />
+          <TabBar tab={current} onChange={setTab} t={t} tabs={tabs} />
         </NavContext.Provider>
       </KeyboardAvoidingView>
     </SafeAreaView>

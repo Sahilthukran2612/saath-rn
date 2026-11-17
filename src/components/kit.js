@@ -104,7 +104,7 @@ export function Toggle({ value, onValueChange, label }) {
   const reduced = useReducedMotion();
   const x = useSpringValue(value ? 1 : 0, { damping: 20, stiffness: 320, mass: 1 });
   const pos = x.interpolate({ inputRange: [0, 1], outputRange: [3, 27] });
-  const bg = x.interpolate({ inputRange: [0, 1], outputRange: [colors.lineStrong, colors.leaf] });
+  const bg = x.interpolate({ inputRange: [0, 1], outputRange: [colors.control, colors.leaf] });
   return (
     <Pressable
       accessibilityRole="switch"
@@ -118,7 +118,7 @@ export function Toggle({ value, onValueChange, label }) {
       style={{ minHeight: 56, justifyContent: 'center' }}
     >
       <Animated.View
-        style={[styles.track, { backgroundColor: reduced ? (value ? colors.leaf : colors.lineStrong) : bg }]}
+        style={[styles.track, { backgroundColor: reduced ? (value ? colors.leaf : colors.control) : bg }]}
       >
         <Animated.View style={[styles.knob, { transform: [{ translateX: pos }] }]} />
       </Animated.View>
@@ -225,7 +225,7 @@ export function Field({
           fontSize: type.body * k,
           color: colors.ink,
           borderWidth: focus ? 2 : 1.5,
-          borderColor: focus ? colors.indigo : colors.lineStrong,
+          borderColor: focus ? colors.indigo : colors.control,
           borderRadius: radii.md,
           paddingHorizontal: 14,
           backgroundColor: colors.white,
@@ -358,7 +358,7 @@ export function CheckMark({ done, size = 32 }) {
         cx={c}
         cy={c}
         r={c - 1.5}
-        stroke={done ? colors.leaf : colors.lineStrong}
+        stroke={done ? colors.leaf : colors.control}
         strokeWidth={2.2}
         fill="none"
       />

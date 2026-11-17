@@ -40,6 +40,7 @@ const PERSIST = [
   'autoSms',
   'autoCall',
   'onboarded',
+  'usage',
   'reminders',
   'siren',
   'profile',

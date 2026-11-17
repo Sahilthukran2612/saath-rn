@@ -48,6 +48,7 @@ export default function MeScreen() {
   const { state, dispatch, t } = useStore();
   const set = (key, value) => dispatch({ type: 'SET', key, value });
   const choices = useChoices();
+  const member = state.usage === 'member'; // looks after someone, has no sensors or emergency contacts of their own
   return (
     <ScrollView
       keyboardShouldPersistTaps="handled"
@@ -61,6 +62,7 @@ export default function MeScreen() {
         </View>
       </View>
 
+      {!member ? (
       <Reveal index={0}>
         <Card tone="tint" style={{ gap: 12 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -132,9 +134,21 @@ export default function MeScreen() {
           <Caption>{t('siren.note')}</Caption>
         </Card>
       </Reveal>
+      ) : null}
 
       <Reveal index={1}>
+        <Body bold>{t('use.title')}</Body>
+        <View style={{ height: 8 }} />
+        <Segmented
+          value={state.usage || 'person'}
+          onChange={(v) => set('usage', v)}
+          options={['person', 'member', 'both'].map((v) => ({ value: v, label: t(`use.${v}`) }))}
+        />
+        <Caption>{t('use.note')}</Caption>
+        <View style={{ height: 18 }} />
         <Account />
+        {member ? null : (
+          <>
         <View style={{ height: 18 }} />
         <SharedPhone />
         <View style={{ height: 18 }} />
@@ -153,6 +167,8 @@ export default function MeScreen() {
           onChange={(v) => set('phase', v)}
           options={['new', 'stable', 'crisis'].map((v) => ({ value: v, label: t(`phase.${v}`) }))}
         />
+          </>
+        )}
       </Reveal>
 
       <Reveal index={2}>
