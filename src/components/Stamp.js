@@ -88,3 +88,26 @@ export default function Stamp({ show, word, sub, rotate = -6, size = 1, onLanded
     </Animated.View>
   );
 }
+
+// A small, still stamp for lists: a task the person has stamped as done. No animation, so a long list
+// stays calm. It carries the word, not only the colour.
+export function StampMark({ word }) {
+  const k = useScale();
+  const s = Math.min(k, 1.2);
+  return (
+    <View
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={{
+        transform: [{ rotate: '-5deg' }],
+        borderWidth: 2.5,
+        borderColor: colors.stamp,
+        borderRadius: 8,
+        paddingHorizontal: 10 * s,
+        paddingVertical: 2,
+      }}
+    >
+      <Text style={{ fontFamily: fonts.bold, fontSize: 16 * s, lineHeight: 22 * s, letterSpacing: 0.6, color: colors.stamp }}>{word}</Text>
+    </View>
+  );
+}

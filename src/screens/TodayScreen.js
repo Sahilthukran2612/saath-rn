@@ -20,7 +20,7 @@ import { useNow } from '../components/useNow';
 import { taskIcon } from '../components/taskIcons';
 import RoutineEditor from '../components/RoutineEditor';
 import SuggestionPad from '../components/SuggestionPad';
-import Stamp from '../components/Stamp';
+import Stamp, { StampMark } from '../components/Stamp';
 import Perf from '../components/Perf';
 import Tally from '../components/Tally';
 import { useStore } from '../state/store';
@@ -347,7 +347,7 @@ function FamilyHome() {
               iconBg={task.done ? colors.leafTint : colors.indigoTint}
               iconColor={task.done ? colors.leafDeep : colors.indigo}
               title={task.title}
-              trailing={<CheckMark done={task.done} size={28} />}
+              trailing={task.done ? <StampMark word={t('sg.stamped')} /> : <CheckMark done={false} size={28} />}
             />
           ))}
         </ListGroup>
