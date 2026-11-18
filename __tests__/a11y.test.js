@@ -2,9 +2,10 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react-native';
 import { StoreProvider } from '../src/state/store';
 import AppShell from '../src/AppShell';
+import { t as translate } from '../src/i18n/strings';
 
 const ROLES_WITH_PRESS = new Set(['button', 'switch', 'tab', 'checkbox', 'radio', 'link']);
-const TABS = ['Today', 'Circle', 'Safety', 'Care', 'Plan', 'Me'];
+const TABS = ['Today', 'Circle', 'Safety', 'Care', 'Plan'];
 
 const textOf = (node) =>
   typeof node === 'string'
@@ -47,12 +48,21 @@ describe('accessibility audit: every control has a name', () => {
     ['clinician', { role: 'clinician' }],
     ['elder in Hindi with large text', { mode: 'elder', lang: 'hi', largeText: true }],
   ];
-  test.each(homes)('%s: all six tabs', async (_name, preload) => {
+  // Five navigation-bar destinations plus Me behind the account avatar in the top app bar.
+  // The navigation bar shows five for a person and two (Today, Circle) for a care-giver.
+  test.each(homes)('%s: every destination and Me', async (_name, preload) => {
     await mount(preload);
-    for (const tab of TABS) {
-      await fireEvent.press(screen.getAllByRole('tab')[TABS.indexOf(tab)]);
-      expect([tab, unlabelled(screen.toJSON())]).toEqual([tab, []]);
+    const destinations = screen.getAllByRole('tab').length;
+    for (let i = 0; i < destinations; i++) {
+      await fireEvent.press(screen.getAllByRole('tab')[i]);
+      expect([TABS[i], unlabelled(screen.toJSON())]).toEqual([TABS[i], []]);
     }
+    const lang = preload.lang || 'en';
+    await fireEvent.press(screen.getByLabelText(translate(lang, 'tabMe')));
+    expect(['Me', unlabelled(screen.toJSON())]).toEqual(['Me', []]);
+    // Back from Me returns to Today
+    await fireEvent.press(screen.getByLabelText(translate(lang, 'back')));
+    expect(screen.getAllByRole('tab')[0].props.accessibilityState.selected).toBe(true);
   });
 
   test('the alert takeover has named controls', async () => {

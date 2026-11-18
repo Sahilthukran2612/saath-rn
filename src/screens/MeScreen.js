@@ -1,8 +1,17 @@
 import React from 'react';
-import { ScrollView, View } from 'react-native';
-import { Languages, Eye, MessageCircle, Phone, RotateCcw, ShieldCheck, Siren, Type } from '../components/icons';
-import { BigButton, Body, Caption, Card, Title } from '../components/ui';
-import { Avatar, Badge, ListGroup, ListRow, Segmented, Toggle } from '../components/kit';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import {
+  Languages,
+  Eye,
+  MessageCircle,
+  Phone,
+  RotateCcw,
+  ShieldCheck,
+  Siren,
+  Type,
+} from '../components/icons';
+import { BigButton, Body, Caption, Title } from '../components/ui';
+import { Avatar, Badge, ListGroup, ListRow, SectionTitle, Segmented, Toggle } from '../components/kit';
 import { Reveal } from '../components/motion';
 import SharedPhone from '../components/me/SharedPhone';
 import Account from '../components/me/Account';
@@ -16,19 +25,19 @@ import { colors } from '../theme';
 // The label gets the full width and the selector sits underneath, so neither is squeezed at large text.
 function LanguageRow({ lang, onChange, label }) {
   return (
-    <View style={{ padding: 16, gap: 12, borderBottomWidth: 1, borderBottomColor: colors.line }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+    <View style={{ padding: 16, gap: 12 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
         <View
           style={{
-            width: 44,
-            height: 44,
-            borderRadius: 14,
+            width: 40,
+            height: 40,
+            borderRadius: 20,
             backgroundColor: colors.indigoTint,
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          <Languages size={22} color={colors.indigo} />
+          <Languages size={24} color={colors.indigoDeep} />
         </View>
         <Body>{label}</Body>
       </View>
@@ -40,10 +49,12 @@ function LanguageRow({ lang, onChange, label }) {
           { value: 'hi', label: 'हिन्दी' },
         ]}
       />
+      <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: colors.outlineVariant }} />
     </View>
   );
 }
 
+const styles = StyleSheet.create({ warn: { color: colors.madder, paddingHorizontal: 4, paddingTop: 8 } });
 export default function MeScreen() {
   const { state, dispatch, t } = useStore();
   const set = (key, value) => dispatch({ type: 'SET', key, value });
@@ -57,87 +68,86 @@ export default function MeScreen() {
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
         <Avatar name={state.profile.name || t('role.person')} role="person" size={64} />
         <View style={{ flex: 1, gap: 4 }}>
-          <Title style={{ fontSize: 28, letterSpacing: -0.5 }}>{state.profile.name || t('tabMe')}</Title>
+          <Title style={{ fontSize: 28 }}>{state.profile.name || t('tabMe')}</Title>
           <Badge label={t(`mode.${state.mode}`)} tone="indigo" />
         </View>
       </View>
 
       {!member ? (
-      <Reveal index={0}>
-        <Card tone="tint" style={{ gap: 12 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <ShieldCheck size={24} color={colors.indigo} />
-            <Body bold style={{ flex: 1 }}>
-              {t('bg.title')}
-            </Body>
-            <Toggle
-              value={state.background}
-              label={t('bg.title')}
-              onValueChange={(on) => {
-                set('backgroundDenied', false);
-                set('background', on);
-              }}
+        <Reveal index={0}>
+          <ListGroup>
+            <ListRow
+              icon={ShieldCheck}
+              title={t('bg.title')}
+              subtitle={t('bg.note')}
+              trailing={
+                <Toggle
+                  value={state.background}
+                  label={t('bg.title')}
+                  onValueChange={(on) => {
+                    set('backgroundDenied', false);
+                    set('background', on);
+                  }}
+                />
+              }
             />
-          </View>
-          <Caption>{t('bg.note')}</Caption>
-          {!foregroundAvailable ? <Body bold>{t('bg.unavailable')}</Body> : null}
-          {state.backgroundDenied ? <Body bold>{t('bg.denied')}</Body> : null}
-        </Card>
-        <View style={{ height: 12 }} />
-        <Card tone="tint" style={{ gap: 12 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <Phone size={24} color={colors.indigo} />
-            <Body bold style={{ flex: 1 }}>
-              {t('call.title')}
-            </Body>
-            <Toggle value={state.autoCall} label={t('call.title')} onValueChange={choices.autoCall} />
-          </View>
-          <Caption>{t('call.note')}</Caption>
-          {!callsAvailable ? <Body bold>{t(state.demo ? 'call.demoNote' : 'call.unavailable')}</Body> : null}
-          {state.autoCallDenied ? <Body bold>{t('call.denied')}</Body> : null}
-        </Card>
-        <View style={{ height: 12 }} />
-        <Card tone="tint" style={{ gap: 12 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <MessageCircle size={24} color={colors.indigo} />
-            <Body bold style={{ flex: 1 }}>
-              {t('sms.title')}
-            </Body>
-            <Toggle
-              value={state.autoSms}
-              label={t('sms.title')}
-              onValueChange={async (on) => {
-                set('autoSmsDenied', false);
-                if (!on) return set('autoSms', false);
-                if (!smsAvailable && state.demo) return set('autoSms', true); // demo: shown on screen, not sent
-                if (await askSmsPermission()) set('autoSms', true);
-                else {
-                  set('autoSms', false);
-                  set('autoSmsDenied', true);
-                }
-              }}
+            <ListRow
+              icon={Phone}
+              title={t('call.title')}
+              subtitle={t('call.note')}
+              trailing={
+                <Toggle value={state.autoCall} label={t('call.title')} onValueChange={choices.autoCall} />
+              }
             />
-          </View>
-          <Caption>{t('sms.note')}</Caption>
-          {!smsAvailable ? <Body bold>{t(state.demo ? 'sms.demoNote' : 'sms.unavailable')}</Body> : null}
-          {state.autoSmsDenied ? <Body bold>{t('sms.denied')}</Body> : null}
-        </Card>
-        <View style={{ height: 12 }} />
-        <Card tone="tint" style={{ gap: 12 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <Siren size={24} color={colors.indigo} />
-            <Body bold style={{ flex: 1 }}>
-              {t('siren.title')}
-            </Body>
-            <Toggle value={state.siren} label={t('siren.title')} onValueChange={(on) => set('siren', on)} />
-          </View>
-          <Caption>{t('siren.note')}</Caption>
-        </Card>
-      </Reveal>
+            <ListRow
+              icon={MessageCircle}
+              title={t('sms.title')}
+              subtitle={t('sms.note')}
+              trailing={
+                <Toggle
+                  value={state.autoSms}
+                  label={t('sms.title')}
+                  onValueChange={async (on) => {
+                    set('autoSmsDenied', false);
+                    if (!on) return set('autoSms', false);
+                    if (!smsAvailable && state.demo) return set('autoSms', true); // demo: shown on screen, not sent
+                    if (await askSmsPermission()) set('autoSms', true);
+                    else {
+                      set('autoSms', false);
+                      set('autoSmsDenied', true);
+                    }
+                  }}
+                />
+              }
+            />
+            <ListRow
+              icon={Siren}
+              title={t('siren.title')}
+              subtitle={t('siren.note')}
+              trailing={
+                <Toggle
+                  value={state.siren}
+                  label={t('siren.title')}
+                  onValueChange={(on) => set('siren', on)}
+                />
+              }
+            />
+          </ListGroup>
+          {!foregroundAvailable ? <Caption style={styles.warn}>{t('bg.unavailable')}</Caption> : null}
+          {state.backgroundDenied ? <Caption style={styles.warn}>{t('bg.denied')}</Caption> : null}
+          {!callsAvailable ? (
+            <Caption style={styles.warn}>{t(state.demo ? 'call.demoNote' : 'call.unavailable')}</Caption>
+          ) : null}
+          {state.autoCallDenied ? <Caption style={styles.warn}>{t('call.denied')}</Caption> : null}
+          {!smsAvailable ? (
+            <Caption style={styles.warn}>{t(state.demo ? 'sms.demoNote' : 'sms.unavailable')}</Caption>
+          ) : null}
+          {state.autoSmsDenied ? <Caption style={styles.warn}>{t('sms.denied')}</Caption> : null}
+        </Reveal>
       ) : null}
 
       <Reveal index={1}>
-        <Body bold>{t('use.title')}</Body>
+        <SectionTitle>{t('use.title')}</SectionTitle>
         <View style={{ height: 8 }} />
         <Segmented
           value={state.usage || 'person'}
@@ -149,30 +159,30 @@ export default function MeScreen() {
         <Account />
         {member ? null : (
           <>
-        <View style={{ height: 18 }} />
-        <SharedPhone />
-        <View style={{ height: 18 }} />
-        <Body bold>{t('me.mode')}</Body>
-        <View style={{ height: 8 }} />
-        <Segmented
-          value={state.mode}
-          onChange={(v) => set('mode', v)}
-          options={['teen', 'elder', 'adult'].map((v) => ({ value: v, label: t(`mode.${v}`) }))}
-        />
-        <View style={{ height: 16 }} />
-        <Body bold>{t('me.phase')}</Body>
-        <View style={{ height: 8 }} />
-        <Segmented
-          value={state.phase}
-          onChange={(v) => set('phase', v)}
-          options={['new', 'stable', 'crisis'].map((v) => ({ value: v, label: t(`phase.${v}`) }))}
-        />
+            <View style={{ height: 18 }} />
+            <SharedPhone />
+            <View style={{ height: 18 }} />
+            <SectionTitle>{t('me.mode')}</SectionTitle>
+            <View style={{ height: 8 }} />
+            <Segmented
+              value={state.mode}
+              onChange={(v) => set('mode', v)}
+              options={['teen', 'elder', 'adult'].map((v) => ({ value: v, label: t(`mode.${v}`) }))}
+            />
+            <View style={{ height: 16 }} />
+            <SectionTitle>{t('me.phase')}</SectionTitle>
+            <View style={{ height: 8 }} />
+            <Segmented
+              value={state.phase}
+              onChange={(v) => set('phase', v)}
+              options={['new', 'stable', 'crisis'].map((v) => ({ value: v, label: t(`phase.${v}`) }))}
+            />
           </>
         )}
       </Reveal>
 
       <Reveal index={2}>
-        <Body bold>{t('me.settings')}</Body>
+        <SectionTitle>{t('me.settings')}</SectionTitle>
         <View style={{ height: 8 }} />
         <ListGroup>
           <LanguageRow lang={state.lang} onChange={(v) => set('lang', v)} label={t('language')} />

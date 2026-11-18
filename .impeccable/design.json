@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-18T00:00:00.000Z",
+  "title": "Design System: Saath",
+  "extensions": {
+    "colorMeta": {
+      "indigo": { "role": "primary", "displayName": "Neel Indigo", "canonical": "#26306B", "tonalRamp": ["#0E1233", "#171D4A", "#26306B", "#3E4A8F", "#6B76B3", "#9AA2D0", "#C9CEEA", "#E8EAF5"] },
+      "leaf": { "role": "secondary", "displayName": "Leaf", "canonical": "#2F8F6B", "tonalRamp": ["#0E3A2A", "#1D6B4E", "#2F8F6B", "#53AB89", "#7FC4A8", "#A9D9C5", "#CDE8DC", "#E3F2EC"] },
+      "haldi": { "role": "tertiary", "displayName": "Haldi", "canonical": "#F2B134", "tonalRamp": ["#4A3000", "#8A5B00", "#C28514", "#F2B134", "#F6C664", "#F9D98F", "#FCE8B8", "#FDF1D6"] },
+      "brick": { "role": "alert", "displayName": "Brick (safety only)", "canonical": "#B3261E", "tonalRamp": ["#4A0E0A", "#7A1913", "#B3261E", "#CF5A52", "#E08A84", "#EDB5B1", "#F6D6D3", "#FBE9E7"] },
+      "madder": { "role": "tertiary", "displayName": "Madder", "canonical": "#9B3D2E", "tonalRamp": ["#3A130C", "#6B2A1F", "#9B3D2E", "#B86556", "#CC8D81", "#DDB1A8", "#EBD0CA", "#F6E7E4"] },
+      "mist": { "role": "neutral", "displayName": "Mist", "canonical": "#F6F7FB", "tonalRamp": ["#1B1E2B", "#4A4F66", "#626780", "#7F86A0", "#C9CDDF", "#E1E3EE", "#F0F1F7", "#F6F7FB"] }
+    },
+    "typographyMeta": {
+      "hero": { "displayName": "Hero", "purpose": "The one big statement on a screen." },
+      "title": { "displayName": "Title", "purpose": "Screen and section titles, in indigo, with header semantics." },
+      "body": { "displayName": "Body", "purpose": "Reading text, never below 18." },
+      "small": { "displayName": "Small", "purpose": "Supporting text, never below 16." },
+      "button": { "displayName": "Button", "purpose": "Button labels." },
+      "chip": { "displayName": "Chip", "purpose": "Chips and segmented options." },
+      "tab-label": { "displayName": "Tab label", "purpose": "Bottom navigation labels." }
+    },
+    "shadows": [
+      { "name": "card", "value": "shadowColor #1B1E2B, shadowOpacity 0.07, shadowRadius 12, shadowOffset 0/4, elevation 2", "purpose": "Hero panel and faint lift." },
+      { "name": "raised", "value": "shadowColor #1B1E2B, shadowOpacity 0.16, shadowRadius 10, shadowOffset 0/4, elevation 4", "purpose": "Filled buttons." }
+    ],
+    "motion": [
+      { "name": "press", "value": "scale 0.97, spring damping 20 stiffness 400 mass 1", "purpose": "Press feedback from touch-down." },
+      { "name": "settle", "value": "spring damping 22 stiffness 260 mass 1", "purpose": "Layout and entrance settle." },
+      { "name": "pill", "value": "spring damping 20 stiffness 300 mass 1", "purpose": "Tab pill and thumb movement." },
+      { "name": "enter", "value": "260ms, 45ms stagger", "purpose": "Screen rise and fade on tab open." }
+    ],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one primary action per screen.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Save</button>",
+      "css": ".ds-btn{min-height:56px;border:none;border-radius:20px;padding:14px 20px;font-family:'Mukta',sans-serif;font-weight:700;font-size:18px;letter-spacing:.1px;cursor:pointer;transition:transform .12s} .ds-btn:active{transform:scale(.97)} .ds-btn:focus-visible{outline:3px solid #C9CEEA;outline-offset:2px} .ds-btn-primary{background:#26306B;color:#fff;box-shadow:0 4px 10px rgba(27,30,43,.16)}"
+    },
+    {
+      "name": "OK Button",
+      "kind": "button",
+      "refersTo": "button-ok",
+      "description": "Confirms done and \"I'm OK\".",
+      "html": "<button class=\"ds-btn ds-btn-ok\">I'm OK</button>",
+      "css": ".ds-btn{min-height:56px;border:none;border-radius:20px;padding:14px 20px;font-family:'Mukta',sans-serif;font-weight:700;font-size:18px;letter-spacing:.1px;cursor:pointer;transition:transform .12s} .ds-btn:active{transform:scale(.97)} .ds-btn-ok{background:#2F8F6B;color:#fff;box-shadow:0 4px 10px rgba(27,30,43,.16)}"
+    },
+    {
+      "name": "Alert Button",
+      "kind": "button",
+      "refersTo": "button-alert",
+      "description": "Brick, only on a real safety alert.",
+      "html": "<button class=\"ds-btn ds-btn-alert\">Call now</button>",
+      "css": ".ds-btn{min-height:56px;border:none;border-radius:20px;padding:14px 20px;font-family:'Mukta',sans-serif;font-weight:700;font-size:18px;letter-spacing:.1px;cursor:pointer;transition:transform .12s} .ds-btn:active{transform:scale(.97)} .ds-btn-alert{background:#B3261E;color:#fff;box-shadow:0 4px 10px rgba(27,30,43,.16)}"
+    },
+    {
+      "name": "Quiet Button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Tonal secondary, no shadow.",
+      "html": "<button class=\"ds-btn ds-btn-quiet\">Not now</button>",
+      "css": ".ds-btn{min-height:56px;border:none;border-radius:20px;padding:14px 20px;font-family:'Mukta',sans-serif;font-weight:700;font-size:18px;letter-spacing:.1px;cursor:pointer;transition:transform .12s} .ds-btn:active{transform:scale(.97)} .ds-btn-quiet{background:#E8EAF5;color:#26306B}"
+    },
+    {
+      "name": "Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Pill choice, filled when active.",
+      "html": "<span class=\"ds-chip\">Hindi</span> <span class=\"ds-chip ds-chip-on\">English</span>",
+      "css": ".ds-chip{display:inline-flex;align-items:center;min-height:48px;padding:8px 18px;border-radius:999px;background:#E8EAF5;color:#26306B;font-family:'Mukta',sans-serif;font-weight:600;font-size:16px} .ds-chip-on{background:#26306B;color:#fff}"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Flat white panel with a hairline. Use sparingly; prefer divided lists.",
+      "html": "<div class=\"ds-card\"><strong>Sugar</strong><span>Last reading 6:40 pm</span></div>",
+      "css": ".ds-card{display:flex;flex-direction:column;gap:10px;background:#fff;border:1px solid #E1E3EE;border-radius:20px;padding:20px;font-family:'Mukta',sans-serif;font-size:18px;color:#1B1E2B} .ds-card span{font-size:16px;color:#4A4F66}"
+    },
+    {
+      "name": "Tab Bar",
+      "kind": "nav",
+      "refersTo": "tab-bar",
+      "description": "Six icon-over-label tabs with a sliding indigo-mist pill.",
+      "html": "<nav class=\"ds-tabs\"><span class=\"ds-tab ds-tab-on\">Today</span><span class=\"ds-tab\">Circle</span><span class=\"ds-tab\">Safety</span></nav>",
+      "css": ".ds-tabs{display:flex;background:#fff;border-top:1px solid #E1E3EE;padding:6px;font-family:'Mukta',sans-serif} .ds-tab{flex:1;min-height:60px;display:flex;align-items:center;justify-content:center;border-radius:20px;font-weight:600;font-size:13.5px;color:#626780} .ds-tab-on{background:#E8EAF5;color:#26306B;font-weight:700}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Dyed Cloth",
+    "overview": "Saath is drawn the way a household textile is dyed: a few fast, honest colours (neel indigo, haldi turmeric, leaf green, madder) laid on plain cloth, with one hand-made pattern that people remember. The pattern is the dye ring on the elder's Today screen, one bandhani-style dot per routine task around an \"I'm OK\" seal. Everything else stays quiet so that single thing can be memorable, and so that a person in a hurry or under stress can read the screen in a second.\n\nThe density is low and the type is big. Body text is 18, supporting text never goes below 16, every target is at least 56, and every layout must survive a 1.35x large-text mode.\n\nRed is a promise. Brick appears only when the phone really needs a person's attention.",
+    "keyCharacteristics": [
+      "Textile-dye palette on cool mist and white surfaces.",
+      "One memorable element per product (the dye ring), everything else restrained.",
+      "Brick red is reserved for a real safety alert.",
+      "One family (Mukta) carries Devanagari and Latin as one voice.",
+      "Large type, 56 px targets, plain words, 1.35x large-text tolerant.",
+      "Lists divided by rule instead of a card per item.",
+      "Critically damped springs that start on touch-down and yield to reduced motion."
+    ],
+    "rules": [
+      { "name": "The Brick Rule", "body": "Brick red means a real safety alert and nothing else. Warnings, errors, low stock and \"missed\" use madder.", "section": "colors" },
+      { "name": "The One Memorable Thing Rule", "body": "Colour, motion and ornament budget is spent on the dye ring. Other surfaces are mist, white and indigo with a single accent.", "section": "colors" },
+      { "name": "The Never Colour Alone Rule", "body": "Meaning is never carried by colour. Bars, charts and rings print their number or state.", "section": "colors" },
+      { "name": "The Pick The Family Rule", "body": "With a custom family, choose the family (regular, semi, bold) instead of setting fontWeight.", "section": "typography" },
+      { "name": "The Scale Together Rule", "body": "Every size multiplies by 1.35 in large-text mode and line height follows the size actually used.", "section": "typography" },
+      { "name": "The Flat Unless Pressed Rule", "body": "Most things are flat. Raised is a signal that something is a control or the hero.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do take every colour, size and radius from src/theme.js.",
+      "Do keep targets at 56 or more, body at 18 or more, supporting text at 16 or more, and test at 1.35x.",
+      "Do use BigButton, with one primary action per screen.",
+      "Do draw faces, the plate, the mark, rings and charts in SVG, and import line icons one per file through src/components/icons.js.",
+      "Do make motion tap-triggered or tied to a real alert, with critically damped springs, and replace it with an instant change when reduced motion is on.",
+      "Do print the number or state wherever colour carries meaning.",
+      "Do label every control and keep the Hindi and English strings in step."
+    ],
+    "donts": [
+      "Don't use brick red for anything but a real safety alert.",
+      "Don't put every item in its own card. Use divided lists.",
+      "Don't use ALL CAPS labels, middle-dot meta strings, or numbered markers unless the content is a real sequence.",
+      "Don't use emoji as icons or import lucide-react-native from the package root.",
+      "Don't set fontWeight with a custom font family.",
+      "Don't loop animations while idle, except the soft pulse behind the siren on an open alert.",
+      "Don't call Date.now() in render or read refs during render."
+    ]
+  }
+}

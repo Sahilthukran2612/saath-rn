@@ -3,7 +3,7 @@ import { Image, Share, StyleSheet, Text, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Banana, Camera, Candy, Coffee, Heart, Send, Soup, Salad, Utensils, Wheat } from '../icons';
 import { BigButton, Body, Caption, Card, Chip, Glyph, PressRow, Title } from '../ui';
-import { Badge, CheckMark, Field, ListGroup, ListRow, Segmented, Stat } from '../kit';
+import { Badge, CheckMark, Field, ListGroup, ListRow, Segmented, Stat, SectionTitle } from '../kit';
 import { MoodFace, PlateDiagram } from '../art';
 import { useStore } from '../../state/store';
 import { useNow } from '../useNow';
@@ -101,7 +101,7 @@ export function FoodSection() {
         </View>
       </Card>
       <View style={{ gap: 10 }}>
-        <Body bold>{t('food.region')}</Body>
+        <SectionTitle>{t('food.region')}</SectionTitle>
         <View style={row}>
           {food.regions.map((r) => (
             <Chip key={r.id} label={r[lang]} active={region === r.id} onPress={() => setRegion(r.id)} />
@@ -114,7 +114,7 @@ export function FoodSection() {
         </ListGroup>
       </View>
       <View style={{ gap: 10 }}>
-        <Body bold>{t('food.fasting')}</Body>
+        <SectionTitle>{t('food.fasting')}</SectionTitle>
         <ListGroup>
           {food.fasting.map((f) => (
             <ListRow
@@ -126,7 +126,7 @@ export function FoodSection() {
             />
           ))}
         </ListGroup>
-        <Body bold>{t('food.festival')}</Body>
+        <SectionTitle>{t('food.festival')}</SectionTitle>
         <ListGroup>
           {food.festival.map((f) => (
             <ListRow
@@ -230,7 +230,7 @@ export function BodySection() {
             <Image
               key={p.uri}
               source={{ uri: p.uri }}
-              style={{ width: 84, height: 84, borderRadius: 14 }}
+              style={{ width: 84, height: 84, borderRadius: 12 }}
               accessibilityLabel={t('foot.photos')}
             />
           ))}

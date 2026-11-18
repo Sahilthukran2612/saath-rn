@@ -17,10 +17,8 @@ function Choice({ icon, title, note, onPress }) {
       accessibilityLabel={title}
       onPress={onPress}
       style={{
-        backgroundColor: colors.white,
+        backgroundColor: colors.surfaceLow,
         borderRadius: radii.lg,
-        borderWidth: 1.5,
-        borderColor: colors.indigoSoft,
         padding: 20,
         gap: 8,
       }}

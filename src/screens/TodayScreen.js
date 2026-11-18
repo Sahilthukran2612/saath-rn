@@ -44,7 +44,7 @@ function Greeting() {
   });
   return (
     <View accessibilityRole="header" style={{ gap: 2 }}>
-      <Title style={{ fontSize: 32, letterSpacing: -0.6 }}>{t(`greet.${key}`)}</Title>
+      <Title style={{ fontSize: 32 }}>{t(`greet.${key}`)}</Title>
       <Caption>{date}</Caption>
     </View>
   );
@@ -458,9 +458,9 @@ export default function TodayScreen() {
 }
 
 const styles = StyleSheet.create({
-  taskRow: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 16 },
-  taskDivider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
-  taskIcon: { width: 46, height: 46, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
+  taskRow: { flexDirection: 'row', alignItems: 'center', gap: 16, paddingHorizontal: 16 },
+  taskDivider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.outlineVariant },
+  taskIcon: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
   seal: {
     width: 150,
     height: 150,
@@ -469,21 +469,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 2,
-    shadowColor: colors.leafDeep,
-    shadowOpacity: 0.35,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 8,
+    shadowColor: '#1B1E2B',
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 4,
   },
-  hero: { backgroundColor: colors.indigo, borderRadius: radii.hero, padding: 22, gap: 10 },
-  heroLink: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', minHeight: 44 },
+  hero: { backgroundColor: colors.indigo, borderRadius: radii.xl, padding: 24, gap: 10 },
+  heroLink: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', minHeight: 48 },
   heroLight: {
-    backgroundColor: colors.white,
-    borderRadius: radii.hero,
-    padding: 22,
+    backgroundColor: colors.surfaceLow,
+    borderRadius: radii.xl,
+    padding: 24,
     gap: 8,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.line,
   },
   statRow: { flexDirection: 'row', gap: 12, paddingHorizontal: 4 },
   rank: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },

@@ -41,9 +41,9 @@ export default function HelpSection() {
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
         <View
           style={{
-            width: 44,
-            height: 44,
-            borderRadius: 14,
+            width: 48,
+            height: 48,
+            borderRadius: 24,
             backgroundColor: colors.haldiTint,
             alignItems: 'center',
             justifyContent: 'center',

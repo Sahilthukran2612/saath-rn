@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
   actionBtn: {
     flex: 1,
     minHeight: 56,
-    borderRadius: radii.md,
+    borderRadius: radii.pill,
     backgroundColor: colors.indigo,
     alignItems: 'center',
     justifyContent: 'center',
@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
   actionText: { fontFamily: fonts.semi, fontSize: 15, color: colors.white },
   action: {
     minHeight: 64,
-    borderRadius: radii.lg,
+    borderRadius: radii.pill,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

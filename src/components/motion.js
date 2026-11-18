@@ -19,7 +19,8 @@ export function useReducedMotion() {
   return reduced;
 }
 
-// A short rise-and-fade when a screen opens after a tap. Not used for idle decoration.
+// Material "fade through": content fades in while settling from 96% scale, on the emphasized
+// decelerate curve. Used when a screen or section opens after a tap, never as idle decoration.
 export function Reveal({ children, index = 0, style }) {
   const reduced = useReducedMotion();
   const [v] = useState(() => new Animated.Value(reduced ? 1 : 0));
@@ -32,7 +33,7 @@ export function Reveal({ children, index = 0, style }) {
       toValue: 1,
       duration: motion.enterMs,
       delay: Math.min(index, 8) * motion.staggerMs,
-      easing: Easing.out(Easing.cubic),
+      easing: Easing.bezier(...motion.emphasizedDecelerate),
       useNativeDriver: true,
     });
     a.start();
@@ -44,7 +45,7 @@ export function Reveal({ children, index = 0, style }) {
         style,
         {
           opacity: v,
-          transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) }],
+          transform: [{ scale: v.interpolate({ inputRange: [0, 1], outputRange: [0.96, 1] }) }],
         },
       ]}
     >

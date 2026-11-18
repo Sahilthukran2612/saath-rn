@@ -7,6 +7,7 @@ export { default as HeartPulse } from 'lucide-react-native/icons/heart-pulse';
 export { default as LayoutGrid } from 'lucide-react-native/icons/layout-grid';
 export { default as UserRound } from 'lucide-react-native/icons/user-round';
 export { default as Eye } from 'lucide-react-native/icons/eye';
+export { default as ArrowLeft } from 'lucide-react-native/icons/arrow-left';
 export { default as ChevronLeft } from 'lucide-react-native/icons/chevron-left';
 export { default as ChevronRight } from 'lucide-react-native/icons/chevron-right';
 export { default as Check } from 'lucide-react-native/icons/check';

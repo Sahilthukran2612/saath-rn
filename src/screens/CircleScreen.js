@@ -2,7 +2,7 @@ import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Eye, Lock, Phone, ShieldCheck, X } from '../components/icons';
 import { Body, Caption, Card, Chip, Glyph, Title } from '../components/ui';
-import { Avatar, Badge, ListGroup, ListRow, Segmented, Toggle } from '../components/kit';
+import { Avatar, Badge, ListGroup, ListRow, Segmented, Toggle, SectionTitle } from '../components/kit';
 import { Reveal } from '../components/motion';
 import InviteSection from '../components/circle/InviteSection';
 import HelpSection from '../components/circle/HelpSection';
@@ -104,7 +104,7 @@ export default function CircleScreen() {
         </Card>
       </Reveal>
       <Reveal index={1}>
-        <Body bold>{t('privacyDial')}</Body>
+        <SectionTitle>{t('privacyDial')}</SectionTitle>
         <View style={{ height: 8 }} />
         <View style={styles.group}>
           {state.members.map((m, i) => (
@@ -133,7 +133,7 @@ export default function CircleScreen() {
         <CirclesSection />
       </Reveal>
       <Reveal index={5}>
-        <Body bold>{t('whoViewed')}</Body>
+        <SectionTitle>{t('whoViewed')}</SectionTitle>
         <View style={{ height: 8 }} />
         {state.audit.length === 0 ? (
           <Card tone="tint" style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -162,10 +162,8 @@ export default function CircleScreen() {
 
 const styles = StyleSheet.create({
   group: {
-    backgroundColor: colors.white,
-    borderRadius: 20,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.line,
+    backgroundColor: colors.surfaceLow,
+    borderRadius: 16,
     overflow: 'hidden',
   },
   member: { padding: 16, gap: 12 },

@@ -5,7 +5,7 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { Droplet, FileText, ListChecks, Package, Phone, Pill, Plus, Send, X } from '../icons';
 import { BigButton, Body, Caption, Card, Chip, Title } from '../ui';
-import { Badge, Field, ListGroup, ListRow, StageTrack, Toggle } from '../kit';
+import { Badge, Field, ListGroup, ListRow, StageTrack, Toggle, SectionTitle } from '../kit';
 import { useStore } from '../../state/store';
 import { useNow } from '../useNow';
 import {
@@ -128,7 +128,7 @@ export function VisitSection() {
   return (
     <View style={{ gap: 16 }}>
       <View style={{ gap: 8 }}>
-        <Body bold>{t('visit.facts')}</Body>
+        <SectionTitle>{t('visit.facts')}</SectionTitle>
         <ListGroup>
           {lines.map((l, i) => (
             <ListRow key={l} icon={VISIT_ICONS[i] || Droplet} title={l} />
@@ -234,7 +234,7 @@ export function PassportSection() {
         />
       </Card>
       <View style={{ gap: 8 }}>
-        <Body bold>{t('pass.include')}</Body>
+        <SectionTitle>{t('pass.include')}</SectionTitle>
         <ListGroup>
           {toggles.map(([k, Icon]) => (
             <ListRow
@@ -253,7 +253,7 @@ export function PassportSection() {
         </ListGroup>
       </View>
       <View style={{ gap: 8 }}>
-        <Body bold>{t('pass.emergency')}</Body>
+        <SectionTitle>{t('pass.emergency')}</SectionTitle>
         <View style={row}>
           {state.members.map((m) => (
             <Chip

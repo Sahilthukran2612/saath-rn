@@ -15,7 +15,7 @@ import {
   Wallet,
 } from '../icons';
 import { BigButton, Body, Caption, Card, Chip, Glyph, Title } from '../ui';
-import { Badge, Field, LineChart, ListGroup, ListRow, Stat } from '../kit';
+import { Badge, Field, LineChart, ListGroup, ListRow, Stat, SectionTitle } from '../kit';
 import { useStore } from '../../state/store';
 import { useNow } from '../useNow';
 import { adviceText } from '../../i18n/strings';
@@ -341,7 +341,7 @@ export function BudgetCard() {
       ) : null}
       {s.tipIds.length > 0 ? (
         <View style={{ gap: 8 }}>
-          <Body bold>{t('savingTips')}</Body>
+          <SectionTitle>{t('savingTips')}</SectionTitle>
           <ListGroup>
             {s.tipIds.map((id) => (
               <ListRow
@@ -377,7 +377,7 @@ export function BudgetCard() {
 }
 
 const styles = StyleSheet.create({
-  tile: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  tile: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
   trendPill: {
     flexDirection: 'row',
     alignItems: 'center',

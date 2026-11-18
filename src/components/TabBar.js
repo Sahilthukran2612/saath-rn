@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { HeartPulse, House, LayoutGrid, ShieldCheck, UserRound, Users } from './icons';
-import { colors, fonts, motion } from '../theme';
+import { colors, fonts, roles } from '../theme';
 import { PressRow, useScale, Glyph } from './ui';
-import { useReducedMotion } from './motion';
+import { useSpringValue } from './motion';
 
+// Five destinations, the Material 3 maximum. "Me" lives behind the account avatar in the top app bar,
+// the way Google's own apps do it. It stays in this list so the screen can still be routed to.
 export const TABS = [
   ['today', 'tabToday', House],
   ['circle', 'tabCircle', Users],
@@ -14,92 +16,75 @@ export const TABS = [
   ['me', 'tabMe', UserRound],
 ];
 
-// A pill follows the selected tab with a critically damped spring. It starts moving on touch,
-// can be redirected mid-flight, and is replaced by an instant jump when reduced motion is on.
-export default function TabBar({ tab, onChange, t, tabs = TABS }) {
-  const k = useScale();
-  const reduced = useReducedMotion();
-  const [width, setWidth] = useState(0);
-  const [x] = useState(() => new Animated.Value(0));
-  const index = Math.max(
-    0,
-    tabs.findIndex((tb) => tb[0] === tab)
-  );
-  const slot = width / tabs.length;
+export const NAV_TABS = TABS.filter(([id]) => id !== 'me');
 
-  useEffect(() => {
-    if (!slot) return undefined;
-    if (reduced) {
-      x.setValue(index * slot);
-      return undefined;
-    }
-    const a = Animated.spring(x, { toValue: index * slot, useNativeDriver: true, ...motion.pill });
-    a.start();
-    return () => a.stop();
-  }, [index, slot, reduced, x]);
-
+function Item({ id, label, Icon, on, onPress, k }) {
+  // The active indicator grows out from its centre on a critically damped spring; with reduced
+  // motion it simply appears (useSpringValue handles that).
+  const v = useSpringValue(on ? 1 : 0, { damping: 22, stiffness: 380, mass: 1 });
+  const scaleX = v.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] });
   return (
-    <View style={styles.bar} onLayout={(e) => setWidth(e.nativeEvent.layout.width - 12)}>
-      <View style={styles.inner}>
-        {slot > 0 && (
-          <Animated.View
-            pointerEvents="none"
-            style={[styles.pill, { width: slot - 6, transform: [{ translateX: x }] }]}
-          />
-        )}
-        {tabs.map(([id, key, Icon]) => {
-          const on = tab === id;
-          return (
-            <PressRow
-              key={id}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: on }}
-              accessibilityLabel={t(key)}
-              onPress={() => onChange(id)}
-              containerStyle={{ flex: 1 }}
-              style={styles.item}
-            >
-              <Glyph
-                icon={Icon}
-                size={24 * Math.min(k, 1.15)}
-                color={on ? colors.indigo : colors.inkFaint}
-                strokeWidth={on ? 2.3 : 1.8}
-              />
-              <Text
-                numberOfLines={1}
-                style={{
-                  fontFamily: on ? fonts.bold : fonts.semi,
-                  fontSize: 13.5 * Math.min(k, 1.15),
-                  color: on ? colors.indigo : colors.inkFaint,
-                }}
-              >
-                {t(key)}
-              </Text>
-            </PressRow>
-          );
-        })}
+    <PressRow
+      accessibilityRole="tab"
+      accessibilityState={{ selected: on }}
+      accessibilityLabel={label}
+      onPress={onPress}
+      containerStyle={{ flex: 1 }}
+      style={styles.item}
+      rippleColor="transparent"
+    >
+      <View style={styles.iconSlot}>
+        <Animated.View style={[styles.indicator, { opacity: v, transform: [{ scaleX }] }]} />
+        <Glyph
+          icon={Icon}
+          size={24 * Math.min(k, 1.15)}
+          color={on ? colors.indigoDeep : colors.inkSoft}
+          strokeWidth={on ? 2.3 : 1.9}
+        />
       </View>
+      <Text
+        numberOfLines={1}
+        style={{
+          fontFamily: on ? fonts.bold : roles.labelNav.font,
+          fontSize: roles.labelNav.size * Math.min(k, 1.15),
+          lineHeight: roles.labelNav.line * Math.min(k, 1.15),
+          letterSpacing: roles.labelNav.track,
+          color: on ? colors.ink : colors.inkSoft,
+        }}
+      >
+        {label}
+      </Text>
+    </PressRow>
+  );
+}
+
+// Material 3 navigation bar: tonal surface, a 64 x 32 pill behind the active icon, labels always shown.
+export default function TabBar({ tab, onChange, t, tabs = NAV_TABS }) {
+  const k = useScale();
+  return (
+    <View style={styles.bar}>
+      {tabs.map(([id, key, Icon]) => (
+        <Item key={id} id={id} label={t(key)} Icon={Icon} on={tab === id} onPress={() => onChange(id)} k={k} />
+      ))}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   bar: {
-    backgroundColor: colors.white,
-    paddingHorizontal: 6,
-    paddingTop: 6,
-    paddingBottom: 6,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.line,
+    flexDirection: 'row',
+    backgroundColor: colors.surfaceContainer,
+    paddingTop: 12,
+    paddingBottom: 16,
+    paddingHorizontal: 8,
   },
-  inner: { flexDirection: 'row' },
-  pill: {
+  item: { minHeight: 64, alignItems: 'center', justifyContent: 'flex-start', gap: 4 },
+  iconSlot: { width: 64, height: 32, alignItems: 'center', justifyContent: 'center' },
+  indicator: {
     position: 'absolute',
-    left: 3,
-    top: 0,
-    bottom: 0,
-    borderRadius: 20,
-    backgroundColor: colors.indigoTint,
+    width: 64,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.indigoSoft,
   },
-  item: { minHeight: 60, alignItems: 'center', justifyContent: 'center', gap: 2, borderRadius: 20 },
 });

@@ -74,7 +74,7 @@ export default function PlanScreen() {
       ) : (
         <>
           <View style={{ gap: 2 }}>
-            <Title style={{ fontSize: 32, letterSpacing: -0.6 }}>{t('tabPlan')}</Title>
+            <Title style={{ fontSize: 32 }}>{t('tabPlan')}</Title>
             <Caption>{t('planSub')}</Caption>
           </View>
           <View style={styles.grid}>
@@ -106,5 +106,5 @@ export default function PlanScreen() {
 const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   cell: { width: '48%', flexGrow: 1 },
-  tile: { minHeight: 132, borderRadius: radii.hero, padding: 18, justifyContent: 'space-between', gap: 14 },
+  tile: { minHeight: 132, borderRadius: radii.xl, padding: 20, justifyContent: 'space-between', gap: 14 },
 });

@@ -39,7 +39,7 @@ export default function SafetyScreen() {
       contentContainerStyle={{ padding: 20, paddingTop: 8, gap: 18 }}
     >
       <View style={{ gap: 2 }}>
-        <Title style={{ fontSize: 32, letterSpacing: -0.6 }}>{t('tabSafety')}</Title>
+        <Title style={{ fontSize: 32 }}>{t('tabSafety')}</Title>
       </View>
 
       <Reveal index={0}>
@@ -169,20 +169,20 @@ export default function SafetyScreen() {
 }
 
 const styles = StyleSheet.create({
-  hero: { backgroundColor: colors.indigo, borderRadius: radii.hero, padding: 22, gap: 8 },
+  hero: { backgroundColor: colors.indigo, borderRadius: radii.xl, padding: 24, gap: 8 },
   heroIcon: {
     width: 60,
     height: 60,
-    borderRadius: 20,
+    borderRadius: 30,
     backgroundColor: 'rgba(255,255,255,0.14)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 4,
   },
   trialIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: colors.haldiTint,
     alignItems: 'center',
     justifyContent: 'center',

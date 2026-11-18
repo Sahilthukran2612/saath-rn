@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { ArrowRight, Check } from '../components/icons';
 import { BigButton, Body, Caption, Card, Chip, Title } from '../components/ui';
-import { Avatar, Field, ListGroup, ListRow, Segmented, Toggle } from '../components/kit';
+import { Avatar, Field, ListGroup, ListRow, Segmented, Toggle, SectionTitle } from '../components/kit';
 import { SaathMark } from '../components/art';
 import ContactsForm from '../components/circle/ContactsForm';
 import { useStore } from '../state/store';
@@ -26,20 +26,37 @@ export default function OnboardingScreen() {
   const real = state.members.filter((m) => !m.demo);
 
   const next = () => {
-    if (step === 1) dispatch({ type: 'PROFILE_SET', patch: { name: name.trim(), condition: condition.trim() } });
+    if (step === 1)
+      dispatch({ type: 'PROFILE_SET', patch: { name: name.trim(), condition: condition.trim() } });
     setStep((s) => s + 1);
   };
 
   return (
-    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 24, paddingTop: 32, gap: 18 }}>
+    <ScrollView
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={{ padding: 24, paddingTop: 32, gap: 18 }}
+    >
       <SaathMark size={56} />
-      <Caption>{t('ob.step').replace('{n}', String(step + 1)).replace('{total}', String(STEPS))}</Caption>
+      <View style={{ gap: 8 }}>
+        <View
+          accessibilityRole="progressbar"
+          accessibilityValue={{ min: 1, max: STEPS, now: step + 1 }}
+          style={{ height: 4, borderRadius: 2, backgroundColor: colors.indigoTint, overflow: 'hidden' }}
+        >
+          <View style={{ height: 4, borderRadius: 2, backgroundColor: colors.indigo, width: `%` }} />
+        </View>
+        <Caption>
+          {t('ob.step')
+            .replace('{n}', String(step + 1))
+            .replace('{total}', String(STEPS))}
+        </Caption>
+      </View>
 
       {step === 0 ? (
         <View style={{ gap: 16 }}>
           <Title style={{ fontSize: 32, letterSpacing: -0.6 }}>{t('ob.welcome')}</Title>
           <Body>{t('ob.intro')}</Body>
-          <Body bold>{t('language')}</Body>
+          <SectionTitle>{t('language')}</SectionTitle>
           <Segmented
             value={state.lang}
             onChange={(v) => set('lang', v)}
@@ -48,7 +65,7 @@ export default function OnboardingScreen() {
               { value: 'hi', label: 'हिन्दी' },
             ]}
           />
-          <Body bold>{t('ob.who')}</Body>
+          <SectionTitle>{t('ob.who')}</SectionTitle>
           <Segmented
             value={state.mode}
             onChange={(v) => set('mode', v)}
@@ -106,12 +123,26 @@ export default function OnboardingScreen() {
           <ListGroup>
             <ListRow
               title={t('call.title')}
-              subtitle={!callsAvailable && !state.demo ? t('call.unavailable') : state.autoCallDenied ? t('call.denied') : t('call.note')}
-              trailing={<Toggle value={state.autoCall} label={t('call.title')} onValueChange={choices.autoCall} />}
+              subtitle={
+                !callsAvailable && !state.demo
+                  ? t('call.unavailable')
+                  : state.autoCallDenied
+                    ? t('call.denied')
+                    : t('call.note')
+              }
+              trailing={
+                <Toggle value={state.autoCall} label={t('call.title')} onValueChange={choices.autoCall} />
+              }
             />
             <ListRow
               title={t('sms.title')}
-              subtitle={!smsAvailable && !state.demo ? t('sms.unavailable') : state.autoSmsDenied ? t('sms.denied') : t('sms.note')}
+              subtitle={
+                !smsAvailable && !state.demo
+                  ? t('sms.unavailable')
+                  : state.autoSmsDenied
+                    ? t('sms.denied')
+                    : t('sms.note')
+              }
               trailing={
                 <Toggle
                   value={state.autoSms}
@@ -131,7 +162,13 @@ export default function OnboardingScreen() {
             <ListRow
               title={t('siren.title')}
               subtitle={t('siren.note')}
-              trailing={<Toggle value={state.siren} label={t('siren.title')} onValueChange={(on) => set('siren', on)} />}
+              trailing={
+                <Toggle
+                  value={state.siren}
+                  label={t('siren.title')}
+                  onValueChange={(on) => set('siren', on)}
+                />
+              }
             />
             <ListRow
               title={t('rem.toggle')}
@@ -155,7 +192,13 @@ export default function OnboardingScreen() {
             <ListRow
               title={t('bg.title')}
               subtitle={t('bg.note')}
-              trailing={<Toggle value={state.background} label={t('bg.title')} onValueChange={(on) => set('background', on)} />}
+              trailing={
+                <Toggle
+                  value={state.background}
+                  label={t('bg.title')}
+                  onValueChange={(on) => set('background', on)}
+                />
+              }
               last
             />
           </ListGroup>

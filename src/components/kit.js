@@ -1,10 +1,10 @@
 import React from 'react';
 import { Animated, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient, Path, Stop } from 'react-native-svg';
-import { ChevronLeft, ChevronRight } from './icons';
+import { ArrowLeft, Check, ChevronRight } from './icons';
 import { colors, fonts, radii, type } from '../theme';
 import { Body, Caption, Glyph, Title, useScale } from './ui';
-import { useReducedMotion, useSpringValue } from './motion';
+import { useSpringValue } from './motion';
 import { tap } from '../services/haptics';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -56,9 +56,11 @@ export function ListGroup({ children, style }) {
   );
 }
 
+// Material list item: a leading icon in a tonal circle, headline and supporting text, trailing content.
+// A chevron appears only when asked for (`chevron`); a row that opens something is signalled by its ripple.
 export function ListRow({
   icon,
-  iconColor = colors.indigo,
+  iconColor = colors.indigoDeep,
   iconBg = colors.indigoTint,
   lead,
   title,
@@ -70,20 +72,24 @@ export function ListRow({
   chevron,
 }) {
   const k = useScale();
+  const hasLead = !!(lead || icon);
   const body = (
-    <View style={[styles.row, !last && styles.rowDivider]}>
-      {lead ||
-        (icon ? (
-          <View style={[styles.iconBox, { backgroundColor: iconBg }]}>
-            <Glyph icon={icon} size={22 * Math.min(k, 1.2)} color={iconColor} />
-          </View>
-        ) : null)}
-      <View style={{ flex: 1, gap: 2 }}>
-        <Body bold={!!subtitle}>{title}</Body>
-        {subtitle ? <Caption>{subtitle}</Caption> : null}
+    <View>
+      <View style={styles.row}>
+        {lead ||
+          (icon ? (
+            <View style={[styles.iconBox, { backgroundColor: iconBg }]}>
+              <Glyph icon={icon} size={24 * Math.min(k, 1.2)} color={iconColor} />
+            </View>
+          ) : null)}
+        <View style={{ flex: 1, gap: 2 }}>
+          <Body bold={!!subtitle}>{title}</Body>
+          {subtitle ? <Caption>{subtitle}</Caption> : null}
+        </View>
+        {trailing}
+        {onPress && chevron === true ? <Glyph icon={ChevronRight} size={24} color={colors.inkFaint} /> : null}
       </View>
-      {trailing}
-      {onPress && chevron !== false ? <Glyph icon={ChevronRight} size={20} color={colors.inkFaint} /> : null}
+      {!last ? <View style={[styles.rowDivider, { marginLeft: hasLead ? 72 : 16 }]} /> : null}
     </View>
   );
   if (!onPress) return body;
@@ -92,19 +98,22 @@ export function ListRow({
       accessibilityRole="button"
       accessibilityLabel={label || title}
       onPress={onPress}
-      android_ripple={{ color: colors.indigoTint }}
+      android_ripple={{ color: 'rgba(38,48,107,0.12)' }}
     >
       {body}
     </Pressable>
   );
 }
 
-// ---- Switch: a spring-driven toggle with the state in its accessibility label ----
+// ---- Material switch: 52 x 32 track, thumb grows when on and carries a check. State is in the label ----
 export function Toggle({ value, onValueChange, label }) {
-  const reduced = useReducedMotion();
   const x = useSpringValue(value ? 1 : 0, { damping: 20, stiffness: 320, mass: 1 });
-  const pos = x.interpolate({ inputRange: [0, 1], outputRange: [3, 27] });
-  const bg = x.interpolate({ inputRange: [0, 1], outputRange: [colors.control, colors.leaf] });
+  const pos = x.interpolate({ inputRange: [0, 1], outputRange: [6, 26] });
+  const thumb = x.interpolate({ inputRange: [0, 1], outputRange: [16, 24] });
+  const lift = x.interpolate({ inputRange: [0, 1], outputRange: [4, 0] });
+  const bg = x.interpolate({ inputRange: [0, 1], outputRange: [colors.surfaceHigh, colors.indigo] });
+  const edge = x.interpolate({ inputRange: [0, 1], outputRange: [colors.outline, colors.indigo] });
+  const thumbBg = x.interpolate({ inputRange: [0, 1], outputRange: [colors.outline, colors.white] });
   return (
     <Pressable
       accessibilityRole="switch"
@@ -115,52 +124,34 @@ export function Toggle({ value, onValueChange, label }) {
         onValueChange(!value);
       }}
       hitSlop={8}
-      style={{ minHeight: 56, justifyContent: 'center' }}
+      style={{ minHeight: 56, minWidth: 56, justifyContent: 'center', alignItems: 'center' }}
     >
-      <Animated.View
-        style={[styles.track, { backgroundColor: reduced ? (value ? colors.leaf : colors.control) : bg }]}
-      >
-        <Animated.View style={[styles.knob, { transform: [{ translateX: pos }] }]} />
+      <Animated.View style={[styles.track, { backgroundColor: bg, borderColor: edge }]}>
+        <Animated.View
+          style={{
+            position: 'absolute',
+            left: pos,
+            top: lift,
+            width: thumb,
+            height: thumb,
+            borderRadius: 12,
+            backgroundColor: thumbBg,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {value ? <Glyph icon={Check} size={16} color={colors.indigo} strokeWidth={3} /> : null}
+        </Animated.View>
       </Animated.View>
     </Pressable>
   );
 }
 
-// ---- Segmented control: a thumb slides under the chosen option ----
+// ---- Segmented button: outlined group, the selected segment is a secondary container with a check ----
 export function Segmented({ options, value, onChange }) {
-  const reduced = useReducedMotion();
-  const [w, setW] = React.useState(0);
-  const [x] = React.useState(() => new Animated.Value(0));
-  const index = Math.max(
-    0,
-    options.findIndex((o) => o.value === value)
-  );
-  const slot = w / options.length;
-  React.useEffect(() => {
-    if (!slot) return undefined;
-    if (reduced) {
-      x.setValue(index * slot);
-      return undefined;
-    }
-    const a = Animated.spring(x, {
-      toValue: index * slot,
-      useNativeDriver: true,
-      damping: 22,
-      stiffness: 320,
-      mass: 1,
-    });
-    a.start();
-    return () => a.stop();
-  }, [index, slot, reduced, x]);
   return (
-    <View style={styles.segTrack} onLayout={(e) => setW(e.nativeEvent.layout.width - 6)}>
-      {slot > 0 && (
-        <Animated.View
-          pointerEvents="none"
-          style={[styles.segThumb, { width: slot, transform: [{ translateX: x }] }]}
-        />
-      )}
-      {options.map((o) => {
+    <View style={styles.segTrack}>
+      {options.map((o, i) => {
         const on = o.value === value;
         return (
           <Pressable
@@ -168,18 +159,21 @@ export function Segmented({ options, value, onChange }) {
             accessibilityRole="button"
             accessibilityLabel={o.label}
             accessibilityState={{ selected: on }}
+            android_ripple={{ color: 'rgba(38,48,107,0.12)' }}
             onPress={() => {
               tap();
               onChange(o.value);
             }}
-            style={styles.segItem}
+            style={[styles.segItem, i > 0 && styles.segDivider, on && styles.segOn]}
           >
+            {on ? <Glyph icon={Check} size={18} color={colors.indigoDeep} strokeWidth={2.6} /> : null}
             <Text
               numberOfLines={1}
               style={{
-                fontFamily: on ? fonts.bold : fonts.semi,
-                fontSize: 15.5,
-                color: on ? colors.indigo : colors.inkSoft,
+                fontFamily: fonts.semi,
+                fontSize: 16,
+                color: on ? colors.indigoDeep : colors.inkSoft,
+                flexShrink: 1,
               }}
             >
               {o.label}
@@ -224,11 +218,11 @@ export function Field({
           fontFamily: fonts.regular,
           fontSize: type.body * k,
           color: colors.ink,
-          borderWidth: focus ? 2 : 1.5,
-          borderColor: focus ? colors.indigo : colors.control,
+          borderWidth: focus ? 2 : 1,
+          borderColor: focus ? colors.indigo : colors.outline,
           borderRadius: radii.md,
-          paddingHorizontal: 14,
-          backgroundColor: colors.white,
+          paddingHorizontal: 16,
+          backgroundColor: colors.surface,
         }}
       />
     </View>
@@ -434,21 +428,19 @@ export function LineChart({ values, width = 300, height = 120, color = colors.in
 }
 
 // ---- Header, badge, stat ----
+// A screen header inside a flow: an icon button for Back (48 target), then the headline.
 export function ScreenHeader({ title, subtitle, onBack, backLabel = 'Back', right }) {
   return (
-    <View style={{ gap: 6 }}>
+    <View style={{ gap: 4 }}>
       {onBack ? (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={backLabel}
           onPress={onBack}
-          hitSlop={10}
+          android_ripple={{ color: 'rgba(38,48,107,0.14)', borderless: true, radius: 28 }}
           style={styles.back}
         >
-          <Glyph icon={ChevronLeft} size={24} color={colors.indigo} />
-          <Text style={{ fontFamily: fonts.semi, fontSize: type.body, color: colors.indigo }}>
-            {backLabel}
-          </Text>
+          <Glyph icon={ArrowLeft} size={24} color={colors.ink} />
         </Pressable>
       ) : null}
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
@@ -462,9 +454,10 @@ export function ScreenHeader({ title, subtitle, onBack, backLabel = 'Back', righ
   );
 }
 
+// A small status label: tonal container, never a coloured outline. Brick only for a real alert.
 export function Badge({ label, tone = 'indigo' }) {
   const t = {
-    indigo: [colors.indigoTint, colors.indigo],
+    indigo: [colors.indigoTint, colors.indigoDeep],
     leaf: [colors.leafTint, colors.leafDeep],
     haldi: [colors.haldiTint, colors.haldiDeep],
     brick: [colors.brickTint, colors.brick],
@@ -473,13 +466,13 @@ export function Badge({ label, tone = 'indigo' }) {
     <View
       style={{
         backgroundColor: t[0],
-        borderRadius: radii.pill,
+        borderRadius: radii.sm,
         paddingHorizontal: 12,
         paddingVertical: 4,
         alignSelf: 'flex-start',
       }}
     >
-      <Text style={{ fontFamily: fonts.semi, fontSize: 15, color: t[1] }}>{label}</Text>
+      <Text style={{ fontFamily: fonts.semi, fontSize: 16, color: t[1] }}>{label}</Text>
     </View>
   );
 }
@@ -495,58 +488,58 @@ export function Stat({ value, label, color = colors.indigo }) {
   );
 }
 
+// Section label above a list: Material "title medium".
 export function SectionTitle({ children }) {
   return (
-    <View style={{ paddingTop: 8 }}>
-      <Body bold>{children}</Body>
+    <View style={{ paddingTop: 12, paddingHorizontal: 4 }}>
+      <Text accessibilityRole="header" style={{ fontFamily: fonts.semi, fontSize: 18, lineHeight: 24, color: colors.ink }}>
+        {children}
+      </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   group: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surfaceLow,
     borderRadius: radii.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.line,
     overflow: 'hidden',
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
+    gap: 16,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 12,
     minHeight: 64,
   },
-  rowDivider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
-  iconBox: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  track: { width: 56, height: 32, borderRadius: 16, justifyContent: 'center' },
-  knob: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: colors.white,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 2,
+  rowDivider: { height: StyleSheet.hairlineWidth, backgroundColor: colors.outlineVariant, marginRight: 16 },
+  iconBox: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  track: { width: 52, height: 32, borderRadius: 16, borderWidth: 2 },
+  back: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: -12,
   },
-  back: { flexDirection: 'row', alignItems: 'center', gap: 2, minHeight: 44, alignSelf: 'flex-start' },
-  segTrack: { flexDirection: 'row', backgroundColor: colors.indigoTint, borderRadius: radii.md, padding: 3 },
-  segThumb: {
-    position: 'absolute',
-    left: 3,
-    top: 3,
-    bottom: 3,
-    borderRadius: radii.md - 3,
-    backgroundColor: colors.white,
-    shadowColor: '#1B1E2B',
-    shadowOpacity: 0.12,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 2,
+  segTrack: {
+    flexDirection: 'row',
+    borderRadius: radii.pill,
+    borderWidth: 1,
+    borderColor: colors.outline,
+    overflow: 'hidden',
   },
-  segItem: { flex: 1, minHeight: 48, alignItems: 'center', justifyContent: 'center' },
+  segItem: {
+    flex: 1,
+    minHeight: 48,
+    flexDirection: 'row',
+    gap: 6,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  segDivider: { borderLeftWidth: 1, borderLeftColor: colors.outline },
+  segOn: { backgroundColor: colors.indigoTint },
 });
