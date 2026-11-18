@@ -28,24 +28,28 @@ import {
   stripsPlan,
   CLINICIAN_NOTE,
 } from '../../care';
+import Doodle from '../doodles';
 import { colors, fonts, radii } from '../../theme';
 
 const TREND_KEY = { up: 'trendUp', down: 'trendDown', steady: 'trendSteady' };
 const LEVEL_KEY = { now: 'refillNow', soon: 'refillSoon', ok: 'refillOk' };
 const LEVEL_COLOR = { ok: colors.leaf, soon: colors.haldi, now: colors.madder, unknown: colors.inkFaint };
 
-function IconTile({ icon, bg = colors.indigoTint, color = colors.indigo }) {
-  return (
-    <View style={[styles.tile, { backgroundColor: bg }]}>
-      <Glyph icon={icon} size={22} color={color} />
-    </View>
-  );
-}
+// Each card heading carries a ballpoint doodle of its subject instead of an icon in a tinted square.
+const HEAD_DOODLE = new Map([
+  [Droplet, 'drop'],
+  [Info, 'note'],
+  [Pill, 'strip'],
+  [Package, 'strip'],
+  [Wallet, 'note'],
+  [Route, 'steps'],
+  [Utensils, 'plate'],
+]);
 
-function CardHead({ icon, bg, color, title, right }) {
+function CardHead({ icon, title, right }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-      <IconTile icon={icon} bg={bg} color={color} />
+      <Doodle name={HEAD_DOODLE.get(icon) || 'note'} size={44} />
       <View style={{ flex: 1 }}>
         <Title style={{ fontSize: 22 }}>{title}</Title>
       </View>
@@ -53,7 +57,6 @@ function CardHead({ icon, bg, color, title, right }) {
     </View>
   );
 }
-
 // A thin bar. Colour supports the number printed beside it; it is never the only signal.
 function Bar({ value, max, color }) {
   const pct = Math.max(0, Math.min(1, max ? value / max : 0));
