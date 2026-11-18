@@ -4,6 +4,7 @@ import { Eye, Lock, Phone, ShieldCheck, X } from '../components/icons';
 import { Body, Caption, Card, Chip, Glyph, Title } from '../components/ui';
 import { Avatar, Badge, ListGroup, ListRow, Segmented, Toggle, SectionTitle } from '../components/kit';
 import { Reveal } from '../components/motion';
+import Perf from '../components/Perf';
 import InviteSection from '../components/circle/InviteSection';
 import HelpSection from '../components/circle/HelpSection';
 import CirclesSection from '../components/circle/CirclesSection';
@@ -28,7 +29,7 @@ function MemberRow({ m, last }) {
   const roleLabel = t(`role.${m.role}`);
   const { base, note } = splitName(m.name, roleLabel);
   return (
-    <View style={[styles.member, !last && styles.divider]}>
+    <View style={styles.member}>
       <View style={styles.memberTop}>
         <Avatar name={m.name} role={m.role} size={48} />
         <View style={{ flex: 1 }}>
@@ -80,6 +81,7 @@ function MemberRow({ m, last }) {
         <Badge label={t(`dial${m.dial}`)} tone={m.dial === 2 ? 'indigo' : m.dial === 1 ? 'leaf' : 'haldi'} />
       )}
       {state.mode === 'teen' && m.guardian ? <Caption>{t('guardianLimit')}</Caption> : null}
+      {!last ? <Perf style={{ marginTop: 4 }} /> : null}
     </View>
   );
 }
