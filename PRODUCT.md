@@ -54,7 +54,7 @@ The central object is **the circle**, not the patient's data. Sensing is one wea
 - **Brick red appears only for a real safety alert**, so red always means "pay attention".
 - Large type, large buttons (56 px or more).
 - Mukta font family (3 weights) covers Devanagari and Latin so Hindi and English read as one voice.
-- Drawn art (dye ring, mood faces, charts, plate diagram), not emoji or stock icons. Lucide line icons.
+- Drawn art (ballpoint doodles, tally marks, the violet stamp, mood faces, charts, plate diagram), not emoji or stock icons. Lucide line icons. The visual world is the kirana bill book (see DESIGN.md).
 - App icon, themed icon and splash exist in the Saath identity, not yet seen on a phone.
 
 ## Evidence on Hand

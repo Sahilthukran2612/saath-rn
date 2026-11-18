@@ -40,6 +40,8 @@ Details: `docs/ROLES.md` (how each person gets in) and `docs/RBAC.md` (who can s
 | Health Passport QR/PDF, foot check, weekly check-in | Built; run on an Android emulator earlier, not on a phone |
 | Hindi and English | Complete and parity-checked by test. **No native-speaker review yet** |
 | Accessibility | Automated audit (every control named, 56 px targets, computed contrast ratios). **TalkBack not run** |
+| Suggestion slips on Today (16 fixed rules, made on the phone from what the person entered; no doses, no diagnosis; hard weeks only get company and rest; animated stamp and tear-off) | Built, 14 rule tests and 5 screen tests, see docs/SUGGESTIONS.md. **Not seen on a phone; wording not clinician-reviewed; Hindi not native-reviewed** |
+| Counter Stamp visual world on every screen (slips, perforated lists, tally marks, stamped I'm OK, doodles) | Built; colours audited by computed contrast tests. **Never viewed as a rendered screen** |
 | Release APK | Builds (`dist\saath.apk`, about 39 MB, both phone CPU types, unneeded permissions removed). The owner installed an earlier build on a phone; the newest build (Material 3 look) has not been reported on yet |
 
 Not built: SMS gateway or missed-call alerts, glucometer photo, voice input, dark mode, forgotten-password recovery, encrypted local storage, CAPTCHA and extra abuse limits for a public launch.
