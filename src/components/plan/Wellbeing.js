@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
   checkDivider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
   schoolCard: {
     backgroundColor: colors.white,
-    borderRadius: radii.hero,
+    borderRadius: radii.md,
     overflow: 'hidden',
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.line,

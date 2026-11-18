@@ -1,10 +1,10 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { Animated, Easing, Text, View } from 'react-native';
-import Svg, { Line } from 'react-native-svg';
 import { Body, Caption, Title, PressRow, Glyph, useScale } from './ui';
 import { ChevronRight } from './icons';
 import Doodle from './doodles';
 import Stamp from './Stamp';
+import Perf from './Perf';
 import { useReducedMotion } from './motion';
 import { useNow } from './useNow';
 import { useNav } from './nav';
@@ -19,14 +19,6 @@ import { colors, fonts, radii } from '../theme';
 // tap-triggered; nothing moves while you are only looking.
 
 const TEAR_MS = 320;
-
-function Perforation() {
-  return (
-    <Svg width="100%" height={6} style={{ marginVertical: 2 }} accessibilityElementsHidden importantForAccessibility="no">
-      <Line x1="0" y1="3" x2="100%" y2="3" stroke={colors.lineStrong} strokeWidth="2" strokeDasharray="2 7" strokeLinecap="round" />
-    </Svg>
-  );
-}
 
 // One slip. `key` is the slip id, so a fresh one mounts clean for each new top slip.
 function TopSlip({ slip, index, total, onDone, lang, nowMs }) {
@@ -89,7 +81,7 @@ function TopSlip({ slip, index, total, onDone, lang, nowMs }) {
           </View>
           <Caption>{fmt(t('sg.left'), { n: total - index })}</Caption>
         </View>
-        <Perforation />
+        <Perf />
         <View style={{ flexDirection: 'row', gap: 14, alignItems: 'flex-start' }}>
           <View style={{ paddingTop: 2 }}>
             <Doodle name={slip.doodle} size={72} />

@@ -7,7 +7,6 @@ import {
   Avatar,
   Badge,
   CheckMark,
-  DyeRing,
   LineChart,
   ListGroup,
   ListRow,
@@ -21,6 +20,9 @@ import { useNow } from '../components/useNow';
 import { taskIcon } from '../components/taskIcons';
 import RoutineEditor from '../components/RoutineEditor';
 import SuggestionPad from '../components/SuggestionPad';
+import Stamp from '../components/Stamp';
+import Perf from '../components/Perf';
+import Tally from '../components/Tally';
 import { useStore } from '../state/store';
 import { adviceText } from '../i18n/strings';
 import { can, glucoseAdvice } from '../logic';
@@ -111,46 +113,54 @@ function TaskRow({ task, big, k, dispatch, state, t, last }) {
   );
 }
 
-// The memorable thing: a bandhani-style ring with one dot per task, around the "I'm OK" seal.
+// The first thing on the elder's day: one big slip. "I'm OK" is a leaf-green button the full width; pressing
+// it lands the violet stamp with the time, and the day's tasks are counted in tally marks below.
 function ImOkHero() {
   const { state, dispatch, t } = useStore();
   const done = state.tasks.filter((x) => x.done).length;
-  const [sent, setSent] = useState(false);
+  const [sentAt, setSentAt] = useState(null);
+  const sent = sentAt != null;
   useEffect(() => {
     if (!sent) return undefined;
-    const h = setTimeout(() => setSent(false), 6000);
+    const h = setTimeout(() => setSentAt(null), 6000);
     return () => clearTimeout(h);
   }, [sent]);
+  const time = sent
+    ? new Date(sentAt).toLocaleTimeString(state.lang === 'hi' ? 'hi-IN' : 'en-IN', { hour: 'numeric', minute: '2-digit' })
+    : '';
   return (
-    <View style={{ alignItems: 'center', gap: 10, paddingVertical: 4 }}>
-      <DyeRing total={state.tasks.length} done={done} size={264}>
-        <PressRow
-          accessibilityRole="button"
-          accessibilityLabel={t('imOk')}
-          accessibilityHint={t('imOkHint')}
-          haptic={false}
-          onPress={() => {
-            confirm();
-            dispatch({ type: 'CHECK_IN', at: Date.now() });
-            speak(t('imOk'), state.lang);
-            setSent(true);
-          }}
-          style={styles.seal}
-        >
-          <Glyph icon={Check} size={48} color={colors.white} strokeWidth={2.6} />
-          <Text style={{ fontFamily: fonts.bold, fontSize: 26, color: colors.white, letterSpacing: -0.2 }}>
-            {t('imOk')}
-          </Text>
-        </PressRow>
-      </DyeRing>
-      <Body bold style={{ color: sent ? colors.leafDeep : colors.inkSoft, textAlign: 'center' }}>
-        {sent ? t('sent.ok') : fmt(t('doneOf'), { done, total: state.tasks.length })}
-      </Body>
+    <View style={styles.slip}>
+      <PressRow
+        accessibilityRole="button"
+        accessibilityLabel={t('imOk')}
+        accessibilityHint={t('imOkHint')}
+        haptic={false}
+        rippleColor="rgba(255,255,255,0.24)"
+        onPress={() => {
+          const at = Date.now();
+          dispatch({ type: 'CHECK_IN', at });
+          speak(t('imOk'), state.lang);
+          setSentAt(at);
+        }}
+        style={styles.imOkButton}
+      >
+        <Glyph icon={Check} size={44} color={colors.white} strokeWidth={2.8} />
+        <Text style={{ fontFamily: fonts.bold, fontSize: 32, lineHeight: 40, color: colors.white }}>{t('imOk')}</Text>
+      </PressRow>
+      <View style={{ minHeight: sent ? 72 : 0, justifyContent: 'center' }}>
+        <Stamp show={sent} word={t('imOk')} sub={time} rotate={-5} />
+      </View>
+      <Perf />
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+        <Tally done={done} total={state.tasks.length} />
+        <Body bold style={{ flex: 1, color: sent ? colors.leafDeep : colors.inkSoft }}>
+          {sent ? t('sent.ok') : fmt(t('doneOf'), { done, total: state.tasks.length })}
+        </Body>
+      </View>
       {!sent && <Caption>{t('imOkHint')}</Caption>}
     </View>
   );
 }
-
 function TeenHome() {
   const { state, t } = useStore();
   const go = useNav();
@@ -471,26 +481,31 @@ const styles = StyleSheet.create({
   taskRow: { flexDirection: 'row', alignItems: 'center', gap: 16, paddingHorizontal: 16 },
   taskDivider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.outlineVariant },
   taskIcon: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
-  seal: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
+  slip: {
+    backgroundColor: colors.white,
+    borderRadius: radii.md,
+    borderWidth: 1.5,
+    borderColor: colors.indigo,
+    padding: 16,
+    gap: 12,
+  },
+  imOkButton: {
+    minHeight: 96,
+    borderRadius: radii.pill,
     backgroundColor: colors.leaf,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 2,
-    shadowColor: '#1B1E2B',
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 4,
-  },
-  hero: { backgroundColor: colors.indigo, borderRadius: radii.xl, padding: 24, gap: 10 },
+    gap: 12,
+    paddingHorizontal: 24,
+  },  hero: { backgroundColor: colors.indigo, borderRadius: radii.md, padding: 24, gap: 10 },
   heroLink: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', minHeight: 48 },
   heroLight: {
-    backgroundColor: colors.surfaceLow,
-    borderRadius: radii.xl,
-    padding: 24,
+    backgroundColor: colors.white,
+    borderRadius: radii.md,
+    borderWidth: 1.5,
+    borderColor: colors.indigo,
+    padding: 20,
     gap: 8,
   },
   statRow: { flexDirection: 'row', gap: 12, paddingHorizontal: 4 },

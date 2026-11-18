@@ -169,7 +169,7 @@ export default function SafetyScreen() {
 }
 
 const styles = StyleSheet.create({
-  hero: { backgroundColor: colors.indigo, borderRadius: radii.xl, padding: 24, gap: 8 },
+  hero: { backgroundColor: colors.indigo, borderRadius: radii.md, padding: 24, gap: 8 },
   heroIcon: {
     width: 60,
     height: 60,

@@ -1,31 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import {
-  Backpack,
-  Footprints,
-  Heart,
-  HeartHandshake,
-  IdCard,
-  Lock,
-  Salad,
-  Stethoscope,
-} from '../components/icons';
-import { Body, Caption, Card, Glyph, PressRow, Title } from '../components/ui';
-import { ScreenHeader } from '../components/kit';
+import { ScrollView, View } from 'react-native';
+import { Lock } from '../components/icons';
+import Doodle from '../components/doodles';
+import { Body, Caption, Card, Glyph, Title } from '../components/ui';
+import { ListGroup, ListRow, ScreenHeader } from '../components/kit';
 import { Reveal } from '../components/motion';
 import { LadderSection, PassportSection, VisitSection } from '../components/plan/Handover';
 import { BodySection, CheckinSection, FoodSection, SchoolSection } from '../components/plan/Wellbeing';
 import { useStore } from '../state/store';
-import { colors, fonts, radii } from '../theme';
+import { colors } from '../theme';
 
 const SECTIONS = {
-  ladder: { icon: HeartHandshake, tone: [colors.indigo, colors.white], Comp: LadderSection, teenOnly: true },
-  visit: { icon: Stethoscope, tone: [colors.indigoTint, colors.indigo], Comp: VisitSection },
-  passport: { icon: IdCard, tone: [colors.haldiTint, colors.haldiDeep], Comp: PassportSection },
-  checkin: { icon: Heart, tone: [colors.leafTint, colors.leafDeep], Comp: CheckinSection },
-  food: { icon: Salad, tone: [colors.leafTint, colors.leafDeep], Comp: FoodSection },
-  body: { icon: Footprints, tone: [colors.indigoTint, colors.indigo], Comp: BodySection },
-  school: { icon: Backpack, tone: [colors.haldiTint, colors.haldiDeep], Comp: SchoolSection, teenOnly: true },
+  ladder: { doodle: 'steps', Comp: LadderSection, teenOnly: true },
+  visit: { doodle: 'note', Comp: VisitSection },
+  passport: { doodle: 'strip', Comp: PassportSection },
+  checkin: { doodle: 'face', Comp: CheckinSection },
+  food: { doodle: 'plate', Comp: FoodSection },
+  body: { doodle: 'foot', Comp: BodySection },
+  school: { doodle: 'stretch', Comp: SchoolSection, teenOnly: true },
 };
 
 // The person sees every section. A family member sees only the ladder, to agree or say "not yet".
@@ -77,34 +69,19 @@ export default function PlanScreen() {
             <Title style={{ fontSize: 32 }}>{t('tabPlan')}</Title>
             <Caption>{t('planSub')}</Caption>
           </View>
-          <View style={styles.grid}>
-            {ids.map((id, i) => {
-              const [bg, fg] = SECTIONS[id].tone;
-              return (
-                <Reveal key={id} index={i} style={styles.cell}>
-                  <PressRow
-                    accessibilityRole="button"
-                    accessibilityLabel={t(`sec.${id}`)}
-                    onPress={() => setOpen(id)}
-                    style={[styles.tile, { backgroundColor: bg }]}
-                  >
-                    <Glyph icon={SECTIONS[id].icon} size={32} color={fg} strokeWidth={1.8} />
-                    <Text style={{ fontFamily: fonts.bold, fontSize: 19, lineHeight: 24, color: fg }}>
-                      {t(`sec.${id}`)}
-                    </Text>
-                  </PressRow>
-                </Reveal>
-              );
-            })}
-          </View>
+          <ListGroup>
+            {ids.map((id) => (
+              <ListRow
+                key={id}
+                lead={<Doodle name={SECTIONS[id].doodle} size={44} />}
+                title={t(`sec.${id}`)}
+                chevron
+                onPress={() => setOpen(id)}
+              />
+            ))}
+          </ListGroup>
         </>
       )}
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  cell: { width: '48%', flexGrow: 1 },
-  tile: { minHeight: 132, borderRadius: radii.xl, padding: 20, justifyContent: 'space-between', gap: 14 },
-});

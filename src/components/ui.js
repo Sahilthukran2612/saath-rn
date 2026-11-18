@@ -167,7 +167,7 @@ export function BigButton({ label, icon, onPress, kind = 'primary', style, hint 
 
 // A filled card (tonal surface, no border, no shadow). Depth is tone; nest nothing inside it.
 export function Card({ children, style, tone, ...rest }) {
-  const toneStyle = tone === 'tint' ? styles.cardTint : tone === 'haldi' ? styles.cardHaldi : null;
+  const toneStyle = tone === 'tint' ? styles.cardTint : tone === 'haldi' ? styles.cardHaldi : tone === 'carbon' ? styles.cardCarbon : null;
   return (
     <View style={[styles.card, toneStyle, style]} {...rest}>
       {children}
@@ -223,14 +223,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   btnRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  // a slip: white bill paper with a ballpoint-blue edge; tint is a pale wash, haldi the yellow copy, carbon the pink copy
   card: {
-    backgroundColor: colors.surfaceLow,
-    borderRadius: radii.lg,
+    backgroundColor: colors.white,
+    borderRadius: radii.md,
+    borderWidth: 1.5,
+    borderColor: colors.indigo,
     padding: sizes.gutter,
     gap: 10,
   },
   cardTint: { backgroundColor: colors.indigoTint },
   cardHaldi: { backgroundColor: colors.haldiTint },
+  cardCarbon: { backgroundColor: colors.carbon },
   chip: {
     minHeight: sizes.target - 8,
     paddingHorizontal: 16,

@@ -287,12 +287,12 @@ export function PassportSection() {
 }
 
 const styles = StyleSheet.create({
-  hero: { backgroundColor: colors.indigo, borderRadius: radii.hero, padding: 22, gap: 8 },
+  hero: { backgroundColor: colors.indigo, borderRadius: radii.md, padding: 22, gap: 8 },
   qrCard: {
     alignItems: 'center',
     gap: 10,
     backgroundColor: colors.white,
-    borderRadius: radii.hero,
+    borderRadius: radii.md,
     padding: 20,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.line,

@@ -162,8 +162,10 @@ export default function CircleScreen() {
 
 const styles = StyleSheet.create({
   group: {
-    backgroundColor: colors.surfaceLow,
-    borderRadius: 16,
+    backgroundColor: colors.white,
+    borderWidth: 1.5,
+    borderColor: colors.indigo,
+    borderRadius: 12,
     overflow: 'hidden',
   },
   member: { padding: 16, gap: 12 },

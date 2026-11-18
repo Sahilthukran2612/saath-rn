@@ -39,7 +39,14 @@ const TEXT = [
   [c.haldiDeep, c.haldiTint, 'note badge', 4.5],
   [c.ink, c.haldiTint, 'text on a note card', 4.5],
   [c.leafDeep, c.white, 'ok label on the confirm button', 4.5],
-  [c.white, c.leaf, 'ok button label', 3],
+  [c.white, c.leaf, 'ok button label', 4.5],
+  [c.stamp, c.white, 'rubber stamp word on a slip', 4.5],
+  [c.stamp, c.stampTint, 'rubber stamp on a tinted slip', 4.5],
+  [c.carbonDeep, c.carbon, 'kind chip on the pink slip', 4.5],
+  [c.haldiDeep, c.haldi, 'kind chip on the yellow slip', 4.5],
+  [c.ink, c.carbon, 'text on the pink slip', 4.5],
+  [c.ink, c.haldi, 'text on the yellow slip', 4.5],
+  [c.indigoDeep, c.white, 'slip title', 4.5],
 ];
 
 // Shapes and icons (not text): 3:1 against what they sit on.
@@ -50,7 +57,11 @@ const SHAPES = [
   [c.control, c.mist, 'field border on the page'],
   [c.white, c.control, 'switch knob on its off track'],
   [c.control, c.white, 'empty check circle'],
-  [c.haldi, c.indigoDeep, 'dye ring dots on the dark hero'],
+  [c.haldi, c.indigoDeep, 'dots on the dark hero'],
+  [c.indigo, c.carbon, 'slip edge on the pink copy'],
+  [c.indigo, c.haldi, 'slip edge on the yellow copy'],
+  [c.stamp, c.white, 'stamp ring'],
+  [c.indigo, c.white, 'tally strokes and doodles'],
 ];
 
 describe('text contrast (WCAG)', () => {
