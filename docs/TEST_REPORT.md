@@ -329,3 +329,19 @@ Prompted by a real gap: every install used to be shown the *person's* setup, so 
 What changed in the app: a first question ("I need care" / "I look after someone"); a separate care-giver setup (name, own account, invite code); a care-giver has only Today, Circle and Me, no motion sensing and no background service; Me has "How I use Saath" (I need care, I look after someone, Both); each person they look after is shown with their role ("You are their neighbour."); the invite form says the invited person must use the same number.
 
 Not tested: the care-giver setup on a phone; a real clinician or ASHA (roles are the person's choice and are not verified).
+
+## Stage: Counter Stamp look and suggestion slips (2026-11-18)
+
+| Check | Result |
+|---|---|
+| `npm test` | 586 passed, 32 suites (adds `suggestions`: 14 rule and wording tests, `pad`: 5 screen tests; `contrast` extended to the new world's colours) |
+| `npm run lint` | 0 errors |
+| Suggestion rules | 16 fixed rules. Tested: stock slips only when stock is low and rank first; a walk only after a logged meal; habits follow the clock; a hard week or crisis phase removes every "do more" slip; the pad is at most 4 and drops done or skipped slips for the day; the reducer resets it at midnight |
+| Wording scan | Every slip, English and Hindi, is checked for dose, medicine-instruction, diagnosis and sugar-level words (none) and for matching placeholders |
+| Pad on screen | Tested with fake time and reduced motion: first slip is the refill reminder, Stamp it moves to the next, Not today puts it aside, Hindi text, not shown on the family home |
+| Contrast | New pairs added and passing: stamp violet on paper and tint, chip ink on the pink and yellow slips, text on both slips, slip edges, tally strokes |
+| Release APK | Built (`dist\saath.apk`, 39.2 MB, 17:04) |
+
+What changed: new palette and slip surfaces on every screen; dye ring replaced by a stamped "I'm OK" and tally marks; Plan as a slip list with doodles; Safety hero and Care headings with doodles; Circle dividers as perforations; suggestion pad with animated stamp and tear-off (`docs/SUGGESTIONS.md`); DESIGN.md rewritten.
+
+**Not tested:** none of this has been seen rendered. No screenshot was taken (the emulator is not to be run) and the independent design review was therefore skipped. The stamp and tear-off animations have not run on a phone or a low-end device. The clinician review of the slip wording and the native-speaker review of the Hindi are not done.
