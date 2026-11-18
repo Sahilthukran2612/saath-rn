@@ -12,6 +12,7 @@ import {
 import { BigButton, Body, Caption, Card, Glyph, Title } from '../components/ui';
 import { ListGroup, ListRow, SectionTitle, Stat } from '../components/kit';
 import { Reveal } from '../components/motion';
+import Doodle from '../components/doodles';
 import HeartCard from '../components/safety/HeartCard';
 import { useNav } from '../components/nav';
 import { useStore } from '../state/store';
@@ -44,14 +45,19 @@ export default function SafetyScreen() {
 
       <Reveal index={0}>
         <View style={styles.hero}>
-          <View style={styles.heroIcon}>
-            <Glyph icon={ShieldCheck} size={34} color={colors.white} strokeWidth={2} />
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+            <Doodle name="walker" size={72} />
+            <View style={{ flex: 1, gap: 6 }}>
+              <View style={styles.watchChip}>
+                <Glyph icon={ShieldCheck} size={20} color={colors.leafDeep} strokeWidth={2.2} />
+                <Body bold style={{ color: colors.leafDeep }}>
+                  {state.background ? t('watch.bg') : t('watch.on')}
+                </Body>
+              </View>
+              <Body>{t('helpsNotice')}</Body>
+            </View>
           </View>
-          <Title style={{ color: colors.white, fontSize: 24 }}>
-            {state.background ? t('watch.bg') : t('watch.on')}
-          </Title>
-          <Body style={{ color: colors.indigoSoft }}>{t('helpsNotice')}</Body>
-          {!state.background ? <Caption style={{ color: colors.indigoSoft }}>{t('bg.note')}</Caption> : null}
+          {!state.background ? <Caption>{t('bg.note')}</Caption> : null}
         </View>
       </Reveal>
 
@@ -154,7 +160,7 @@ export default function SafetyScreen() {
               <BigButton
                 kind="quiet"
                 icon={RotateCcw}
-                label="Reset tally"
+                label={t('resetTally')}
                 onPress={() => dispatch({ type: 'RESET_TALLY' })}
               />
             </View>
@@ -169,17 +175,17 @@ export default function SafetyScreen() {
 }
 
 const styles = StyleSheet.create({
-  hero: { backgroundColor: colors.indigo, borderRadius: radii.md, padding: 24, gap: 8 },
-  heroIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: 'rgba(255,255,255,0.14)',
+  hero: { backgroundColor: colors.white, borderWidth: 1.5, borderColor: colors.indigo, borderRadius: radii.md, padding: 16, gap: 10 },
+  watchChip: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 4,
-  },
-  trialIcon: {
+    gap: 8,
+    alignSelf: 'flex-start',
+    backgroundColor: colors.leafTint,
+    borderRadius: radii.pill,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+  },  trialIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
