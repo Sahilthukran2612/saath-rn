@@ -1,4 +1,5 @@
 import { addReading } from '../heart';
+import { markSlip } from '../suggestions';
 import { CFG, clampDial, escalationChain, isDelegationActive, isInactive, validPhone } from '../logic';
 import { adjustBaseline, cfgFrom, defaultBaseline } from '../care';
 import { addCheckin, approveAdvance, declineAdvance, initialLadder, requestAdvance, stepBack } from '../plan';
@@ -95,6 +96,7 @@ export const initialState = {
   feeds: {}, // household_id -> latest events I am allowed to see (kept for offline reading)
   seen: {}, // household_id -> created_at of the newest event I have looked at
   baseline: defaultBaseline(), // personal thresholds, tuned by false-alarm and missed feedback
+  slips: { day: null, done: [], skipped: [] }, // suggestion slips stamped or put aside today (see suggestions.js)
   careEvents: { lastInsulinAt: null, lastMealAt: null }, // times only. Saath never records or suggests a dose
   meds: { name: 'Metformin (demo)', pillsLeft: 24, perDay: 2 },
   testPlan: { perDay: 2, strips: 20 }, // set by the clinician; Saath only counts
@@ -602,6 +604,8 @@ function baseReducer(state, a) {
       return { ...state, feeds: { ...state.feeds, [a.id]: a.events.slice(0, 30) } };
     case 'SEEN_SET':
       return { ...state, seen: { ...state.seen, [a.id]: a.at } };
+    case 'SLIP':
+      return { ...state, slips: markSlip(state.slips, a.id, a.how, a.now) };
     case 'INVITE_SYNCED':
       return { ...state, invites: state.invites.map((i) => (i.id === a.id ? { ...i, cloud: true } : i)) };
     case 'OUTBOX_SENT':

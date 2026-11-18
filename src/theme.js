@@ -1,38 +1,41 @@
-// Saath on Material 3. The brand arrives through theming: neel indigo is the seed, haldi the warm
-// tertiary, leaf means done, and brick is for real safety alerts only. Existing token names are kept
-// so every screen inherits the new system; the M3 role names below are the vocabulary for new work.
+// Saath, the counter stamp. A kirana bill book: white bill paper, ballpoint blue ink, a violet rubber
+// stamp for "done", carbon-pink and slip-yellow second copies, ledger green for OK. Brick is for real
+// safety alerts only. Token names are kept from the earlier system so every screen inherits the world.
 export const colors = {
-  indigo: '#26306B',
-  indigoDeep: '#171D4A',
-  indigoTint: '#E3E6F6',
-  indigoSoft: '#C9CEEA',
-  haldi: '#F2B134',
-  haldiTint: '#FDF1D6',
-  haldiDeep: '#8A5B00',
-  leaf: '#2F8F6B',
-  leafDeep: '#1D6B4E',
-  leafTint: '#E3F2EC',
-  brick: '#B3261E',
+  indigo: '#1B3FAE', // ballpoint blue: type accents, primary actions, doodles
+  indigoDeep: '#102A7A',
+  indigoTint: '#E7EDFC', // pale blue wash: selected states, quiet buttons
+  indigoSoft: '#BFCDF3',
+  haldi: '#FFE066', // the yellow third copy of a slip
+  haldiTint: '#FFF4BF',
+  haldiDeep: '#5E4800', // text on the yellow slip
+  leaf: '#1F6F4A', // ledger green: done and OK
+  leafDeep: '#14523A',
+  leafTint: '#E0F1E8',
+  brick: '#B3261E', // a real safety alert and nothing else
   brickTint: '#FBE9E7',
-  madder: '#9B3D2E',
-  mist: '#FBFBFF',
-  ink: '#1B1E2B',
-  inkSoft: '#4A4F66',
-  inkFaint: '#626780',
+  madder: '#9B3D2E', // mild warnings: low stock, missed, form errors
+  stamp: '#5B2A86', // violet rubber-stamp ink: the stamp only
+  stampTint: '#EEE5F7',
+  carbon: '#FFD9E4', // the pink second copy of a slip
+  carbonDeep: '#7A1F45', // text on the pink slip
+  mist: '#FFFFFF',
+  ink: '#10163A',
+  inkSoft: '#39426B',
+  inkFaint: '#525C86',
   white: '#FFFFFF',
-  line: '#E1E3EE',
-  lineStrong: '#C9CDDF', // decorative lines and ring tracks only: too faint to identify a control
-  control: '#7F86A0', // borders and off-states of controls (field border, switch off, empty check): 3.4:1 or more
+  line: '#DCE3F5',
+  lineStrong: '#BCC7E8', // decorative lines and perforations only
+  control: '#717AA3', // borders and off-states of controls: 3:1 or more
 
-  // Material 3 surface roles (tonal, tinted from the indigo seed). Depth is tone, not shadow.
-  surface: '#FBFBFF',
-  surfaceLow: '#F2F3FA', // cards and grouped lists
-  surfaceContainer: '#ECEEF7', // navigation bar, app bar on scroll
-  surfaceHigh: '#E6E8F3', // inputs, unselected tracks
-  outline: '#7F86A0',
-  outlineVariant: '#C9CDDF',
+  // Surface roles (bill paper tones). Depth is a slip lifting off the pad, not blur.
+  surface: '#FFFFFF',
+  surfaceLow: '#F4F6FD', // slips and grouped lists
+  surfaceContainer: '#EDF1FB', // navigation bar
+  surfaceHigh: '#E5EBF9', // inputs, unselected tracks
+  outline: '#717AA3',
+  outlineVariant: '#BCC7E8',
 };
-
 // Mukta carries Devanagari and Latin in one voice, so Hindi and English sit together.
 export const fonts = { regular: 'Mukta_400Regular', semi: 'Mukta_600SemiBold', bold: 'Mukta_700Bold' };
 

@@ -20,6 +20,7 @@ import { useNav } from '../components/nav';
 import { useNow } from '../components/useNow';
 import { taskIcon } from '../components/taskIcons';
 import RoutineEditor from '../components/RoutineEditor';
+import SuggestionPad from '../components/SuggestionPad';
 import { useStore } from '../state/store';
 import { adviceText } from '../i18n/strings';
 import { can, glucoseAdvice } from '../logic';
@@ -175,6 +176,9 @@ function TeenHome() {
         </View>
       </Reveal>
       <Reveal index={2}>
+        <SuggestionPad />
+      </Reveal>
+      <Reveal index={2}>
         <Body bold>{t('privacyDial')}</Body>
         <View style={{ height: 8 }} />
         <ListGroup>
@@ -246,6 +250,9 @@ function AdultHome() {
         </View>
       </Reveal>
       <Reveal index={2}>
+        <SuggestionPad />
+      </Reveal>
+      <Reveal index={2}>
         <View style={styles.statRow}>
           <Stat
             value={refill.daysLeft ?? '–'}
@@ -283,6 +290,9 @@ function PersonHome() {
         <ImOkHero />
       </Reveal>
       <Reveal index={2}>
+        <SuggestionPad />
+      </Reveal>
+      <Reveal index={3}>
         <TaskList big />
       </Reveal>
     </>

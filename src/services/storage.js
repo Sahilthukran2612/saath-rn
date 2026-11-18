@@ -33,6 +33,7 @@ const PERSIST = [
   'seen',
   'baseline',
   'careEvents',
+  'slips',
   'meds',
   'testPlan',
   'budget',
