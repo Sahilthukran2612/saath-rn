@@ -16,6 +16,10 @@ import {
 
 const POLL_MS = 30000;
 
+// The Send now button asks for a pass right away instead of waiting for the next 30 seconds.
+const listeners = new Set();
+export const requestSync = () => listeners.forEach((f) => f());
+
 // One sync pass at a time, in order (refresh tokens rotate, so two passes must never race):
 // 1. send waiting events, 2. publish new invites, 3. share my name, 4. read the circles I am in
 // and their latest events. Quiet when offline, signed out, or with no server configured.
@@ -33,6 +37,12 @@ export default function useCloudSync() {
   useEffect(() => {
     latest.current = state;
   });
+
+  useEffect(() => {
+    const f = () => setTick((n) => n + 1);
+    listeners.add(f);
+    return () => listeners.delete(f);
+  }, []);
 
   useEffect(() => {
     if (!access) return undefined;
@@ -61,9 +71,15 @@ export default function useCloudSync() {
       }
 
       for (const inv of latest.current.invites.filter((i) => i.status === 'pending' && !i.cloud)) {
-        const r = await createInvite(cfg, cloud, inv);
+        let r;
+        try {
+          r = await createInvite(cfg, cloud, inv);
+        } catch {
+          r = { ok: false, status: 'net' }; // no connection: the invite stays waiting
+        }
         keep(r.session);
         if (r.ok) dispatch({ type: 'INVITE_SYNCED', id: inv.id });
+        keep({ inviteFail: r.ok ? null : r.status || 'net' });
       }
 
       const nm = latest.current.profile.name;

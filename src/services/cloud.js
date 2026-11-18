@@ -187,7 +187,7 @@ export async function createInvite(cfg, cloud, inv, fetchImpl) {
     fetchImpl
   );
   // 409 means the code is already there (sent before, reply lost): count that as done
-  return { ok: res.ok || res.status === 409, session };
+  return { ok: res.ok || res.status === 409, status: res.status, session };
 }
 
 export async function acceptInvite(cfg, cloud, code, fetchImpl) {

@@ -4,14 +4,17 @@ import { Send, UserPlus } from '../icons';
 import { BigButton, Body, Caption, Card, Chip, Glyph, Title } from '../ui';
 import { Avatar, Badge, Field, ListGroup, ListRow } from '../kit';
 import { useStore } from '../../state/store';
-import { inviteLink, validPhone } from '../../logic';
+import { validPhone } from '../../logic';
+import { requestSync } from '../../state/useCloudSync';
+import { fmt } from '../../circleFeed';
 import { colors } from '../../theme';
 
 const ROLES = ['family', 'neighbour', 'asha', 'clinician'];
 const newCode = () => (Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)).slice(0, 8).toUpperCase();
 
-// Invite by phone number or link. The link is shared through the phone's own share sheet
-// (WhatsApp, SMS). Joining is simulated until real accounts exist (Phase 4).
+// Invite by phone number. The code is shared as plain text through the phone's own share sheet (WhatsApp,
+// SMS). No web link is used: there is no website for it to open. The invite only works once it has reached
+// the server, so each waiting invite says whether it has, and offers Send now when it has not.
 export default function InviteSection() {
   const { state, dispatch, t } = useStore();
   const [name, setName] = useState('');
@@ -35,13 +38,16 @@ export default function InviteSection() {
     setName('');
     setPhone('');
     try {
-      await Share.share({ message: `${t('inviteTitle')}: ${inviteLink(code)}` });
+      await Share.share({ message: fmt(t('inv.message'), { code }) });
     } catch {
       // the invite is saved even if the share sheet is dismissed
     }
   };
 
   const pending = state.invites.filter((i) => i.status === 'pending');
+  const unsent = pending.filter((i) => !i.cloud);
+  const signedIn = !!state.cloud?.access;
+  const failed = !!state.cloud?.inviteFail;
   return (
     <Card style={{ gap: 14 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -79,15 +85,27 @@ export default function InviteSection() {
               key={i.id}
               lead={<Avatar name={i.name} role={i.role} />}
               title={i.name}
-              subtitle={t(`role.${i.role}`)}
-              trailing={<Badge label={t('invitePending')} tone="haldi" />}
-              onPress={() => dispatch({ type: 'INVITE_ACCEPT', id: i.id })}
+              subtitle={`${t(`role.${i.role}`)}. ${fmt(t('inv.code'), { code: i.code })}`}
+              trailing={<Badge label={i.cloud ? t('inv.sentBadge') : t('invitePending')} tone={i.cloud ? 'leaf' : 'haldi'} />}
+              onPress={state.demo ? () => dispatch({ type: 'INVITE_ACCEPT', id: i.id }) : undefined}
               label={t('inviteAcceptSim')}
               chevron={false}
             />
           ))}
         </ListGroup>
       ) : null}
+      {unsent.length > 0 ? (
+        <View style={{ gap: 10 }}>
+          <Body bold style={{ color: colors.madder }}>
+            {signedIn ? t('inv.notSent') : t('inv.needSignIn')}
+          </Body>
+          {signedIn && failed ? <Body style={{ color: colors.madder }}>{t('inv.failed')}</Body> : null}
+          {signedIn ? <BigButton kind="quiet" icon={Send} label={t('inv.sendNow')} onPress={requestSync} /> : null}
+        </View>
+      ) : pending.length > 0 ? (
+        <Caption>{t('inv.sent')}</Caption>
+      ) : null}
+      {pending.length > 0 && state.demo ? <Caption>{t('inv.demoNote')}</Caption> : null}
     </Card>
   );
 }
