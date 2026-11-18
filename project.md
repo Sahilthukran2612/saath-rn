@@ -55,6 +55,9 @@ It is not a medical device, not a diagnosis tool, not an emergency service. It d
 ### 4.1 Today
 A greeting, one hero, then the day's routine. For the elder, the hero is the **dye ring**: one dot per task around an "I'm OK" seal; as tasks are ticked the dots fill. Tapping "I'm OK" tells the circle in plain words.
 
+### 4.1.1 Today's slips and the visual world
+The person's Today screen carries a pad of up to four suggestion slips (Care and Habit), drawn as bill-book slips and stamped when done. They are fixed hand-written cards chosen by rules from what the person entered and the clock, never a dose or a diagnosis (`docs/SUGGESTIONS.md`). The whole app is drawn as a kirana bill book, the Counter Stamp world (`DESIGN.md`): white slips, ballpoint blue, a violet rubber stamp, carbon-pink and yellow copies, ballpoint doodles. Not yet seen on a phone.
+
 ### 4.2 Circle
 The member list with avatars, the **Privacy Dial** per member, **Time Off**, an invite form (name, phone, role), **Ask for help** (a task delegated for one hour or one day that expires by itself), a "who viewed what" log, and, once synced, **People I look after** with a feed of what the server allows you to see.
 
