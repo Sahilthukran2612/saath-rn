@@ -122,7 +122,7 @@ describe('demo mode on a real install', () => {
   test('turning demo off also removes the demo person I look after', () => {
     let s = reducer(real, { type: 'DEMO_ON' });
     s = reducer(s, { type: 'DEMO_CIRCLE_ADD', at: 1_000_000 });
-    expect(s.circles.length).toBe(1);
+    expect(s.circles.length).toBe(3); // a guardian, a neighbour and a doctor demo patient
     expect(reducer(s, { type: 'DEMO_OFF' }).circles).toEqual([]);
   });
 });
@@ -144,7 +144,7 @@ describe('the first-run setup', () => {
     await fireEvent.changeText(screen.getByLabelText('Name'), 'Asha');
     await fireEvent.changeText(screen.getByLabelText('Phone number'), '9876543210');
     await fireEvent.press(screen.getByLabelText('Add contact'));
-    await waitFor(() => expect(screen.getByText('Family, 9876543210')).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('Guardian, 9876543210')).toBeTruthy());
     expect(screen.queryByText('Without a contact, an alert has no one to reach.')).toBeNull();
     await fireEvent.press(screen.getByLabelText('Next'));
     expect(screen.getByText('How should alerts work?')).toBeTruthy();

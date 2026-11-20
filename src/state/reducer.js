@@ -479,24 +479,31 @@ function baseReducer(state, a) {
     // Demo only: a person I look after, and what they send. It goes through the same feed, banner and
     // wording as the real server data, so the screens shown are the real ones.
     case 'DEMO_CIRCLE_ADD': {
+      // Three made-up people, one for each way of looking after someone, so every dashboard can be shown with no server.
       if (state.circles.some((c) => c.household_id === 'demo-amma')) return state;
       const iso = (min) => new Date(a.at - min * 60000).toISOString();
+      const demo = [
+        { household_id: 'demo-amma', role: 'family', dial: 1, time_off: false, person_name: 'Amma (demo)' },
+        { household_id: 'demo-chacha', role: 'neighbour', dial: 0, time_off: false, person_name: 'Chacha (demo)' },
+        { household_id: 'demo-sita', role: 'clinician', dial: 2, time_off: false, person_name: 'Sita (demo)' },
+      ];
       return {
         ...state,
-        circles: [
-          ...state.circles,
-          { household_id: 'demo-amma', role: ['neighbour', 'asha', 'clinician'].includes(state.role) ? state.role : 'family', dial: 1, time_off: false, person_name: 'Amma (demo)' },
-        ],
+        circles: [...state.circles, ...demo],
         feeds: {
           ...state.feeds,
           'demo-amma': [
             { id: 'demo-2', event_type: 1, kind: 'task_done', detail: 'Lunch', created_at: iso(25) },
-            { id: 'demo-1', event_type: 1, kind: 'im_ok', detail: null, created_at: iso(180) },
+            { id: 'demo-1', event_type: 0, kind: 'im_ok', detail: null, created_at: iso(180) },
+          ],
+          'demo-chacha': [{ id: 'demo-c1', event_type: 0, kind: 'im_ok', detail: null, created_at: iso(300) }],
+          'demo-sita': [
+            { id: 'demo-s2', event_type: 1, kind: 'task_done', detail: 'Morning medicine', created_at: iso(90) },
+            { id: 'demo-s1', event_type: 0, kind: 'im_ok', detail: null, created_at: iso(240) },
           ],
         },
       };
-    }
-    case 'DEMO_CIRCLE_EVENT': {
+    }    case 'DEMO_CIRCLE_EVENT': {
       const feed = state.feeds['demo-amma'];
       if (!feed) return state;
       const safety = a.kind === 'fall' || a.kind === 'quiet' || a.kind === 'false_alarm';

@@ -104,8 +104,8 @@ describe('Care and alert screens', () => {
     expect(screen.queryByPlaceholderText(/units|dose/i)).toBeNull();
     expect(screen.getByText('Saath records only the time, never the amount.')).toBeTruthy();
   });
-  test('a neighbour has no Care tab, so cannot see the Care cards', async () => {
-    await mount({ role: 'neighbour' });
+  test('someone who only looks after people has no Care tab, so cannot see the Care cards', async () => {
+    await mount({ usage: 'member' });
     expect(screen.queryByLabelText('Care')).toBeNull();
     expect(screen.queryByText('Sugar log')).toBeNull();
   });

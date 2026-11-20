@@ -5,13 +5,14 @@ import AppShell from '../src/AppShell';
 import { initialState, reducer } from '../src/state/reducer';
 import { heartStatus } from '../src/heart';
 
+// Someone who looks after people has one screen with all of them, so these tests mount as that kind of user.
 const mount = (preload) =>
   render(
-    <StoreProvider preload={preload}>
+    <StoreProvider preload={{ usage: 'member', ...preload }}>
       <AppShell sensing={false} />
     </StoreProvider>
   );
-const openCircle = async () => fireEvent.press(screen.getByLabelText('Circle'));
+const openCircle = async () => {};
 
 describe('demo: a person I look after (no server)', () => {
   test('the section and the demo buttons show in demo mode even without a server', async () => {
@@ -59,7 +60,6 @@ describe('demo: a person I look after (no server)', () => {
   test('outside demo mode, with no server, none of it shows', async () => {
     await mount({ demo: false });
     await openCircle();
-    expect(screen.queryByText('People I look after')).toBeNull();
     expect(screen.queryByLabelText('Demo: add a person I look after')).toBeNull();
   });
 });

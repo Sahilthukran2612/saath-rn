@@ -213,9 +213,13 @@ describe('Circle', () => {
   test('the privacy dial is a control per member and shows who is chosen', async () => {
     await mountApp({});
     await fireEvent.press(screen.getByLabelText('Circle'));
-    expect(screen.getAllByLabelText('Safety only').length).toBe(4);
-    const full = screen.getAllByLabelText('Full')[0];
-    expect(full.props.accessibilityState.selected).toBe(true); // Asha starts at Full
+    // one switch per person in the circle: who is in the privacy dial, and who is not
+    expect(screen.getAllByLabelText(/In my privacy dial/).length).toBe(4);
+    expect(screen.getAllByLabelText('In my privacy dial: on').length).toBe(3);
+    expect(screen.getAllByLabelText('Full')[0].props.accessibilityState.selected).toBe(true); // Asha starts at Full
+    // switching someone in shows their level
+    await fireEvent.press(screen.getByLabelText('In my privacy dial: off'));
+    expect(screen.getAllByLabelText('In my privacy dial: on').length).toBe(4);
     await fireEvent.press(screen.getAllByLabelText('Full')[1]);
     expect(screen.getAllByLabelText('Full')[1].props.accessibilityState.selected).toBe(true);
   });

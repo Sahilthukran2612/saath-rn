@@ -91,7 +91,7 @@ describe('the care-giver setup (family, neighbour, ASHA, clinician)', () => {
     await fireEvent.press(screen.getByLabelText('Next'));
     expect(screen.getByText('Circles you have joined: 1')).toBeTruthy();
     await fireEvent.press(screen.getByLabelText('Start'));
-    await waitFor(() => expect(screen.getByLabelText('Today')).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('People I look after')).toBeTruthy());
   });
   test('skipping the code still opens the app, with a clear message that nobody is joined yet', async () => {
     await mount({ ...productionState, usage: 'member', cloud: signedIn });
@@ -105,14 +105,16 @@ describe('the care-giver setup (family, neighbour, ASHA, clinician)', () => {
 describe('the care-giver\u2019s app', () => {
   const memberApp = { ...productionState, usage: 'member', onboarded: true, cloud: signedIn, circles: [neighbourOf], feeds: { hx: [] } };
 
-  test('has only the tabs that are theirs: Today, Circle and Me', async () => {
+  test('has one screen with all their people, no tab bar, and Me from the avatar', async () => {
     await mount(memberApp);
-    ['Today', 'Circle', 'Me'].forEach((l) => expect(screen.getByLabelText(l)).toBeTruthy());
-    ['Safety', 'Care', 'Plan'].forEach((l) => expect(screen.queryByLabelText(l)).toBeNull());
+    expect(screen.getByText('People I look after')).toBeTruthy();
+    ['Today', 'Circle', 'Safety', 'Care', 'Plan'].forEach((l) => expect(screen.queryByLabelText(l)).toBeNull());
+    expect(screen.getByLabelText('Me')).toBeTruthy();
   });
-  test('Today names each person they look after and their role in that circle', async () => {
+  test('the dashboard names each person they look after and their role with that person', async () => {
     await mount(memberApp);
-    expect(screen.getByText('Amma: you are their Neighbour.')).toBeTruthy();
+    expect(screen.getByLabelText('Amma')).toBeTruthy();
+    expect(screen.getByText(/Neighbour ·/)).toBeTruthy();
   });
   test('opening a person says what role they have and what they may see', async () => {
     await mount(memberApp);
@@ -177,7 +179,6 @@ describe('inviting someone', () => {
   });
   test('the joining card tells the care-giver which number to sign in with', async () => {
     await mount({ ...productionState, usage: 'member', onboarded: true });
-    await fireEvent.press(screen.getByLabelText('Circle'));
     await fireEvent.press(screen.getByLabelText('I have an invite code'));
     expect(screen.getByText(/only works for the phone number the person entered for you/)).toBeTruthy();
   });

@@ -23,6 +23,7 @@ import RoutineEditor from '../components/RoutineEditor';
 import SuggestionPad from '../components/SuggestionPad';
 import { MedicinesNow } from '../components/care/Medicines';
 import PlanNotice from '../components/care/PlanNotice';
+import PatientsHome from '../components/patients/PatientsHome';
 import Stamp, { StampMark } from '../components/Stamp';
 import Perf from '../components/Perf';
 import Doodle from '../components/doodles';
@@ -481,35 +482,13 @@ function RealProHome() {
   );
 }
 
-// The home of someone who looks after a person: who they look after and what role they have, then the list.
-function MemberHome() {
-  const { state, t } = useStore();
-  return (
-    <View style={{ gap: 14 }}>
-      {state.circles.length === 0 ? (
-        <Card tone="haldi" style={{ gap: 6 }}>
-          <Body bold>{t('mh.empty')}</Body>
-          <Caption style={{ color: colors.ink }}>{t('mo.noCode')}</Caption>
-        </Card>
-      ) : (
-        state.circles.map((c) => (
-          <Caption key={c.household_id}>
-            {t('mh.line').replace('{name}', c.person_name || t('cf.someone')).replace('{role}', t(`role.${c.role}`))}
-          </Caption>
-        ))
-      )}
-      <CirclesSection />
-    </View>
-  );
-}
-
 export default function TodayScreen() {
   const { state, t } = useStore();
   if (state.usage === 'member')
     return (
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 20, paddingTop: 8, gap: 18 }}>
         <Greeting />
-        <MemberHome />
+        <PatientsHome />
       </ScrollView>
     );
   let body;

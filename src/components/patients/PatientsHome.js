@@ -1,0 +1,115 @@
+import React, { useState } from 'react';
+import { View } from 'react-native';
+import Text from '../AppText';
+import { BigButton, Body, Caption, Card } from '../ui';
+import { Avatar, Badge, ListGroup, ListRow, SectionTitle } from '../kit';
+import { useStore } from '../../state/store';
+import { useNow } from '../useNow';
+import { nowMs } from '../../services/clock';
+import { describeEvent, newest, pendingAlert } from '../../circleFeed';
+import JoinCard from '../circle/JoinCard';
+import PatientPanel from './PatientPanel';
+import { colors, fonts, radii } from '../../theme';
+
+const ROLE_ORDER = ['family', 'clinician', 'asha', 'neighbour'];
+
+// Joining is the less common path, so it sits behind one plain link.
+function JoinLink() {
+  const { t } = useStore();
+  const [open, setOpen] = useState(false);
+  if (open) return <JoinCard onJoined={() => setOpen(false)} />;
+  return <BigButton kind="text" label={t('join.link')} onPress={() => setOpen(true)} />;
+}
+
+// The home of everyone who looks after someone: all their people in one place. The role is per person, because the
+// same phone can be a guardian for one, a neighbour for another and a doctor for a third. What each role gets to see
+// is decided by the server under that person's privacy dial; this screen only words it. Most urgent first.
+export default function PatientsHome() {
+  const { state, dispatch, t } = useStore();
+  const now = useNow();
+  const [open, setOpen] = useState(null); // household id
+  const nameOf = (c) => c.person_name || t('cf.someone');
+  const alertOf = (c) => pendingAlert(state.feeds[c.household_id] || [], state.seen[c.household_id], now);
+
+  const circle = state.circles.find((c) => c.household_id === open);
+  if (circle) return <PatientPanel circle={circle} onBack={() => setOpen(null)} />;
+
+  const all = state.circles;
+  const needing = all.filter(alertOf).length;
+  const roles = ROLE_ORDER.filter((r) => all.some((c) => c.role === r));
+  const grouped = roles.length > 1;
+
+  const row = (c, i, list) => {
+    const feed = state.feeds[c.household_id] || [];
+    const alert = alertOf(c);
+    const latest = feed[0];
+    return (
+      <ListRow
+        key={c.household_id}
+        lead={<Avatar name={nameOf(c)} role={c.role} size={44} />}
+        title={nameOf(c)}
+        subtitle={`${t(`role.${c.role}`)} · ${latest ? describeEvent(latest, nameOf(c), t) : t('cf.empty')}`}
+        trailing={<Badge tone={alert ? 'brick' : 'leaf'} label={alert ? t('tabSafety') : t('pt.ok')} />}
+        label={nameOf(c)}
+        onPress={() => {
+          setOpen(c.household_id);
+          if (newest(feed)) dispatch({ type: 'SEEN_SET', id: c.household_id, at: newest(feed) });
+        }}
+        last={i === list.length - 1}
+      />
+    );
+  };
+
+  return (
+    <View style={{ gap: 16 }}>
+      <View
+        style={{ backgroundColor: needing ? colors.brick : colors.indigo, borderRadius: radii.xl, padding: 22, gap: 4 }}
+        accessibilityRole="header"
+      >
+        <Text style={{ fontFamily: fonts.semi, fontSize: 16, lineHeight: 22, color: '#EEF3FF' }}>{t('pt.title')}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 10 }}>
+          <Text style={{ fontFamily: fonts.bold, fontSize: 56, lineHeight: 64, color: colors.white }}>{all.length}</Text>
+          <Text style={{ fontFamily: fonts.semi, fontSize: 20, lineHeight: 28, color: '#EEF3FF', flex: 1 }}>
+            {all.length === 0 ? t('pt.none') : needing ? t('pt.need').replace('{n}', String(needing)) : t('pt.allWell')}
+          </Text>
+        </View>
+      </View>
+
+      {all.length === 0 ? (
+        <Card tone="tint">
+          <Body bold>{t('mh.empty')}</Body>
+        </Card>
+      ) : grouped ? (
+        roles.map((r) => {
+          const list = all.filter((c) => c.role === r).sort((a, b) => Number(!!alertOf(b)) - Number(!!alertOf(a)));
+          return (
+            <View key={r} style={{ gap: 8 }}>
+              <SectionTitle>{t(`pt.as.${r}`)}</SectionTitle>
+              <ListGroup>{list.map((c, i) => row(c, i, list))}</ListGroup>
+            </View>
+          );
+        })
+      ) : (
+        <ListGroup>
+          {[...all]
+            .sort((a, b) => Number(!!alertOf(b)) - Number(!!alertOf(a)))
+            .map((c, i, list) => row(c, i, list))}
+        </ListGroup>
+      )}
+
+      {state.demo ? (
+        <Card tone="haldi" style={{ gap: 10 }}>
+          <Caption style={{ color: colors.ink }}>{t('demo.circleNote')}</Caption>
+          <BigButton kind="quiet" label={t('demo.circleAdd')} onPress={() => dispatch({ type: 'DEMO_CIRCLE_ADD', at: nowMs() })} />
+          {state.circles.some((c) => c.household_id === 'demo-amma') ? (
+            <>
+              <BigButton kind="quiet" label={t('demo.circleFall')} onPress={() => dispatch({ type: 'DEMO_CIRCLE_EVENT', kind: 'fall', at: nowMs() })} />
+              <BigButton kind="quiet" label={t('demo.circleOk')} onPress={() => dispatch({ type: 'DEMO_CIRCLE_EVENT', kind: 'im_ok', at: nowMs() })} />
+            </>
+          ) : null}
+        </Card>
+      ) : null}
+      <JoinLink />
+    </View>
+  );
+}

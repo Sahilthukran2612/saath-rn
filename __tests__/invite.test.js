@@ -54,7 +54,7 @@ describe('sending an invite', () => {
 
   test('the code is shown on the waiting row, and tapping it does not mark anyone as joined outside demo', async () => {
     await invite({ demo: false, cloud: SIGNED });
-    const row = await screen.findByText(/Family\. Code: [A-Z0-9]{8}/);
+    const row = await screen.findByText(/Guardian\. Code: [A-Z0-9]{8}/);
     await fireEvent.press(row);
     expect(screen.queryByText('Waiting')).toBeTruthy(); // still waiting: nothing was accepted locally
   });

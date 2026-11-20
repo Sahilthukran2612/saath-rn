@@ -268,9 +268,8 @@ describe('screens', () => {
   });
 
   test('joining without being signed in says to sign in first', async () => {
-    await mount({});
-    await fireEvent.press(screen.getByLabelText('Circle'));
-    expect(screen.getByText('You are not in anyone\'s circle yet.')).toBeTruthy();
+    await mount({ usage: 'member' });
+    expect(screen.getByText(/You have not joined anyone/)).toBeTruthy();
     await fireEvent.press(screen.getByLabelText('I have an invite code'));
     await fireEvent.changeText(screen.getByLabelText('Invite code'), 'abc123');
     await fireEvent.press(screen.getByLabelText('Join'));

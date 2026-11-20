@@ -204,8 +204,7 @@ describe('on the Circle screen', () => {
   test('the demo person can be paused locally without any server', async () => {
     delete process.env.EXPO_PUBLIC_SAATH_API_URL;
     global.fetch = jest.fn();
-    await mount({ demo: true });
-    await openCircle();
+    await mount({ demo: true, usage: 'member' });
     await fireEvent.press(screen.getByLabelText('Demo: add a person I look after'));
     await fireEvent.press(screen.getByLabelText('Amma (demo)'));
     await fireEvent.press(screen.getByLabelText('Pause routine updates from them: off'));

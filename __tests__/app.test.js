@@ -32,11 +32,10 @@ test("simulate fall opens the alert, I'm OK closes it", async () => {
   expect(screen.queryByText('Are you OK?')).toBeNull();
 });
 
-test.each(['neighbour', 'asha', 'clinician'])('%s has no Care or Plan tab, only Today and Circle', async (role) => {
-  await mount({ role });
-  expect(screen.queryByLabelText('Care')).toBeNull();
-  expect(screen.queryByLabelText('Plan')).toBeNull();
-  expect(screen.getByLabelText('Circle')).toBeTruthy();
+test('someone who only looks after people has one screen: no Care, Plan, Safety or Circle tabs', async () => {
+  await mount({ usage: 'member' });
+  ['Care', 'Plan', 'Safety', 'Circle'].forEach((l) => expect(screen.queryByLabelText(l)).toBeNull());
+  expect(screen.getByLabelText('Me')).toBeTruthy();
 });
 
 test('Hindi strings switch', async () => {

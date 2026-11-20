@@ -76,34 +76,9 @@ describe('Plan screen', () => {
     expect(screen.getByLabelText('Handing over care')).toBeTruthy();
     expect(screen.getByLabelText('School plan')).toBeTruthy();
   });
-  test('a neighbour has no Plan tab', async () => {
-    await mount({ role: 'neighbour' });
+  test('someone who only looks after people has no Plan tab', async () => {
+    await mount({ usage: 'member' });
     expect(screen.queryByLabelText('Plan')).toBeNull();
-  });
-  test('a family member sees only the ladder and can agree to a step', async () => {
-    const ladder = [
-      { id: 'refills', stage: 0, pending: true },
-      { id: 'explain', stage: 0, pending: false },
-      { id: 'visitPrep', stage: 0, pending: false },
-      { id: 'badDays', stage: 0, pending: false },
-    ];
-    await mount({ mode: 'teen', consent, role: 'family', ladder });
-    await fireEvent.press(screen.getByLabelText('Plan'));
-    expect(screen.queryByLabelText('Visit prep')).toBeNull();
-    await fireEvent.press(screen.getByLabelText('Handing over care'));
-    await fireEvent.press(screen.getByLabelText('Agree'));
-    expect(screen.queryByText('Waiting for a parent to agree')).toBeNull();
-  });
-  test('a family view of the ladder is written to the audit log', async () => {
-    await mount({ mode: 'teen', consent, role: 'family' });
-    await fireEvent.press(screen.getByLabelText('Plan'));
-    await fireEvent.press(screen.getByLabelText('Handing over care'));
-    // switch to the person (demo role bar) and read the log they can see
-    await fireEvent.press(screen.getByLabelText('Person'));
-    await fireEvent.press(screen.getByLabelText('Circle'));
-    expect(screen.getByText('Handing over care')).toBeTruthy();
-    // the audit subtitle is "<role>, <time>", so it starts with a digit after the comma
-    expect(screen.getByText(/^Family, \d/)).toBeTruthy();
   });
   test('the teen can mark a step ready, and the stage name updates', async () => {
     await mount({ mode: 'teen', consent });

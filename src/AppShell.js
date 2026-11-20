@@ -5,7 +5,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useStore } from './state/store';
 import { colors, fonts, themeName } from './theme';
-import RoleBar from './components/RoleBar';
 import AlertBanner from './components/AlertBanner';
 import CircleAlertBanner from './components/CircleAlertBanner';
 import HeartNotice from './components/HeartNotice';
@@ -176,8 +175,9 @@ export default function AppShell({ sensing = true }) {
   // "Me" is the account avatar in the top app bar for everyone.
   // Care and Plan hold the person's own sugar log, medicine, food and handover. A neighbour, an ASHA or a clinician
   // is not that person, so they get only what they act on: the people they look after, and the circle.
-  const onlyCircle = state.usage === 'member' || ['neighbour', 'asha', 'clinician'].includes(state.role);
-  const tabs = onlyCircle ? NAV_TABS.filter(([id]) => ['today', 'circle'].includes(id)) : NAV_TABS;
+  // Someone who only looks after people has one screen: all of their people. The role (guardian, neighbour, doctor)
+  // belongs to each person they look after, so it shows inside that person's panel, not as a tab.
+  const tabs = state.usage === 'member' ? NAV_TABS.filter(([id]) => id === 'today') : NAV_TABS;
   const current = tab === 'me' || tabs.some(([id]) => id === tab) ? tab : 'today';
   const Screen = SCREENS[current];
   const onMe = current === 'me';
@@ -194,7 +194,6 @@ export default function AppShell({ sensing = true }) {
       <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
         <NavContext.Provider value={setTab}>
           <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
-          <RoleBar />
           <View style={styles.header}>
             {onMe ? (
               <PressRow
@@ -255,7 +254,7 @@ export default function AppShell({ sensing = true }) {
               </Reveal>
             ) : null}
           </View>
-          <TabBar tab={current} onChange={setTab} t={t} tabs={tabs} />
+          {tabs.length > 1 ? <TabBar tab={current} onChange={setTab} t={t} tabs={tabs} /> : null}
         </NavContext.Provider>
       </KeyboardAvoidingView>
     </SafeAreaView>

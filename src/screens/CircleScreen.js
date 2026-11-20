@@ -71,11 +71,23 @@ function MemberRow({ m, last }) {
         </View>
       ) : null}
       {isPerson ? (
-        <Segmented
-          value={m.dial}
-          onChange={(dial) => dispatch({ type: 'SET_DIAL', id: m.id, dial })}
-          options={[0, 1, 2].map((d) => ({ value: d, label: t(`dial${d}`) }))}
-        />
+        <View style={{ gap: 10 }}>
+          <View style={styles.inlineToggle}>
+            <Body style={{ flex: 1 }}>{t('dial.in')}</Body>
+            <Toggle
+              value={m.dial > 0}
+              label={t('dial.in')}
+              onValueChange={(on) => dispatch({ type: 'SET_DIAL', id: m.id, dial: on ? 1 : 0 })}
+            />
+          </View>
+          {m.dial > 0 ? (
+            <Segmented
+              value={m.dial}
+              onChange={(dial) => dispatch({ type: 'SET_DIAL', id: m.id, dial })}
+              options={[1, 2].map((d) => ({ value: d, label: t(`dial${d}`) }))}
+            />
+          ) : null}
+        </View>
       ) : (
         <Badge label={t(`dial${m.dial}`)} tone={m.dial === 2 ? 'indigo' : m.dial === 1 ? 'leaf' : 'haldi'} />
       )}
@@ -127,9 +139,11 @@ export default function CircleScreen() {
           <JoinedSection />
         </Reveal>
       ) : null}
-      <Reveal index={4}>
-        <CirclesSection />
-      </Reveal>
+      {state.circles.length > 0 ? (
+        <Reveal index={4}>
+          <CirclesSection />
+        </Reveal>
+      ) : null}
       <Reveal index={5}>
         <SectionTitle>{t('whoViewed')}</SectionTitle>
         <View style={{ height: 8 }} />
