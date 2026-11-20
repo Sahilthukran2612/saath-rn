@@ -41,9 +41,16 @@ export default function OnboardingScreen() {
         <View
           accessibilityRole="progressbar"
           accessibilityValue={{ min: 1, max: STEPS, now: step + 1 }}
-          style={{ height: 4, borderRadius: 2, backgroundColor: colors.indigoTint, overflow: 'hidden' }}
+          style={{ height: 8, borderRadius: 4, backgroundColor: colors.indigoTint, overflow: 'hidden' }}
         >
-          <View style={{ height: 4, borderRadius: 2, backgroundColor: colors.indigo, width: `%` }} />
+          <View
+            style={{
+              height: 8,
+              borderRadius: 4,
+              backgroundColor: colors.indigo,
+              width: `${((step + 1) / STEPS) * 100}%`,
+            }}
+          />
         </View>
         <Caption>
           {t('ob.step')
