@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
   checkRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 64, paddingHorizontal: 16 },
   checkDivider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
   schoolCard: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.paper,
     borderRadius: radii.md,
     overflow: 'hidden',
     borderWidth: StyleSheet.hairlineWidth,

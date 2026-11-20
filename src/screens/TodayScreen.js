@@ -501,7 +501,7 @@ const styles = StyleSheet.create({
   taskDivider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.outlineVariant },
   taskIcon: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
   slip: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.paper,
     borderRadius: radii.md,
     borderWidth: 1.5,
     borderColor: colors.indigo,
@@ -520,7 +520,7 @@ const styles = StyleSheet.create({
   },  hero: { backgroundColor: colors.indigo, borderRadius: radii.md, padding: 24, gap: 10 },
   heroLink: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', minHeight: 48 },
   heroLight: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.paper,
     borderRadius: radii.md,
     borderWidth: 1.5,
     borderColor: colors.indigo,

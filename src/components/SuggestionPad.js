@@ -65,7 +65,7 @@ function TopSlip({ slip, index, total, onDone, lang, nowMs }) {
         opacity: x.interpolate({ inputRange: [0, 0.8, 1], outputRange: [1, 1, 0] }),
       }}
     >
-      <View style={{ backgroundColor: colors.white, borderRadius: radii.md, borderWidth: 1.5, borderColor: colors.indigo, padding: 16, gap: 10 }}>
+      <View style={{ backgroundColor: colors.paper, borderRadius: radii.md, borderWidth: 1.5, borderColor: colors.indigo, padding: 16, gap: 10 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View
             style={{
@@ -201,7 +201,7 @@ export default function SuggestionPad() {
         <Title style={{ fontSize: 22 }}>{t('sg.title')}</Title>
       </View>
       {pad.length === 0 ? (
-        <View style={{ backgroundColor: colors.white, borderRadius: radii.md, borderWidth: 1.5, borderColor: colors.indigo, padding: 16, gap: 10 }}>
+        <View style={{ backgroundColor: colors.paper, borderRadius: radii.md, borderWidth: 1.5, borderColor: colors.indigo, padding: 16, gap: 10 }}>
           <Stamp show word={t('sg.stamped')} silent />
           <Body>{t('sg.allDone')}</Body>
         </View>

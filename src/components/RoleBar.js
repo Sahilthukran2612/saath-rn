@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     minHeight: 40,
     paddingHorizontal: 14,
     borderRadius: 20,
-    backgroundColor: colors.white,
+    backgroundColor: colors.paper,
     justifyContent: 'center',
   },
   chipOn: { backgroundColor: colors.indigo },

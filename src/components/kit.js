@@ -502,7 +502,7 @@ export function SectionTitle({ children }) {
 
 const styles = StyleSheet.create({
   group: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.paper,
     borderRadius: radii.md,
     borderWidth: 1.5,
     borderColor: colors.indigo,

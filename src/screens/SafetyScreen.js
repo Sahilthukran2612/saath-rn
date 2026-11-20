@@ -175,7 +175,7 @@ export default function SafetyScreen() {
 }
 
 const styles = StyleSheet.create({
-  hero: { backgroundColor: colors.white, borderWidth: 1.5, borderColor: colors.indigo, borderRadius: radii.md, padding: 16, gap: 10 },
+  hero: { backgroundColor: colors.paper, borderWidth: 1.5, borderColor: colors.indigo, borderRadius: radii.md, padding: 16, gap: 10 },
   watchChip: {
     flexDirection: 'row',
     alignItems: 'center',

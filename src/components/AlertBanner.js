@@ -70,13 +70,13 @@ function ActionButton({ label, icon, onPress, filled }) {
       style={[styles.action, filled ? styles.actionFilled : styles.actionGhost]}
     >
       {icon ? (
-        <Glyph icon={icon} size={24} color={filled ? colors.leafDeep : colors.white} strokeWidth={2.4} />
+        <Glyph icon={icon} size={24} color={filled ? '#14523A' : colors.white} strokeWidth={2.4} />
       ) : null}
       <Text
         style={{
           fontFamily: fonts.bold,
           fontSize: 20,
-          color: filled ? colors.leafDeep : colors.white,
+          color: filled ? '#14523A' : colors.white,
           flexShrink: 1,
         }}
       >

@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
+  Moon,
   Languages,
   Eye,
   MessageCircle,
@@ -50,6 +52,49 @@ function LanguageRow({ lang, onChange, label }) {
         ]}
       />
       <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: colors.outlineVariant }} />
+    </View>
+  );
+}
+
+// Light, dark, or follow the phone. The look is applied when Saath opens (every screen builds its styles then),
+// so the row says to reopen the app. The choice is kept on this phone only.
+function ThemeRow() {
+  const { t } = useStore();
+  const [choice, setChoice] = useState('auto');
+  const [changed, setChanged] = useState(false);
+  useEffect(() => {
+    AsyncStorage.getItem('saath.theme')
+      .then((v) => v && setChoice(v))
+      .catch(() => {});
+  }, []);
+  const pick = (v) => {
+    setChoice(v);
+    setChanged(true);
+    AsyncStorage.setItem('saath.theme', v).catch(() => {});
+  };
+  return (
+    <View style={{ padding: 16, gap: 12 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+        <View
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: colors.indigoTint,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Moon size={24} color={colors.indigoDeep} />
+        </View>
+        <Body>{t('theme.title')}</Body>
+      </View>
+      <Segmented
+        value={choice}
+        onChange={pick}
+        options={['auto', 'light', 'dark'].map((v) => ({ value: v, label: t(`theme.${v}`) }))}
+      />
+      {changed ? <Caption>{t('theme.reopen')}</Caption> : null}
     </View>
   );
 }
@@ -186,6 +231,7 @@ export default function MeScreen() {
         <View style={{ height: 8 }} />
         <ListGroup>
           <LanguageRow lang={state.lang} onChange={(v) => set('lang', v)} label={t('language')} />
+          <ThemeRow />
           <ListRow
             icon={Type}
             title={t('largeText')}

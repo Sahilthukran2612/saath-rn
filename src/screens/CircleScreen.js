@@ -164,7 +164,7 @@ export default function CircleScreen() {
 
 const styles = StyleSheet.create({
   group: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.paper,
     borderWidth: 1.5,
     borderColor: colors.indigo,
     borderRadius: 12,

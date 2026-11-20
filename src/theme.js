@@ -36,6 +36,52 @@ export const colors = {
   outline: '#717AA3',
   outlineVariant: '#BCC7E8',
 };
+colors.paper = '#FFFFFF'; // slip and card background: white bill paper (dark: a deep blue-black slip)
+
+// The night palette: the same tokens, re-inked. `white` stays white (it is the text on coloured buttons);
+// backgrounds that were white use `paper`. The yellow and pink slips stay light, like stickers on a dark
+// counter, so their dark text keeps its contrast.
+export const darkColors = {
+  indigo: '#4F6FE0',
+  indigoDeep: '#102A7A',
+  indigoTint: '#1E2754',
+  indigoSoft: '#BFCDF3',
+  brick: '#D8453D',
+  haldiTint: '#3A3213',
+  leaf: '#2A8458',
+  leafDeep: '#8FE3B8',
+  leafTint: '#16382A',
+  brickTint: '#3D1B19',
+  madder: '#E8907D',
+  stamp: '#BE98EE',
+  stampTint: '#2C1D40',
+  mist: '#0F1226',
+  ink: '#ECEFFC',
+  inkSoft: '#C3CAE8',
+  inkFaint: '#A3ACD2',
+  line: '#2B3355',
+  lineStrong: '#3C4672',
+  control: '#8993BF',
+  surface: '#14183A',
+  surfaceLow: '#1A1F45',
+  surfaceContainer: '#20264F',
+  surfaceHigh: '#2A3162',
+  outline: '#8993BF',
+  outlineVariant: '#3C4672',
+  paper: '#1B2048',
+};
+
+export let themeName = 'light';
+
+// Called once, before any screen module loads (see index.js), because styles are built at import time.
+// 'auto' follows the phone's own light or dark setting.
+export function applyTheme(choice, systemScheme) {
+  const name = choice === 'dark' || (choice !== 'light' && systemScheme === 'dark') ? 'dark' : 'light';
+  themeName = name;
+  if (name === 'dark') Object.assign(colors, darkColors);
+  return name;
+}
+
 // Mukta carries Devanagari and Latin in one voice, so Hindi and English sit together.
 export const fonts = { regular: 'Mukta_400Regular', semi: 'Mukta_600SemiBold', bold: 'Mukta_700Bold' };
 

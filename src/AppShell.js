@@ -3,7 +3,7 @@ import { AppState, BackHandler, KeyboardAvoidingView, StyleSheet, View, Text } f
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useStore } from './state/store';
-import { colors, fonts } from './theme';
+import { colors, fonts, themeName } from './theme';
 import RoleBar from './components/RoleBar';
 import AlertBanner from './components/AlertBanner';
 import CircleAlertBanner from './components/CircleAlertBanner';
@@ -143,7 +143,7 @@ export default function AppShell({ sensing = true }) {
   if (state.hydrated && registry.shared && registry.locked) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.mist }}>
-        <StatusBar style="dark" />
+        <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
         <AlertBanner />
         <LockScreen />
       </SafeAreaView>
@@ -154,7 +154,7 @@ export default function AppShell({ sensing = true }) {
   if (state.hydrated && !state.onboarded) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.mist }}>
-        <StatusBar style="dark" />
+        <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
         <AlertBanner />
         {state.usage == null ? <RoleChoiceScreen /> : state.usage === 'member' ? <MemberOnboardingScreen /> : <OnboardingScreen />}
       </SafeAreaView>
@@ -165,7 +165,7 @@ export default function AppShell({ sensing = true }) {
   if (state.hydrated && state.mode === 'teen' && state.consent.status !== 'granted') {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.mist }}>
-        <StatusBar style="dark" />
+        <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
         <ConsentScreen />
       </SafeAreaView>
     );
@@ -189,7 +189,7 @@ export default function AppShell({ sensing = true }) {
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.surface }}>
       <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
         <NavContext.Provider value={setTab}>
-          <StatusBar style="dark" />
+          <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
           <RoleBar />
           <View style={styles.header}>
             {onMe ? (

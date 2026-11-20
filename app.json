@@ -1,11 +1,11 @@
-{
+﻿{
   "expo": {
     "name": "Saath",
     "slug": "saath-rn",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true
     },
@@ -72,3 +72,4 @@
     ]
   }
 }
+

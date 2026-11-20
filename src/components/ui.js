@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   btnRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
   // a slip: white bill paper with a ballpoint-blue edge; tint is a pale wash, haldi the yellow copy, carbon the pink copy
   card: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.paper,
     borderRadius: radii.md,
     borderWidth: 1.5,
     borderColor: colors.indigo,

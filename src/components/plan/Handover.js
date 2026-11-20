@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
   qrCard: {
     alignItems: 'center',
     gap: 10,
-    backgroundColor: colors.white,
+    backgroundColor: colors.paper,
     borderRadius: radii.md,
     padding: 20,
     borderWidth: StyleSheet.hairlineWidth,
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
   },
   qrBox: {
     padding: 14,
-    backgroundColor: colors.white,
+    backgroundColor: colors.paper,
     borderRadius: radii.lg,
     borderWidth: 2,
     borderColor: colors.indigoTint,

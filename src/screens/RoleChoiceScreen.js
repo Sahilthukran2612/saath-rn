@@ -17,7 +17,7 @@ function Choice({ doodle, title, note, onPress }) {
       accessibilityLabel={title}
       onPress={onPress}
       style={{
-        backgroundColor: colors.white,
+        backgroundColor: colors.paper,
         borderWidth: 1.5,
         borderColor: colors.indigo,
         borderRadius: radii.md,
