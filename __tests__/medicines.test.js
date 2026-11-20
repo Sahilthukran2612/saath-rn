@@ -1,4 +1,4 @@
-﻿import { WHEN, dueMedicines, overdueMedicines, takenToday, dayOf } from '../src/medicines';
+import { WHEN, dueMedicines, overdueMedicines, takenToday, dayOf } from '../src/medicines';
 import { allSlips } from '../src/suggestions';
 import { reducer, initialState } from '../src/state/reducer';
 import { strings } from '../src/i18n/strings';
@@ -25,7 +25,7 @@ describe('medicines', () => {
   });
 
   test('the reducer adds, marks (and unmarks) and removes a medicine', () => {
-    let s = reducer(initialState, { type: 'MED_ADD', id: 'x', name: 'Metformin', dose: '500 mg', when: 'afterBreakfast' });
+    let s = reducer({ ...initialState, medicines: [], medLog: {} }, { type: 'MED_ADD', id: 'x', name: 'Metformin', dose: '500 mg', when: 'afterBreakfast' });
     expect(s.medicines).toEqual([{ id: 'x', name: 'Metformin', dose: '500 mg', when: 'afterBreakfast' }]);
     s = reducer(s, { type: 'MED_TAKEN', id: 'x', now: at(10) });
     expect(s.medTaken.ids).toEqual(['x']);

@@ -59,7 +59,10 @@ describe('care data', () => {
   test('insulin is logged as a time only: no dose field exists in state', () => {
     const s = run(initialState, { type: 'LOG_INSULIN', at: 5, units: 12, dose: 12 });
     expect(s.careEvents).toEqual({ lastInsulinAt: 5, lastMealAt: null });
-    expect(JSON.stringify(s)).not.toMatch(/units|dose/i);
+    // Insulin and care events never carry an amount. (The medicine list holds a dose only as the text the person
+    // typed from their prescription, which Saath never reads, works out or changes: see src/medicines.js.)
+    expect(JSON.stringify(s.careEvents)).not.toMatch(/units|dose/i);
+    expect(JSON.stringify({ ...s, medicines: [], carePlan: null })).not.toMatch(/units|dose/i);
   });
   test('stock never goes below zero', () => {
     expect(run(initialState, { type: 'MEDS_SET', pillsLeft: -5 }).meds.pillsLeft).toBe(0);

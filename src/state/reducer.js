@@ -65,7 +65,11 @@ export const SEED = {
     { id: 't3', icon: '🚶', title: 'Evening walk', done: false, hour: 18 },
     { id: 't4', icon: '🩸', title: 'Sugar check', done: false, hour: 20 },
   ],
-  readings: [{ id: 'r0', mgdl: 112, at: 0, demo: true }],
+  // Two weeks of made-up readings, flagged as demo, so the charts have something to show before anything is logged.
+  readings: Array.from({ length: 14 }, (_, i) => i).flatMap((i) => [
+    { id: `demo-r${i}a`, mgdl: 96 + ((i * 17) % 38), at: Date.now() - (13 - i) * 86400000 - 5 * 3600000, demo: true },
+    { id: `demo-r${i}b`, mgdl: 118 + ((i * 29) % 52), at: Date.now() - (13 - i) * 86400000 - 3600000, demo: true },
+  ]),
 };
 
 export const initialState = {
@@ -101,9 +105,14 @@ export const initialState = {
   slips: { day: null, done: [], skipped: [] },
   carePlan: null, // the newest plan applied from a clinician: { version, author, at, notes, meds, tasks, seen }
   joinCode: null, // an invite code that arrived by scanning a QR, waiting to be used on the join screen
-  medicines: [], // [{ id, name, dose, when }]: typed by the person from their prescription. Saath never suggests a dose
+  // [{ id, name, dose, when }]: typed by the person from their prescription. Saath never suggests a dose.
+  // The demo starts with one made-up medicine (flagged) so the medicines chart has something to show.
+  medicines: [{ id: 'demo-med', name: 'Metformin (demo)', dose: 'as on the prescription', when: 'afterBreakfast', demo: true }],
   medTaken: { day: null, ids: [] },
-  medLog: {}, // { 'YYYY-M-D': [medicine ids taken] }: the last 30 days, for the adherence chart // medicine ids marked as taken today (a time on this phone, nothing sent)
+  // { 'YYYY-M-D': [medicine ids taken] }: the last 30 days, for the adherence chart. The demo starts with a week of it.
+  medLog: Object.fromEntries(
+    Array.from({ length: 7 }, (_, i) => [dayOf(Date.now() - (6 - i) * 86400000), i % 4 === 3 ? [] : ['demo-med']]),
+  ),
   slipStats: {}, // slip id -> { done, skipped }: lets the pad learn which small things this person actually does
   foodPrefs: { region: 'north', diet: 'veg', disliked: [], recent: [] }, // drives the on-device meal ideas (mealGenerator.js) // suggestion slips stamped or put aside today (see suggestions.js)
   careEvents: { lastInsulinAt: null, lastMealAt: null }, // times only. Saath never records or suggests a dose
@@ -146,6 +155,8 @@ export const productionState = {
   onboarded: false,
   members: [],
   readings: [],
+  medicines: [],
+  medLog: {},
   budget: [],
   meds: { name: '', pillsLeft: 0, perDay: 0 },
   testPlan: { perDay: 0, strips: 0 },

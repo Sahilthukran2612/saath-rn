@@ -21,7 +21,8 @@ function StatTile({ value, label, unit }) {
   return (
     <View className="flex-1 gap-0.5 rounded-lg bg-secondary px-3 py-3" accessibilityLabel={`${label}: ${value ?? '–'}`} accessible>
       <Text style={{ fontFamily: fonts.bold, fontSize: 28, lineHeight: 32, color: colors.indigo }}>{value ?? '–'}</Text>
-      <Caption>{unit ? `${label} · ${unit}` : label}</Caption>
+      <Caption>{label}</Caption>
+      {unit ? <Caption>{unit}</Caption> : null}
     </View>
   );
 }
