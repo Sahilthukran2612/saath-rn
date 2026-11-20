@@ -181,9 +181,7 @@ function ImOkHero() {
             {t('sent.ok')}
           </Body>
         </>
-      ) : (
-        <Caption>{t('imOkHint')}</Caption>
-      )}
+      ) : null}
     </View>
   );
 }

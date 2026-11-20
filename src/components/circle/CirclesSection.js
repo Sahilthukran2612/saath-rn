@@ -48,6 +48,7 @@ export default function CirclesSection() {
         <ScreenHeader title={nameOf(circle)} onBack={() => setOpen(null)} backLabel={t('back')} />
         <Body bold>{t('cf.youAre').replace('{role}', t(`role.${circle.role}`))}</Body>
         <Caption>{fmt(t('cf.sees'), { level: t(`dial${circle.dial}`) })}</Caption>
+        <Caption>{t('cf.note')}</Caption>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <View style={{ flex: 1 }}>
             <Body>{t('cf.timeOff')}</Body>
@@ -71,8 +72,6 @@ export default function CirclesSection() {
           </ListGroup>
         )}
         {circle.role === 'clinician' ? <CarePlanBuilder circle={circle} /> : null}
-        <Caption>{t('cf.note')}</Caption>
-        <Caption>{t('cf.offline')}</Caption>
       </View>
     );
   }

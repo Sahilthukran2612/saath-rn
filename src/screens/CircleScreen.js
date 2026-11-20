@@ -96,7 +96,6 @@ export default function CircleScreen() {
     >
       <View style={{ gap: 2 }}>
         <Title style={{ fontSize: 32, letterSpacing: -0.6 }}>{t('tabCircle')}</Title>
-        <Caption>{t('circleSub')}</Caption>
       </View>
       <Reveal index={0}>
         <Card tone="tint" style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>

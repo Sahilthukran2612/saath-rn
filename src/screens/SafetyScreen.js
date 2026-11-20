@@ -57,7 +57,6 @@ export default function SafetyScreen() {
               <Body>{t('helpsNotice')}</Body>
             </View>
           </View>
-          {!state.background ? <Caption>{t('bg.note')}</Caption> : null}
         </View>
       </Reveal>
 
@@ -87,7 +86,6 @@ export default function SafetyScreen() {
             </View>
             <View style={{ flex: 1 }}>
               <Title style={{ fontSize: 22 }}>{t('trialTitle')}</Title>
-              <Caption>{t('trialNote')}</Caption>
               {(state.autoCall || state.autoSms) && !state.demo ? (
                 <Caption style={{ color: colors.madder }}>{t('trial.realWarn')}</Caption>
               ) : null}

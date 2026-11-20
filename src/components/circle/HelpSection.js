@@ -54,7 +54,6 @@ export default function HelpSection() {
         </View>
         <View style={{ flex: 1 }}>
           <Title style={{ fontSize: 22 }}>{t('delegateTitle')}</Title>
-          <Caption>{t('helpSub')}</Caption>
         </View>
       </View>
       <BigButton icon={HandHeart} label={t('helpButton')} onPress={() => send('HELP_REQUEST', HOUR)} />

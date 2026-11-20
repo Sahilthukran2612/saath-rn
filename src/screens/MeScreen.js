@@ -199,7 +199,6 @@ export default function MeScreen() {
           onChange={(v) => set('usage', v)}
           options={['person', 'member', 'both'].map((v) => ({ value: v, label: t(`use.${v}`) }))}
         />
-        <Caption>{t('use.note')}</Caption>
         <View style={{ height: 18 }} />
         <Account />
         {member ? null : (

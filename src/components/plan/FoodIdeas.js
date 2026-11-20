@@ -47,7 +47,6 @@ export default function FoodIdeas() {
   return (
     <View style={{ gap: 14 }}>
       <Title style={{ fontSize: 22 }}>{t('food.ideas')}</Title>
-      <Caption>{t('food.ideasNote')}</Caption>
       <View style={{ gap: 8 }}>
         <SectionTitle>{t('food.diet')}</SectionTitle>
         <View style={row}>

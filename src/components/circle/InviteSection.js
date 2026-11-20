@@ -73,7 +73,6 @@ export default function InviteSection() {
         </View>
         <View style={{ flex: 1 }}>
           <Title style={{ fontSize: 22 }}>{t('inv.card')}</Title>
-          <Caption>{t('inviteSub')}</Caption>
         </View>
       </View>
       {state.members.filter((m) => !m.demo).length === 0 && !state.demo ? <Body bold>{t('ct.empty')}</Body> : null}
@@ -114,8 +113,6 @@ export default function InviteSection() {
           {signedIn && failed ? <Body style={{ color: colors.madder }}>{t('inv.failed')}</Body> : null}
           {signedIn ? <BigButton kind="quiet" icon={Send} label={t('inv.sendNow')} onPress={requestSync} /> : null}
         </View>
-      ) : pending.length > 0 ? (
-        <Caption>{t('inv.sent')}</Caption>
       ) : null}
       {pending.length > 0 && state.demo ? <Caption>{t('inv.demoNote')}</Caption> : null}
     </Card>

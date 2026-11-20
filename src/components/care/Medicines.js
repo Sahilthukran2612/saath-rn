@@ -67,7 +67,6 @@ export default function Medicines() {
       <Sheet visible={open} onClose={() => setOpen(false)} title={t('med.add')}>
         <Field label={t('med.name')} value={name} onChangeText={setName} />
         <Field label={t('med.dose')} value={dose} onChangeText={setDose} />
-        <Caption>{t('med.doseHelp')}</Caption>
         <SectionTitle>{t('med.when')}</SectionTitle>
         <View style={row}>
           {WHEN.map(([id]) => (
