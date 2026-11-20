@@ -13,7 +13,7 @@ Usage (PowerShell, from anywhere):
 
 Edit the four paths below for your machine. Takes about 8 minutes.
 #>
-param([switch]$Prebuild, [switch]$Release, [int]$GradleMemoryMB = 4096)
+param([switch]$Prebuild, [switch]$Release, [switch]$Emulator, [int]$GradleMemoryMB = 4096)
 
 $ErrorActionPreference = 'Stop'
 $Project = Split-Path -Parent $PSScriptRoot
@@ -86,7 +86,8 @@ try {
   # -Release builds a standalone APK with the app's JavaScript inside (it needs no PC running), for the two
   # CPU types real phones use. It is signed with the debug key, so it installs fine but is not a Play Store build.
   try {
-    if ($Release) { .\gradlew.bat assembleRelease '-PreactNativeArchitectures=arm64-v8a,armeabi-v7a' --console=plain }
+    if ($Release -and $Emulator) { .\gradlew.bat assembleRelease '-PreactNativeArchitectures=x86_64' --console=plain }
+    elseif ($Release) { .\gradlew.bat assembleRelease '-PreactNativeArchitectures=arm64-v8a,armeabi-v7a' --console=plain }
     else { .\gradlew.bat assembleDebug --console=plain }
   } finally { Pop-Location }
   $gradleExit = $LASTEXITCODE
@@ -101,7 +102,7 @@ try {
 }
 
 New-Item -ItemType Directory -Force "$Project\dist" | Out-Null
-if ($Release) { $from = "$Short\android\app\build\outputs\apk\release\app-release.apk"; $name = 'saath.apk' }
+if ($Release) { $from = "$Short\android\app\build\outputs\apk\release\app-release.apk"; $name = $(if ($Emulator) { 'saath-x86.apk' } else { 'saath.apk' }) }
 else { $from = "$Short\android\app\build\outputs\apk\debug\app-debug.apk"; $name = 'saath-debug.apk' }
 Copy-Item $from "$Project\dist\$name" -Force
 Write-Host "Done: $Project\dist\$name"
