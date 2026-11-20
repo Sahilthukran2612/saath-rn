@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { BigButton, Body, Caption, Card } from '../ui';
 import { Avatar, Badge, ListGroup, ListRow, ScreenHeader, Toggle } from '../kit';
 import JoinCard from './JoinCard';
+import CarePlanBuilder from './CarePlanBuilder';
 import { useStore } from '../../state/store';
 import { useNow } from '../useNow';
 import { colors } from '../../theme';
@@ -61,6 +62,7 @@ export default function CirclesSection() {
             ))}
           </ListGroup>
         )}
+        {circle.role === 'clinician' ? <CarePlanBuilder circle={circle} /> : null}
         <Caption>{t('cf.note')}</Caption>
         <Caption>{t('cf.offline')}</Caption>
       </View>

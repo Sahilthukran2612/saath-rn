@@ -1,0 +1,49 @@
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
+import { StoreProvider } from '../src/state/store';
+import AppShell from '../src/AppShell';
+
+const mount = (preload) =>
+  render(
+    <StoreProvider preload={preload}>
+      <AppShell sensing={false} />
+    </StoreProvider>,
+  );
+
+const circle = { household_id: 'demo-amma', role: 'clinician', dial: 1, time_off: false, person_name: 'Amma (demo)' };
+
+describe('a clinician publishes a care plan and the person sees it', () => {
+  test('the builder is only for a clinician in that circle', async () => {
+    await mount({ role: 'family', demo: true, circles: [{ ...circle, role: 'family' }] });
+    await fireEvent.press(await screen.findByLabelText('Circle'));
+    await fireEvent.press(await screen.findByLabelText('Amma (demo)'));
+    expect(screen.queryByText('Publish plan')).toBeNull();
+  });
+
+  test('publish in demo mode, then the Person view shows who set it, the medicine and the task', async () => {
+    await mount({ role: 'clinician', demo: true, usage: 'person', circles: [circle] });
+    await fireEvent.press(await screen.findByLabelText('Circle'));
+    await fireEvent.press(await screen.findByLabelText('Amma (demo)'));
+
+    await fireEvent.changeText(await screen.findByLabelText('Medicine name'), 'Metformin');
+    await fireEvent.changeText(screen.getByLabelText('Dose as written on the prescription'), '500 mg after food');
+    await fireEvent.press(screen.getByLabelText('Save medicine'));
+    await fireEvent.changeText(screen.getByLabelText('Sugar checks per day (number)'), '3');
+    await fireEvent.changeText(screen.getByLabelText('A note for the person'), 'Review in two weeks');
+    await fireEvent.press(screen.getByLabelText('Publish plan'));
+    expect(await screen.findByText(/Demo: applied to this phone/)).toBeTruthy();
+
+    // switch to the person's own view
+    await fireEvent.press(screen.getByLabelText('Person'));
+    await fireEvent.press(await screen.findByLabelText('Today'));
+    expect(await screen.findByText(/updated your plan/)).toBeTruthy();
+    expect(screen.getByText('Review in two weeks')).toBeTruthy();
+    await fireEvent.press(screen.getByLabelText('Got it'));
+    await waitFor(() => expect(screen.queryByText(/updated your plan/)).toBeNull());
+
+    await fireEvent.press(screen.getByLabelText('Care'));
+    expect(await screen.findByText('Metformin')).toBeTruthy();
+    expect(screen.getByText(/500 mg after food/)).toBeTruthy();
+    expect(screen.getAllByText(/set by Clinician/).length).toBeGreaterThan(0);
+  });
+});

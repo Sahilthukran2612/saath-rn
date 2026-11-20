@@ -1,5 +1,6 @@
 import { addReading } from '../heart';
 import { dayOf } from '../medicines';
+import { planPatch } from '../carePlan';
 import { markSlip } from '../suggestions';
 import { CFG, clampDial, escalationChain, isDelegationActive, isInactive, validPhone } from '../logic';
 import { adjustBaseline, cfgFrom, defaultBaseline } from '../care';
@@ -98,6 +99,7 @@ export const initialState = {
   seen: {}, // household_id -> created_at of the newest event I have looked at
   baseline: defaultBaseline(), // personal thresholds, tuned by false-alarm and missed feedback
   slips: { day: null, done: [], skipped: [] },
+  carePlan: null, // the newest plan applied from a clinician: { version, author, at, notes, meds, tasks, seen }
   medicines: [], // [{ id, name, dose, when }]: typed by the person from their prescription. Saath never suggests a dose
   medTaken: { day: null, ids: [] }, // medicine ids marked as taken today (a time on this phone, nothing sent)
   slipStats: {}, // slip id -> { done, skipped }: lets the pad learn which small things this person actually does
@@ -483,7 +485,7 @@ function baseReducer(state, a) {
         ...state,
         circles: [
           ...state.circles,
-          { household_id: 'demo-amma', role: 'family', dial: 1, time_off: false, person_name: 'Amma (demo)' },
+          { household_id: 'demo-amma', role: ['neighbour', 'asha', 'clinician'].includes(state.role) ? state.role : 'family', dial: 1, time_off: false, person_name: 'Amma (demo)' },
         ],
         feeds: {
           ...state.feeds,
@@ -628,6 +630,13 @@ function baseReducer(state, a) {
       const ids = base.ids.includes(a.id) ? base.ids.filter((x) => x !== a.id) : [...base.ids, a.id];
       return { ...state, medTaken: { day: today, ids } };
     }
+    case 'PLAN_APPLY': {
+      // Only a newer plan is applied, so polling again never redoes or undoes anything.
+      if (state.carePlan && String(a.version) <= String(state.carePlan.version)) return state;
+      return { ...state, ...planPatch(state, a.plan, { version: a.version, author: a.author, at: a.at }) };
+    }
+    case 'PLAN_SEEN':
+      return state.carePlan ? { ...state, carePlan: { ...state.carePlan, seen: true } } : state;
     case 'FOOD_PREFS':
       return { ...state, foodPrefs: { ...state.foodPrefs, ...a.patch } };
     case 'FOOD_NOT': {

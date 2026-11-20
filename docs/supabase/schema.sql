@@ -317,3 +317,44 @@ create trigger device_tokens_cap before insert on device_tokens for each row exe
 
 revoke all on device_tokens from anon;
 revoke all on function device_tokens_cap() from public, anon;
+
+-- ---- Care plans: a clinician in the household publishes, the person's phone applies the latest ----
+-- The plan is plain JSON (see src/carePlan.js). Only a member whose role is clinician may add one, and only for a
+-- household they belong to. The person, clinicians and members with the full dial can read it.
+create table if not exists care_plans (
+  id uuid primary key default gen_random_uuid(),
+  household_id uuid not null references households (id) on delete cascade,
+  author_user uuid not null default auth.uid(),
+  author_name text not null check (char_length(author_name) <= 60),
+  plan jsonb not null check (pg_column_size(plan) <= 12000),
+  created_at timestamptz not null default now()
+);
+create index if not exists care_plans_latest on care_plans (household_id, created_at desc);
+alter table care_plans enable row level security;
+
+create policy care_plans_read on care_plans for select to authenticated using (
+  is_person(household_id)
+  or exists (
+    select 1 from members m
+    where m.household_id = care_plans.household_id and m.user_id = auth.uid()
+      and (m.role = 'clinician' or m.dial = 2)
+  )
+);
+create policy care_plans_write on care_plans for insert to authenticated with check (
+  author_user = auth.uid()
+  and exists (
+    select 1 from members m
+    where m.household_id = care_plans.household_id and m.user_id = auth.uid() and m.role = 'clinician'
+  )
+);
+
+-- Keep the 40 newest plans per household.
+create or replace function care_plans_cap() returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  delete from care_plans where household_id = new.household_id and id in (
+    select id from care_plans where household_id = new.household_id order by created_at desc offset 40
+  );
+  return new;
+end $$;
+drop trigger if exists care_plans_cap_t on care_plans;
+create trigger care_plans_cap_t after insert on care_plans for each row execute function care_plans_cap();

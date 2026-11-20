@@ -13,12 +13,15 @@ const row = { flexDirection: 'row', flexWrap: 'wrap', gap: 8 };
 // One medicine, as the person typed it from the prescription: the name, the dose text exactly as written, and a
 // "taken" mark for today. Saath never suggests or changes a dose.
 function MedRow({ m, taken, last }) {
-  const { dispatch, t } = useStore();
+  const { state, dispatch, t } = useStore();
+  const author = state.carePlan?.author;
   return (
     <ListRow
       icon={Pill}
       title={m.name}
-      subtitle={m.dose ? `${m.dose} · ${t(`when.${m.when}`)}` : t(`when.${m.when}`)}
+      subtitle={`${m.dose ? `${m.dose} Â· ` : ''}${t(`when.${m.when}`)}${
+        m.plan && author ? ` Â· ${t('plan.setBy').replace('{who}', author)}` : ''
+      }`}
       trailing={<CheckMark done={taken} size={34} />}
       onPress={() => dispatch({ type: 'MED_TAKEN', id: m.id, now: nowMs() })}
       label={`${m.name}, ${taken ? t('med.taken') : t('med.notTaken')}`}
@@ -72,9 +75,9 @@ export default function Medicines() {
             ))}
           </View>
           <BigButton icon={Plus} label={t('med.save')} onPress={add} />
-          {state.medicines.length > 0 ? (
+          {state.medicines.some((m) => !m.plan) ? (
             <View style={row}>
-              {state.medicines.map((m) => (
+              {state.medicines.filter((m) => !m.plan).map((m) => (
                 <Chip
                   key={m.id}
                   label={`${t('remove')}: ${m.name}`}
@@ -92,7 +95,7 @@ export default function Medicines() {
 
 // On Today: the medicines whose time has come and are not yet marked, each with one tap to mark it.
 export function MedicinesNow() {
-  const { state, dispatch, t } = useStore();
+  const { state, t } = useStore();
   const now = useNow(60000);
   const due = dueMedicines(state.medicines, state.medTaken, now);
   if (state.alert || due.length === 0) return null;

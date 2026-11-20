@@ -233,6 +233,41 @@ export async function fetchFeed(cfg, cloud, householdId, fetchImpl) {
   return { ok: res.ok && Array.isArray(res.data), events: Array.isArray(res.data) ? res.data : [], session };
 }
 
+// ---- Care plans: a clinician publishes, the person's phone reads the newest ----
+
+export async function fetchLatestPlan(cfg, cloud, householdId, fetchImpl) {
+  const { res, session } = await withAuth(
+    cfg,
+    cloud,
+    (token) =>
+      call(
+        cfg,
+        `/rest/v1/care_plans?household_id=eq.${encodeURIComponent(householdId)}&select=id,author_name,plan,created_at&order=created_at.desc&limit=1`,
+        { token },
+        fetchImpl
+      ),
+    fetchImpl
+  );
+  const row = Array.isArray(res.data) ? res.data[0] : null;
+  return { ok: res.ok && Array.isArray(res.data), row, session };
+}
+
+export async function publishPlan(cfg, cloud, householdId, authorName, plan, fetchImpl) {
+  const { res, session } = await withAuth(
+    cfg,
+    cloud,
+    (token) =>
+      call(
+        cfg,
+        '/rest/v1/care_plans',
+        { method: 'POST', token, prefer: 'return=minimal', body: { household_id: householdId, author_name: String(authorName || '').slice(0, 60) || 'Clinician', plan } },
+        fetchImpl
+      ),
+    fetchImpl
+  );
+  return { ok: res.ok, status: res.status, session };
+}
+
 // ---- The dial on the server: who joined, and what each may see ----
 
 // People who joined this household from their own phones (rows with a user). The person's phone reads

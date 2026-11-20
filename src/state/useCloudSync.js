@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { useStore } from './store';
 import { setupPush } from '../services/push';
+import { sanitizePlan } from '../carePlan';
 import {
   cloudConfig,
   createInvite,
   fetchFeed,
+  fetchLatestPlan,
   flush,
   isConfigured,
   listCircles,
@@ -93,6 +95,14 @@ export default function useCloudSync() {
         const m = await listMembers(cfg, cloud);
         keep(m.session);
         if (m.ok) dispatch({ type: 'JOINED_SET', members: m.members });
+      }
+
+      // The newest care plan a clinician in my circle published for me. It is applied by itself and shown with who set it.
+      if (householdId) {
+        const p = await fetchLatestPlan(cfg, cloud, householdId);
+        keep(p.session);
+        const clean = p.ok && p.row ? sanitizePlan(p.row.plan) : null;
+        if (clean) dispatch({ type: 'PLAN_APPLY', plan: clean, version: p.row.created_at, author: p.row.author_name, at: Date.now() });
       }
 
       // This phone's push address, once per app run and language: so alerts arrive with Saath closed.

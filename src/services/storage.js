@@ -34,6 +34,7 @@ const PERSIST = [
   'baseline',
   'careEvents',
   'slips',
+  'carePlan',
   'medicines',
   'medTaken',
   'slipStats',
