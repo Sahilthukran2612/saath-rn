@@ -43,7 +43,9 @@ describe('suggestion rules', () => {
   });
 
   test('habits follow the clock', () => {
-    expect(ids(base({ nowMs: at(8) }))).toEqual(expect.arrayContaining(['stretch', 'shoes']));
+    expect(ids(base({ nowMs: at(8) }))).toContain('shoes');
+    expect(ids(base({ nowMs: at(8), condition: 'Asthma' }))).not.toContain('shoes');
+    expect(ids(base({ nowMs: at(8) }))).not.toContain('stretch');
     expect(ids(base({ nowMs: at(22) }))).toContain('sleep');
     expect(ids(base({ nowMs: at(22) }))).not.toContain('water');
     expect(ids(base({ nowMs: at(12, 30) }))).toContain('plate');
@@ -129,7 +131,7 @@ describe('slip wording', () => {
   const forbidden = /\b(dose|doses|dosage|units?|insulin|mg|ml|tablet|take your|diagnos|you have diabetes|low sugar|high sugar)\b/i;
 
   test('every rule has an English and a Hindi title and body', () => {
-    expect(seen.size).toBeGreaterThanOrEqual(16);
+    expect(seen.size).toBeGreaterThanOrEqual(12);
     for (const id of seen) {
       for (const lang of ['en', 'hi']) {
         expect(strings[lang][`sg.${id}.t`]).toBeTruthy();

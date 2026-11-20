@@ -184,8 +184,9 @@ export default function SuggestionPad() {
       readings: state.readings,
       visitQuestions: state.visitQuestions,
       ladder: state.ladder,
+      condition: state.profile?.condition,
     }),
-    [now, state.mode, state.phase, state.meds, state.testPlan, state.careEvents, state.meals, state.footChecks, state.checkins, state.readings, state.visitQuestions, state.ladder],
+    [now, state.mode, state.phase, state.meds, state.testPlan, state.careEvents, state.meals, state.footChecks, state.checkins, state.readings, state.visitQuestions, state.ladder, state.profile?.condition],
   );
   const pad = useMemo(() => buildPad(ctx, state.slips), [ctx, state.slips]);
   const stampedCount = stampedToday(ctx, state.slips).length;

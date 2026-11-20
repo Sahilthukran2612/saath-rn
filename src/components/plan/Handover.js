@@ -213,6 +213,19 @@ export function PassportSection() {
     }
   };
 
+  // Plain text through the share sheet (WhatsApp, SMS): works on every phone, no PDF viewer needed.
+  const shareText = async () => {
+    try {
+      const body = passportRows(payload, t)
+        .map(([label, v]) => `${label}: ${v}`)
+        .join('\n');
+      await Share.share({ message: `${t('sec.passport')}\n${body}\n\n${t('food.verify')}` });
+      setError('');
+    } catch {
+      setError(t('pass.pdfFailed'));
+    }
+  };
+
   const toggles = [
     ['meds', Pill],
     ['sugar', Droplet],
@@ -281,6 +294,7 @@ export function PassportSection() {
         </View>
       ) : null}
       <BigButton kind="quiet" icon={FileText} label={t('pass.pdf')} onPress={savePdf} />
+      <BigButton kind="quiet" icon={Send} label={t('pass.text')} onPress={shareText} />
       {error ? <Body style={{ color: colors.madder }}>{error}</Body> : null}
     </View>
   );

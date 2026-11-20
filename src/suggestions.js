@@ -29,6 +29,12 @@ export const dayKey = (ms) => {
 const hourOf = (ms) => new Date(ms).getHours();
 const sameDay = (a, b) => dayKey(a) === dayKey(b);
 
+// Diabetes-specific cards (foot care, shoes) show unless the person has written a different condition.
+const diabetic = (c) => {
+  const cond = (c.condition || '').trim();
+  return !cond || /diab|sugar|madhumeh|मधुमेह|शुगर/i.test(cond);
+};
+
 function lastAt(list) {
   const times = (list || []).map((x) => x?.at).filter((n) => Number.isFinite(n) && n > 0);
   return times.length ? Math.max(...times) : null;
@@ -76,7 +82,7 @@ const RULES = [
     doodle: 'foot',
     tab: 'plan',
     make: (c) => {
-      if (c.mode === 'teen') return null;
+      if (c.mode === 'teen' || !diabetic(c)) return null;
       const last = lastAt(c.footChecks);
       if (last != null && c.nowMs - last < 7 * 24 * HOUR) return null;
       return { priority: 50, params: {} };
@@ -165,21 +171,12 @@ const RULES = [
     },
   },
   {
-    id: 'stretch',
-    kind: 'habit',
-    doodle: 'stretch',
-    make: (c) => {
-      const h = hourOf(c.nowMs);
-      return h >= 6 && h < 11 ? { priority: 28, params: {} } : null;
-    },
-  },
-  {
     id: 'shoes',
     kind: 'habit',
     doodle: 'foot',
     make: (c) => {
       const h = hourOf(c.nowMs);
-      return c.mode !== 'teen' && h >= 6 && h < 10 ? { priority: 22, params: {} } : null;
+      return c.mode !== 'teen' && diabetic(c) && h >= 6 && h < 10 ? { priority: 22, params: {} } : null;
     },
   },
   {
@@ -212,7 +209,13 @@ export function allSlips(ctx) {
     const made = rule.make(c);
     if (made) out.push({ id: rule.id, kind: rule.kind, doodle: rule.doodle, tab: rule.tab || null, ...made });
   }
-  return out.sort((a, b) => b.priority - a.priority || a.id.localeCompare(b.id));
+  out.sort((a, b) => b.priority - a.priority || a.id.localeCompare(b.id));
+  // Care reminders come first. Habits only fill what is left: at most two, and one when there are
+  // already two or more care reminders, so the pad never turns into a list of generic advice.
+  const care = out.filter((s) => s.kind === 'care');
+  const habitCap = care.length >= 2 ? 1 : 2;
+  let habits = 0;
+  return out.filter((s) => s.kind === 'care' || ++habits <= habitCap);
 }
 
 // Today's pad: ranked, minus anything done or skipped today, and never more than PAD_SIZE.
@@ -235,3 +238,4 @@ export function markSlip(slips, id, how, nowMs) {
   if (base[key].includes(id)) return base;
   return { ...base, [key]: [...base[key], id] };
 }
+
