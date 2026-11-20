@@ -45,6 +45,21 @@ function lastAt(list) {
 const RULES = [
   // ---- care reminders from the person's own entries ----
   {
+    // Something from the person's own daily list whose hour has passed and is not ticked. It only points at the
+    // list: it never says what to take or how much.
+    id: 'task',
+    kind: 'care',
+    doodle: 'note',
+    make: (c) => {
+      const h = hourOf(c.nowMs);
+      const late = (c.tasks || [])
+        .filter((x) => x && !x.done && Number.isFinite(x.hour) && x.hour <= h - 1 && x.title)
+        .sort((a, b) => a.hour - b.hour);
+      if (!late.length) return null;
+      return { priority: 70, params: { title: late[0].title, time: `${late[0].hour}:00` } };
+    },
+  },
+  {
     id: 'refill',
     kind: 'care',
     doodle: 'strip',

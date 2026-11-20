@@ -17,6 +17,8 @@ Nothing is sent anywhere and no network is needed.
 
 - No dose, no medicine instruction, no diagnosis, no sugar level in any slip. A test scans every slip text in both languages for dose and diagnosis words.
 - The phone cannot see sugar, so no slip says what a reading means. Care slips point to the clinic, chemist, ASHA or family.
+- **Still open today** (	ask): a task on the person's own daily list whose hour passed an hour ago and is not ticked. It only points at the list and never says what to take. It is not shown after a hard week or in a crisis phase.
+- Foot and shoe slips show only for diabetes, or when no condition is written. Habit slips are capped at two (one when there are two or more care reminders). The generic stretch slip was removed.
 - After a hard week (the weekly check-in falls to 1 or 2) or in a crisis phase, **only** company, rest, the check-in, refill and strip reminders, the visit questions, water and sleep can appear. No walk, stretch, meal, foot, reading or ladder slip adds to the load.
 - A real alert hides the pad completely.
 - Water carries "if your clinic has told you to limit fluids, follow that". Meals say "as your clinic advised".

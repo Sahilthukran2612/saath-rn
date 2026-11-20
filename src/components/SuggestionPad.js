@@ -10,6 +10,7 @@ import { useReducedMotion } from './motion';
 import { useNow } from './useNow';
 import { useNav } from './nav';
 import { useStore } from '../state/store';
+import { taskLabel } from '../taskLabel';
 import { buildPad, stampedToday } from '../suggestions';
 import { fmt } from '../circleFeed';
 import { colors, fonts, radii } from '../theme';
@@ -186,8 +187,9 @@ export default function SuggestionPad() {
       visitQuestions: state.visitQuestions,
       ladder: state.ladder,
       condition: state.profile?.condition,
+      tasks: state.tasks.map((x) => ({ ...x, title: taskLabel(x, t) })),
     }),
-    [now, state.mode, state.phase, state.meds, state.testPlan, state.careEvents, state.meals, state.footChecks, state.checkins, state.readings, state.visitQuestions, state.ladder, state.profile?.condition],
+    [now, state.mode, state.phase, state.meds, state.testPlan, state.careEvents, state.meals, state.footChecks, state.checkins, state.readings, state.visitQuestions, state.ladder, state.profile?.condition, state.tasks, t],
   );
   const pad = useMemo(() => buildPad(ctx, state.slips), [ctx, state.slips]);
   const stampedCount = stampedToday(ctx, state.slips).length;

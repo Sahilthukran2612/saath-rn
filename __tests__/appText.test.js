@@ -1,4 +1,4 @@
-﻿import { hasDevanagari, withSlack } from '../src/components/AppText';
+import { hasDevanagari, withSlack } from '../src/components/AppText';
 
 describe('Hindi text slack', () => {
   test('finds Devanagari in strings and nested children, not in English or numbers', () => {

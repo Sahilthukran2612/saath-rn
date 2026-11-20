@@ -58,6 +58,18 @@ describe('suggestion rules', () => {
     expect(ids(base())).toContain('checkin');
   });
 
+  test('an unticked task whose hour has passed gets a slip that only points at the list', () => {
+    const tasks = [
+      { id: 't1', title: 'Morning medicine', done: false, hour: 8 },
+      { id: 't2', title: 'Lunch', done: false, hour: 13 },
+    ];
+    expect(ids(base({ nowMs: at(8, 30), tasks }))).not.toContain('task'); // not yet an hour past
+    const late = allSlips(base({ nowMs: at(10), tasks })).find((s) => s.id === 'task');
+    expect(late.params).toEqual({ title: 'Morning medicine', time: '8:00' });
+    expect(ids(base({ nowMs: at(10), tasks: [{ ...tasks[0], done: true }] }))).not.toContain('task');
+    expect(strings.en['sg.task.b']).not.toMatch(/\d+\s?(mg|ml|tablet|dose|unit)/i);
+  });
+
   test('visit questions and teen ladder', () => {
     expect(allSlips(base({ visitQuestions: ['a', 'b'] })).find((s) => s.id === 'visit').params.n).toBe(2);
     expect(ids(base({ mode: 'teen', ladder: [{ id: 'refills', stage: 1 }] }))).toContain('ladder');
@@ -68,11 +80,11 @@ describe('suggestion rules', () => {
 describe('a hard week or a crisis never adds things to do', () => {
   const hard = { checkins: [{ week: '2026-W44', mood: 3, at: at(9, 0, 3) }, { week: '2026-W45', mood: 1, at: at(9) }] };
   test('after a hard week only company, rest and care reminders remain', () => {
-    const list = allSlips(base({ ...hard, nowMs: at(11, 0), meals: [{ id: 'm', at: at(10, 30) }] }));
+    const list = allSlips(base({ ...hard, nowMs: at(11, 0), meals: [{ id: 'm', at: at(10, 30) }], tasks: [{ id: 't', title: 'Morning medicine', done: false, hour: 8 }] }));
     const got = list.map((s) => s.id);
     expect(got).toContain('company');
     expect(got).toContain('rest');
-    for (const banned of ['walk', 'stretch', 'meal', 'plate', 'shoes', 'ladder', 'foot', 'reading']) {
+    for (const banned of ['walk', 'task', 'meal', 'plate', 'shoes', 'ladder', 'foot', 'reading']) {
       expect(got).not.toContain(banned);
     }
     expect(list[0].id).toBe('company');
@@ -80,7 +92,7 @@ describe('a hard week or a crisis never adds things to do', () => {
   test('the crisis phase is treated the same way', () => {
     const got = ids(base({ phase: 'crisis', nowMs: at(8) }));
     expect(got).toContain('rest');
-    expect(got).not.toContain('stretch');
+    expect(got).not.toContain('walk');
   });
 });
 
@@ -123,6 +135,7 @@ describe('slip wording', () => {
         ladder: [{ id: 'a', stage: 0 }],
         meals: [{ id: 'm', at: at(h) - 40 * 60000 }],
         readings: [{ id: 'r', mgdl: 100, at: at(h) - 30 * 3600000 }],
+        tasks: [{ id: 't', title: 'Lunch', done: false, hour: 1 }],
       }),
     ).forEach((s) => seen.add(s.id));
   }

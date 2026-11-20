@@ -23,12 +23,14 @@ import RoutineEditor from '../components/RoutineEditor';
 import SuggestionPad from '../components/SuggestionPad';
 import Stamp, { StampMark } from '../components/Stamp';
 import Perf from '../components/Perf';
+import Doodle from '../components/doodles';
 import Tally from '../components/Tally';
 import { useStore } from '../state/store';
 import { adviceText } from '../i18n/strings';
 import { can, glucoseAdvice } from '../logic';
 import { budgetSummary, refillStatus } from '../care';
 import { overallStage, STAGES } from '../plan';
+import { taskLabel } from '../taskLabel';
 import { colors, fonts, radii } from '../theme';
 import { speak } from '../services/voice';
 import { confirm } from '../services/haptics';
@@ -83,11 +85,11 @@ function TaskRow({ task, big, k, dispatch, state, t, last }) {
     <PressRow
       accessibilityRole="checkbox"
       accessibilityState={{ checked: task.done }}
-      accessibilityLabel={`${task.title}${task.done ? `, ${t('done')}` : ''}`}
+      accessibilityLabel={`${taskLabel(task, t)}${task.done ? `, ${t('done')}` : ''}`}
       onPress={() => {
         if (!task.done) confirm();
         dispatch({ type: 'TOGGLE_TASK', id: task.id });
-        speak(task.title, state.lang);
+        speak(taskLabel(task, t), state.lang);
       }}
       style={[styles.taskRow, { minHeight: big ? 84 : 68 }, !last && styles.taskDivider]}
     >
@@ -107,7 +109,7 @@ function TaskRow({ task, big, k, dispatch, state, t, last }) {
           color: task.done ? colors.inkSoft : colors.ink,
         }}
       >
-        {task.title}
+        {taskLabel(task, t)}
       </Text>
       <CheckMark done={task.done} size={34} />
     </PressRow>
@@ -347,7 +349,7 @@ function FamilyHome() {
               icon={taskIcon(task)}
               iconBg={task.done ? colors.leafTint : colors.indigoTint}
               iconColor={task.done ? colors.leafDeep : colors.indigo}
-              title={task.title}
+              title={taskLabel(task, t)}
               trailing={task.done ? <StampMark word={t('sg.stamped')} /> : <CheckMark done={false} size={28} />}
             />
           ))}
@@ -358,9 +360,9 @@ function FamilyHome() {
 }
 
 const HOUSEHOLDS = [
-  { name: 'Household A', need: 'Missed medicine 2 days', hot: true },
-  { name: 'Household B', need: 'Refill due in 3 days', hot: true },
-  { name: 'Household C', need: 'Stable', hot: false },
+  { id: 'A', need: 'ph.needA', hot: true },
+  { id: 'B', need: 'ph.needB', hot: true },
+  { id: 'C', need: 'ph.needC', hot: false },
 ];
 
 function ProHome() {
@@ -373,7 +375,7 @@ function ProHome() {
         <ListGroup>
           {HOUSEHOLDS.map((h, i) => (
             <ListRow
-              key={h.name}
+              key={h.id}
               lead={
                 <View style={[styles.rank, { backgroundColor: h.hot ? colors.haldiTint : colors.leafTint }]}>
                   <Text
@@ -387,8 +389,8 @@ function ProHome() {
                   </Text>
                 </View>
               }
-              title={`${h.name} (${t('demoData')})`}
-              subtitle={h.need}
+              title={`${fmt(t('ph.household'), { x: h.id })} (${t('demoData')})`}
+              subtitle={t(h.need)}
               trailing={<Badge label={h.hot ? t('rankNeed') : t('rankOk')} tone={h.hot ? 'haldi' : 'leaf'} />}
             />
           ))}
@@ -409,6 +411,30 @@ function ProHome() {
         </Card>
       </Reveal>
     </>
+  );
+}
+
+// The neighbour's home: what they get, what they are asked to do, and what they never see.
+function NeighbourHome() {
+  const { state, t } = useStore();
+  return (
+    <View style={{ gap: 14 }}>
+      <View style={[styles.slip, { gap: 12 }]}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <Doodle name="phone" size={64} />
+          <View style={{ flex: 1, gap: 4 }}>
+            <Title style={{ fontSize: 24 }}>{t('nb.title')}</Title>
+          </View>
+        </View>
+        <Perf />
+        <ListGroup>
+          <ListRow icon={ShieldCheck} title={t('nb.get')} subtitle={t('nb.getSub')} />
+          <ListRow icon={Siren} title={t('nb.do')} subtitle={t('nb.doSub')} />
+          <ListRow icon={Pill} title={t('nb.never')} subtitle={t('nb.neverSub')} last />
+        </ListGroup>
+      </View>
+      {state.demo ? null : <CirclesSection />}
+    </View>
   );
 }
 
@@ -475,15 +501,7 @@ export default function TodayScreen() {
   else if (state.role === 'family') body = <FamilyHome />;
   else if (state.role === 'neighbour')
     body = (
-      <View style={{ gap: 14 }}>
-        <Card tone="tint" style={{ alignItems: 'center', paddingVertical: 28 }}>
-          <Glyph icon={ShieldCheck} size={44} color={colors.indigo} />
-          <Body bold style={{ textAlign: 'center' }}>
-            {t('safetyOnlyView')}
-          </Body>
-        </Card>
-        {state.demo ? null : <CirclesSection />}
-      </View>
+      <NeighbourHome />
     );
   else body = state.demo ? <ProHome /> : <RealProHome />;
   return (

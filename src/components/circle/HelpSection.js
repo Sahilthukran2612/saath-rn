@@ -9,6 +9,7 @@ import { isDelegationActive } from '../../logic';
 import { speak } from '../../services/voice';
 import { confirm } from '../../services/haptics';
 import { taskIcon } from '../taskIcons';
+import { taskLabel } from '../../taskLabel';
 import { colors } from '../../theme';
 
 const HOUR = 3600000;
@@ -67,7 +68,7 @@ export default function HelpSection() {
         {state.tasks.map((x) => (
           <Chip
             key={x.id}
-            label={x.title}
+            label={taskLabel(x, t)}
             icon={taskIcon(x)}
             active={taskId === x.id}
             onPress={() => setTaskId(x.id)}
@@ -106,7 +107,7 @@ export default function HelpSection() {
                 <ListRow
                   key={d.id}
                   lead={<Avatar name={member?.name ?? '?'} role={member?.role} />}
-                  title={d.kind === 'help' ? t('helpButton') : (task?.title ?? '—')}
+                  title={d.kind === 'help' ? t('helpButton') : (task ? taskLabel(task, t) : '—')}
                   subtitle={nameOf(d.to)}
                   trailing={status}
                   onPress={active ? () => dispatch({ type: 'DELEGATION_DONE', id: d.id }) : undefined}
