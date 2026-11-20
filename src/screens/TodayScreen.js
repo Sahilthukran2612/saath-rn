@@ -493,7 +493,6 @@ export default function TodayScreen() {
   if (state.usage === 'member')
     return (
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 20, paddingTop: 8, gap: 18 }}>
-        <Greeting />
         <PatientsHome />
       </ScrollView>
     );

@@ -12,7 +12,7 @@ import {
   Siren,
   Type,
 } from '../components/icons';
-import { BigButton, Body, Caption, Title } from '../components/ui';
+import { BigButton, Body, Caption, Chip, Title } from '../components/ui';
 import { Avatar, Badge, ListGroup, ListRow, SectionTitle, Segmented, Toggle } from '../components/kit';
 import { Reveal } from '../components/motion';
 import SharedPhone from '../components/me/SharedPhone';
@@ -114,7 +114,10 @@ export default function MeScreen() {
         <Avatar name={state.profile.name || t('role.person')} role="person" size={64} />
         <View style={{ flex: 1, gap: 4 }}>
           <Title style={{ fontSize: 28 }}>{state.profile.name || t('tabMe')}</Title>
-          <Badge label={t(`mode.${state.mode}`)} tone="indigo" />
+          <Badge
+            label={member ? t(`role.${state.profile.myRole || 'family'}`) : t(`mode.${state.mode}`)}
+            tone="indigo"
+          />
         </View>
       </View>
 
@@ -199,6 +202,21 @@ export default function MeScreen() {
           onChange={(v) => set('usage', v)}
           options={['person', 'member', 'both'].map((v) => ({ value: v, label: t(`use.${v}`) }))}
         />
+        {state.usage && state.usage !== 'person' ? (
+          <View style={{ gap: 8, marginTop: 14 }}>
+            <SectionTitle>{t('mo.who')}</SectionTitle>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {['family', 'neighbour', 'asha', 'clinician'].map((r) => (
+                <Chip
+                  key={r}
+                  label={t(`role.${r}`)}
+                  active={(state.profile.myRole || 'family') === r}
+                  onPress={() => dispatch({ type: 'PROFILE_SET', patch: { myRole: r } })}
+                />
+              ))}
+            </View>
+          </View>
+        ) : null}
         <View style={{ height: 18 }} />
         <Account />
         {member ? null : (

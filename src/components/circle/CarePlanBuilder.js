@@ -71,7 +71,7 @@ export default function CarePlanBuilder({ circle }) {
   return (
     <View style={{ gap: 14 }}>
 
-      <SectionTitle>{t('med.title')}</SectionTitle>
+      <SectionTitle>{t('plan.meds')}</SectionTitle>
       {draft.meds.length > 0 ? (
         <ListGroup>
           {draft.meds.map((m, i) => (

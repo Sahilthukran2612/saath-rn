@@ -50,7 +50,10 @@ export default function PatientsHome() {
         key={c.household_id}
         lead={<Avatar name={nameOf(c)} role={c.role} size={44} />}
         title={nameOf(c)}
-        subtitle={`${t(`role.${c.role}`)} · ${latest ? describeEvent(latest, nameOf(c), t) : t('cf.empty')}`}
+        subtitle={
+          (grouped ? '' : `${t(`role.${c.role}`)} · `) +
+          (latest ? describeEvent(latest, nameOf(c), t) : t('cf.empty'))
+        }
         trailing={<Badge tone={alert ? 'brick' : 'leaf'} label={alert ? t('tabSafety') : t('pt.ok')} />}
         label={nameOf(c)}
         onPress={() => {
