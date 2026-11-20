@@ -7,6 +7,7 @@ import { useStore } from '../../state/store';
 import { validPhone } from '../../logic';
 import { requestSync } from '../../state/useCloudSync';
 import { fmt } from '../../circleFeed';
+import Sheet from '../Sheet';
 import { colors } from '../../theme';
 
 const ROLES = ['family', 'neighbour', 'asha', 'clinician'];
@@ -21,22 +22,29 @@ export default function InviteSection() {
   const [phone, setPhone] = useState('');
   const [role, setRole] = useState('family');
   const [error, setError] = useState(false);
+  const [open, setOpen] = useState(false);
 
+  // One step for everything: the person becomes someone Saath calls when an alert goes unanswered (a contact),
+  // and gets a code to follow how you are on their own phone (an invite). No second form.
   const send = async () => {
-    if (name.trim().length < 2 || !validPhone(phone)) return setError(true);
+    const digits = String(phone).replace(/\D/g, '').slice(-10);
+    if (name.trim().length < 2 || !validPhone(digits)) return setError(true);
     setError(false);
     const code = newCode();
+    const id = String(Date.now());
+    dispatch({ type: 'CONTACT_ADD', id, name: name.trim(), phone: digits, role });
     dispatch({
       type: 'INVITE_ADD',
-      id: String(Date.now()),
+      id,
       name: name.trim(),
-      phone,
+      phone: digits,
       role,
       code,
       at: Date.now(),
     });
     setName('');
     setPhone('');
+    setOpen(false);
     try {
       await Share.share({ message: fmt(t('inv.message'), { code }) });
     } catch {
@@ -64,20 +72,24 @@ export default function InviteSection() {
           <Glyph icon={UserPlus} size={22} color={colors.indigo} />
         </View>
         <View style={{ flex: 1 }}>
-          <Title style={{ fontSize: 22 }}>{t('inviteTitle')}</Title>
+          <Title style={{ fontSize: 22 }}>{t('inv.card')}</Title>
           <Caption>{t('inviteSub')}</Caption>
         </View>
       </View>
-      <Field label={t('inviteName')} value={name} onChangeText={setName} />
-      <Field label={t('invitePhone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
-      <Caption>{t('inv.sameNumber')}</Caption>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-        {ROLES.map((r) => (
-          <Chip key={r} label={t(`role.${r}`)} active={role === r} onPress={() => setRole(r)} />
-        ))}
-      </View>
-      {error ? <Body style={{ color: colors.brick }}>{t('invalidPhone')}</Body> : null}
-      <BigButton icon={Send} label={t('inviteShare')} onPress={send} />
+      {state.members.filter((m) => !m.demo).length === 0 && !state.demo ? <Body bold>{t('ct.empty')}</Body> : null}
+      <BigButton icon={UserPlus} label={t('inviteTitle')} onPress={() => setOpen(true)} />
+      <Sheet visible={open} onClose={() => setOpen(false)} title={t('inviteTitle')}>
+        <Field label={t('inviteName')} value={name} onChangeText={setName} />
+        <Field label={t('invitePhone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+        <Caption>{t('inv.sameNumber')}</Caption>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          {ROLES.map((r) => (
+            <Chip key={r} label={t(`role.${r}`)} active={role === r} onPress={() => setRole(r)} />
+          ))}
+        </View>
+        {error ? <Body style={{ color: colors.brick }}>{t('invalidPhone')}</Body> : null}
+        <BigButton icon={Send} label={t('inviteShare')} onPress={send} />
+      </Sheet>
       {pending.length > 0 ? (
         <ListGroup>
           {pending.map((i) => (

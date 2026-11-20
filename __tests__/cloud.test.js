@@ -305,52 +305,76 @@ describe('account card', () => {
     configure();
     await open({});
     await fireEvent.changeText(screen.getByLabelText('Your mobile number'), '123');
-    await fireEvent.press(screen.getAllByLabelText('Create account').at(-1));
+    await fireEvent.press(screen.getByLabelText('Continue'));
     expect(screen.getByText('Enter a 10-digit mobile number.')).toBeTruthy();
     await fireEvent.changeText(screen.getByLabelText('Your mobile number'), '9876543210');
     await fireEvent.changeText(screen.getByLabelText('Password (8 or more characters)'), 'abc');
-    await fireEvent.press(screen.getAllByLabelText('Create account').at(-1));
+    await fireEvent.press(screen.getByLabelText('Continue'));
     expect(screen.getByText('Use a password of at least 8 characters.')).toBeTruthy();
   });
-  test('two different passwords are refused when creating an account', async () => {
+  test('there is one Continue button, no repeat-password box and no create/sign-in switch', async () => {
     configure();
     await open({});
-    await fireEvent.changeText(screen.getByLabelText('Your mobile number'), '9876543210');
-    await fireEvent.changeText(screen.getByLabelText('Password (8 or more characters)'), 'abcdefgh1');
-    await fireEvent.changeText(screen.getByLabelText('Repeat the password'), 'abcdefgh2');
-    await fireEvent.press(screen.getAllByLabelText('Create account').at(-1));
-    expect(screen.getByText('The two passwords are different.')).toBeTruthy();
+    expect(screen.getByLabelText('Continue')).toBeTruthy();
+    expect(screen.queryByLabelText('Repeat the password')).toBeNull();
+    expect(screen.queryByLabelText('Create account')).toBeNull();
   });
-  test('creating an account signs in and shows the number; a forgotten password is warned about', async () => {
+  test('a new number: Continue makes the account and signs in; a forgotten password is warned about', async () => {
     configure();
     global.fetch = jest.fn(async (url) => {
+      if (url.includes('grant_type=password')) return reply(400, { error_code: 'invalid_credentials' });
       if (url.includes('/auth/v1/signup')) return reply(200, { access_token: 'A', refresh_token: 'R', user: { id: 'u1' } });
       if (url.includes('select=id,person_name')) return reply(200, []);
       return reply(201, [{ id: 'h1', person_name: '' }]);
     });
     await open({});
-    expect(screen.getByText('A forgotten password cannot be reset, so keep it safe.')).toBeTruthy();
+    expect(screen.getByText(/A forgotten password cannot be reset, so keep it safe/)).toBeTruthy();
     await fireEvent.changeText(screen.getByLabelText('Your mobile number'), '98765 43210');
     await fireEvent.changeText(screen.getByLabelText('Password (8 or more characters)'), 'abcdefgh1');
-    await fireEvent.changeText(screen.getByLabelText('Repeat the password'), 'abcdefgh1');
-    await fireEvent.press(screen.getAllByLabelText('Create account').at(-1));
+    await fireEvent.press(screen.getByLabelText('Continue'));
     await waitFor(() => expect(screen.getByText('Signed in as +91 9876543210')).toBeTruthy());
     expect(screen.getByText(/Sign in with the same number and password on another phone/)).toBeTruthy();
   });
-  test('sign-in on another phone: a wrong password says so', async () => {
+  test('an existing number: Continue signs in without creating anything', async () => {
     configure();
-    global.fetch = jest.fn(async () => reply(400, { error_code: 'invalid_credentials' }));
+    const urls = [];
+    global.fetch = jest.fn(async (url) => {
+      urls.push(url);
+      if (url.includes('grant_type=password')) return reply(200, { access_token: 'A', refresh_token: 'R', user: { id: 'u1' } });
+      if (url.includes('select=id,person_name')) return reply(200, [{ id: 'h1', person_name: 'Asha' }]);
+      return reply(201, [{ id: 'h1', person_name: '' }]);
+    });
     await open({});
-    await fireEvent.press(screen.getAllByLabelText('Sign in')[0]);
+    await fireEvent.changeText(screen.getByLabelText('Your mobile number'), '9876543210');
+    await fireEvent.changeText(screen.getByLabelText('Password (8 or more characters)'), 'abcdefgh1');
+    await fireEvent.press(screen.getByLabelText('Continue'));
+    await waitFor(() => expect(screen.getByText('Signed in as +91 9876543210')).toBeTruthy());
+    expect(urls.some((u) => u.includes('/auth/v1/signup'))).toBe(false);
+  });
+  test('an existing number with the wrong password says the password is wrong, not that the number exists', async () => {
+    configure();
+    global.fetch = jest.fn(async (url) => {
+      if (url.includes('grant_type=password')) return reply(400, { error_code: 'invalid_credentials' });
+      if (url.includes('/auth/v1/signup')) return reply(422, { msg: 'User already registered' });
+      return reply(200, []);
+    });
+    await open({});
     await fireEvent.changeText(screen.getByLabelText('Your mobile number'), '9876543210');
     await fireEvent.changeText(screen.getByLabelText('Password (8 or more characters)'), 'wrongpass1');
-    await fireEvent.press(screen.getAllByLabelText('Sign in').at(-1));
-    await waitFor(() => expect(screen.getByText('The number or the password is not right.')).toBeTruthy());
+    await fireEvent.press(screen.getByLabelText('Continue'));
+    await waitFor(() => expect(screen.getByText('That is not the right password for this number.')).toBeTruthy());
+  });
+  test('the password can be shown and hidden', async () => {
+    configure();
+    await open({});
+    expect(screen.getByLabelText('Password (8 or more characters)').props.secureTextEntry).toBe(true);
+    await fireEvent.press(screen.getByLabelText('Show'));
+    expect(screen.getByLabelText('Password (8 or more characters)').props.secureTextEntry).toBe(false);
   });
   test('"use without an account" still works and warns what is lost', async () => {
     configure();
     await open({});
-    expect(screen.getByLabelText('Use without an account')).toBeTruthy();
+    expect(screen.getByLabelText('Skip for now')).toBeTruthy();
     expect(screen.getByText(/Works on this phone only/)).toBeTruthy();
   });
   test('shows who is signed in, how many updates wait, and signs out', async () => {
@@ -362,7 +386,7 @@ describe('account card', () => {
     expect(screen.getByText('Signed in as +91 9876543210')).toBeTruthy();
     expect(screen.getByText('1 updates waiting to send')).toBeTruthy();
     await fireEvent.press(screen.getByLabelText('Sign out'));
-    await waitFor(() => expect(screen.getByLabelText('Use without an account')).toBeTruthy());
+    await waitFor(() => expect(screen.getByLabelText('Skip for now')).toBeTruthy());
   });
   test('an account without a phone number says what is lost if the data is cleared', async () => {
     configure();

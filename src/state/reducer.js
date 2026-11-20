@@ -545,6 +545,8 @@ function baseReducer(state, a) {
       return {
         ...state,
         members,
+        // a person added in one step has an invite with the same id: taking the person away takes the invite too
+        invites: state.invites.filter((i) => !(i.id === a.id && i.status === 'pending')),
         profile:
           state.profile.emergencyId === a.id
             ? { ...state.profile, emergencyId: members.find((m) => !m.demo)?.id ?? null }

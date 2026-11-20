@@ -9,7 +9,6 @@ import InviteSection from '../components/circle/InviteSection';
 import HelpSection from '../components/circle/HelpSection';
 import CirclesSection from '../components/circle/CirclesSection';
 import JoinedSection from '../components/circle/JoinedSection';
-import ContactsSection from '../components/circle/ContactsSection';
 import { useStore } from '../state/store';
 import { canShareItem } from '../logic';
 import { colors, shadow } from '../theme';
@@ -116,8 +115,6 @@ export default function CircleScreen() {
       </Reveal>
       {isPerson ? (
         <Reveal index={2}>
-          <ContactsSection />
-          <View style={{ height: 18 }} />
           <InviteSection />
         </Reveal>
       ) : null}

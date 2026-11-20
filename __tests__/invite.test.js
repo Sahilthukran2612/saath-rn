@@ -17,11 +17,10 @@ async function invite(preload) {
   const share = jest.spyOn(Share, 'share').mockResolvedValue({});
   await mount({ role: 'person', ...preload });
   await fireEvent.press(await screen.findByLabelText('Circle'));
-  await screen.findAllByLabelText('Name');
-  // the contacts form is the first Name and Phone number on this screen, the invite form is the second
-  await fireEvent.changeText(screen.getAllByLabelText('Name')[1], 'Meena');
-  await fireEvent.changeText(screen.getAllByLabelText('Phone number')[1], '9876543210');
-  await fireEvent.press(screen.getByLabelText('Send invite'));
+  await fireEvent.press(await screen.findByLabelText('Add a person'));
+  await fireEvent.changeText(await screen.findByLabelText('Name'), 'Meena');
+  await fireEvent.changeText(screen.getByLabelText('Phone number'), '9876543210');
+  await fireEvent.press(screen.getByLabelText('Add and send code'));
   await waitFor(() => expect(share).toHaveBeenCalled());
   return share;
 }

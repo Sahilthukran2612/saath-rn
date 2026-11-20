@@ -11,6 +11,14 @@ import { nowMs } from '../../services/clock';
 import { cloudConfig, isConfigured, setMyTimeOff } from '../../services/cloud';
 import { ago, describeEvent, fmt, isAlert, newest, pendingAlert } from '../../circleFeed';
 
+// Joining is the less common path, so it sits behind one plain link instead of a card of its own.
+function JoinLink() {
+  const { t } = useStore();
+  const [open, setOpen] = useState(false);
+  if (open) return <JoinCard onJoined={() => setOpen(false)} />;
+  return <BigButton kind="text" label={t('join.link')} onPress={() => setOpen(true)} />;
+}
+
 // The other half of the circle: the people I look after. I only ever see what the server lets me see
 // under the Privacy Dial they chose for me (row-level security), so this screen just words it.
 export default function CirclesSection() {
@@ -122,7 +130,7 @@ export default function CirclesSection() {
           ) : null}
         </Card>
       ) : null}
-      <JoinCard />
+      <JoinLink />
     </View>
   );
 }

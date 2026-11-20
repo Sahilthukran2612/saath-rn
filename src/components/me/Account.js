@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import { Cloud } from '../icons';
-import { BigButton, Body, Caption, Card } from '../ui';
-import { Field, Segmented } from '../kit';
+import { BigButton, Body, Caption, Card, Chip } from '../ui';
+import { Field } from '../kit';
 import { useStore } from '../../state/store';
 import {
   cloudConfig,
@@ -24,10 +24,9 @@ const last10 = (p) => String(p).replace(/\D/g, '').slice(-10);
 // account" keeps working on this phone only.
 export default function Account() {
   const { state, dispatch, t } = useStore();
-  const [mode, setMode] = useState('create'); // 'create' | 'signin'
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
-  const [again, setAgain] = useState('');
+  const [show, setShow] = useState(false);
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
   const cfg = cloudConfig();
@@ -38,7 +37,6 @@ export default function Account() {
     // a second phone: bring the person's name over from the account
     if (r.personName && !state.profile.name) dispatch({ type: 'PROFILE_SET', patch: { name: r.personName } });
     setPassword('');
-    setAgain('');
     setMsg('');
   };
 
@@ -46,15 +44,18 @@ export default function Account() {
     if (busy) return;
     if (!validPhone(last10(phone))) return setMsg(t('invalidPhone'));
     if (!passwordOk(password)) return setMsg(t('acc.short'));
-    if (mode === 'create' && password !== again) return setMsg(t('acc.mismatch'));
     setBusy(true);
-    const r =
-      mode === 'create'
-        ? await signUpPassword(cfg, last10(phone), password, undefined, state.profile.name)
-        : await signInPassword(cfg, last10(phone), password);
+    // One button for both: a number that already has an account is signed in; a new number gets one made. The
+    // server answers a wrong password and an unknown number the same way, so a failed sign-in tries to create the
+    // account, and if that says the number exists, the password was wrong.
+    let r = await signInPassword(cfg, last10(phone), password);
+    if (!r.ok && r.reason === 'wrong') {
+      const s = await signUpPassword(cfg, last10(phone), password, undefined, state.profile.name);
+      r = s.ok ? s : { ok: false, reason: s.reason === 'exists' ? 'wrong' : s.reason };
+    }
     setBusy(false);
     if (r.ok) return done(r);
-    const reasons = { exists: 'acc.exists', wrong: 'acc.wrong', confirm: 'acc.confirm', network: 'acc.failed' };
+    const reasons = { wrong: 'acc.wrongPass', confirm: 'acc.confirm', network: 'acc.failed' };
     return setMsg(t(reasons[r.reason] || 'acc.failed'));
   };
 
@@ -96,26 +97,15 @@ export default function Account() {
       ) : (
         <View style={{ gap: 10 }}>
           <Caption>{t('acc.note')}</Caption>
-          <Segmented
-            value={mode}
-            onChange={(v) => {
-              setMode(v);
-              setMsg('');
-            }}
-            options={[
-              { value: 'create', label: t('acc.create') },
-              { value: 'signin', label: t('acc.signin.tab') },
-            ]}
-          />
           <Field label={t('acc.phone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
-          <Field label={t('acc.pass')} value={password} onChangeText={setPassword} secureTextEntry />
-          {mode === 'create' ? (
-            <Field label={t('acc.pass2')} value={again} onChangeText={setAgain} secureTextEntry />
-          ) : null}
-          {mode === 'create' ? <Caption>{t('acc.noreset')}</Caption> : null}
+          <Field label={t('acc.pass')} value={password} onChangeText={setPassword} secureTextEntry={!show} />
+          <View style={{ flexDirection: 'row' }}>
+            <Chip label={show ? t('acc.hide') : t('acc.show')} onPress={() => setShow(!show)} />
+          </View>
           {msg ? <Body bold>{msg}</Body> : null}
-          <BigButton kind="primary" label={mode === 'create' ? t('acc.create') : t('acc.signIn')} onPress={submit} />
-          <BigButton kind="quiet" label={t('acc.quick')} onPress={quick} />
+          <BigButton kind="primary" label={busy ? t('acc.wait') : t('acc.continue')} onPress={submit} />
+          <Caption>{t('acc.noreset')}</Caption>
+          <BigButton kind="text" label={t('acc.quick')} onPress={quick} />
           <Caption>{t('acc.quickNote')}</Caption>
         </View>
       )}

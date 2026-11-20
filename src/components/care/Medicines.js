@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import { Pill, Plus, X } from '../icons';
-import { BigButton, Body, Caption, Card, Chip, Title } from '../ui';
+import { BigButton, Body, Caption, Chip, Title } from '../ui';
 import { CheckMark, Field, ListGroup, ListRow, SectionTitle } from '../kit';
 import { useStore } from '../../state/store';
 import { useNow } from '../useNow';
 import { WHEN, dueMedicines, takenToday, validMedicine } from '../../medicines';
 import { nowMs } from '../../services/clock';
+import Sheet from '../Sheet';
 
 const row = { flexDirection: 'row', flexWrap: 'wrap', gap: 8 };
 
@@ -62,22 +63,30 @@ export default function Medicines() {
         </ListGroup>
       )}
       <Caption>{t('med.note')}</Caption>
-      <BigButton kind="quiet" icon={open ? X : Plus} label={open ? t('med.close') : t('med.add')} onPress={() => setOpen(!open)} />
-      {open ? (
-        <Card style={{ gap: 12 }}>
-          <Field label={t('med.name')} value={name} onChangeText={setName} />
-          <Field label={t('med.dose')} value={dose} onChangeText={setDose} />
-          <Caption>{t('med.doseHelp')}</Caption>
-          <SectionTitle>{t('med.when')}</SectionTitle>
+      <BigButton kind="quiet" icon={Plus} label={t('med.add')} onPress={() => setOpen(true)} />
+      <Sheet visible={open} onClose={() => setOpen(false)} title={t('med.add')}>
+        <Field label={t('med.name')} value={name} onChangeText={setName} />
+        <Field label={t('med.dose')} value={dose} onChangeText={setDose} />
+        <Caption>{t('med.doseHelp')}</Caption>
+        <SectionTitle>{t('med.when')}</SectionTitle>
+        <View style={row}>
+          {WHEN.map(([id]) => (
+            <Chip key={id} label={t(`when.${id}`)} active={when === id} onPress={() => setWhen(id)} />
+          ))}
+        </View>
+        <BigButton
+          icon={Plus}
+          label={t('med.save')}
+          onPress={() => {
+            add();
+            if (validMedicine(name)) setOpen(false);
+          }}
+        />
+        {state.medicines.some((m) => !m.plan) ? (
           <View style={row}>
-            {WHEN.map(([id]) => (
-              <Chip key={id} label={t(`when.${id}`)} active={when === id} onPress={() => setWhen(id)} />
-            ))}
-          </View>
-          <BigButton icon={Plus} label={t('med.save')} onPress={add} />
-          {state.medicines.some((m) => !m.plan) ? (
-            <View style={row}>
-              {state.medicines.filter((m) => !m.plan).map((m) => (
+            {state.medicines
+              .filter((m) => !m.plan)
+              .map((m) => (
                 <Chip
                   key={m.id}
                   label={`${t('remove')}: ${m.name}`}
@@ -85,10 +94,9 @@ export default function Medicines() {
                   onPress={() => dispatch({ type: 'MED_REMOVE', id: m.id })}
                 />
               ))}
-            </View>
-          ) : null}
-        </Card>
-      ) : null}
+          </View>
+        ) : null}
+      </Sheet>
     </View>
   );
 }

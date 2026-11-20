@@ -176,13 +176,14 @@ describe('contacts on the Circle tab', () => {
   test('in a real install the list starts empty with a message, and a contact can be added and removed', async () => {
     await mount({ ...productionState, onboarded: true });
     await fireEvent.press(screen.getByLabelText('Circle'));
-    expect(screen.getByText('Emergency contacts')).toBeTruthy();
+    expect(screen.getByLabelText('Add a person')).toBeTruthy();
     expect(screen.getByText(/No contacts yet/)).toBeTruthy();
-    // the contacts form is the first 'Name' and 'Phone number' on this screen (the invite form is below it)
-    await fireEvent.changeText(screen.getAllByLabelText('Name')[0], 'Sunita');
-    await fireEvent.changeText(screen.getAllByLabelText('Phone number')[0], '9123456780');
+    // one form, in a bottom sheet: adding a person makes them a contact and an invite at once
+    await fireEvent.press(screen.getByLabelText('Add a person'));
+    await fireEvent.changeText(await screen.findByLabelText('Name'), 'Sunita');
+    await fireEvent.changeText(screen.getByLabelText('Phone number'), '9123456780');
     await fireEvent.press(screen.getAllByLabelText('ASHA')[0]);
-    await fireEvent.press(screen.getByLabelText('Add contact'));
+    await fireEvent.press(screen.getByLabelText('Add and send code'));
     await waitFor(() => expect(screen.getAllByText('Sunita').length).toBeGreaterThan(0));
     await fireEvent.press(screen.getByLabelText('Remove Sunita'));
     await waitFor(() => expect(screen.queryByText('Sunita')).toBeNull());

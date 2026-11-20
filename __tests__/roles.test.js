@@ -158,7 +158,8 @@ describe('inviting someone', () => {
   test('the invite form says the invited person must use the number entered here', async () => {
     await mount({ ...productionState, usage: 'person', onboarded: true });
     await fireEvent.press(screen.getByLabelText('Circle'));
-    expect(screen.getByText('They must create their Saath account with this same phone number, or the code will not work.')).toBeTruthy();
+    await fireEvent.press(screen.getByLabelText('Add a person'));
+    expect(await screen.findByText('They must create their Saath account with this same phone number, or the code will not work.')).toBeTruthy();
   });
   test('the invite published to the server carries that number, as 10 digits', async () => {
     const cfg = { url: 'https://api.example.test', key: 'k' };
@@ -177,6 +178,7 @@ describe('inviting someone', () => {
   test('the joining card tells the care-giver which number to sign in with', async () => {
     await mount({ ...productionState, usage: 'member', onboarded: true });
     await fireEvent.press(screen.getByLabelText('Circle'));
+    await fireEvent.press(screen.getByLabelText('I have an invite code'));
     expect(screen.getByText(/only works for the phone number the person entered for you/)).toBeTruthy();
   });
 });
