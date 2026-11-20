@@ -196,7 +196,9 @@ describe('Today and the tab bar', () => {
   });
   test('the neighbour view says it is safety only', async () => {
     await mountApp({ role: 'neighbour' });
-    expect(screen.getByText('You get safety alerts only.')).toBeTruthy();
+    expect(screen.getByText('You are a neighbour')).toBeTruthy();
+    expect(screen.getByText('You get safety alerts only')).toBeTruthy();
+    expect(screen.getByText('You never see')).toBeTruthy();
   });
   test('the greeting is localized', async () => {
     await mountApp({ lang: 'hi' });
