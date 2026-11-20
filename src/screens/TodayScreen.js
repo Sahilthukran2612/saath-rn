@@ -24,7 +24,6 @@ import SuggestionPad from '../components/SuggestionPad';
 import Stamp, { StampMark } from '../components/Stamp';
 import Perf from '../components/Perf';
 import Doodle from '../components/doodles';
-import Tally from '../components/Tally';
 import { useStore } from '../state/store';
 import { adviceText } from '../i18n/strings';
 import { can, glucoseAdvice } from '../logic';
@@ -48,10 +47,28 @@ function Greeting() {
     day: 'numeric',
     month: 'long',
   });
+  const person = state.role === 'person' && state.usage !== 'member';
+  const total = state.tasks.length;
+  const done = state.tasks.filter((x) => x.done).length;
   return (
-    <View accessibilityRole="header" style={{ gap: 2 }}>
-      <Title style={{ fontSize: 32 }}>{t(`greet.${key}`)}</Title>
-      <Caption>{date}</Caption>
+    <View accessibilityRole="header" style={styles.heroBlue}>
+      {/* two soft circles, as in the reference: depth without an image */}
+      <View pointerEvents="none" style={[styles.blob, { width: 190, height: 190, right: -50, top: -70 }]} />
+      <View pointerEvents="none" style={[styles.blob, { width: 120, height: 120, right: 70, bottom: -60 }]} />
+      <Text style={{ fontFamily: fonts.semi, fontSize: 16, lineHeight: 22, color: '#EEF3FF' }}>{date}</Text>
+      <Text style={{ fontFamily: fonts.bold, fontSize: 30, lineHeight: 38, color: colors.white }}>{t(`greet.${key}`)}</Text>
+      {person && total > 0 ? (
+        <View style={{ gap: 10, marginTop: 6 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8 }}>
+            <Text style={{ fontFamily: fonts.bold, fontSize: 64, lineHeight: 72, color: colors.white }}>{done}</Text>
+            <Text style={{ fontFamily: fonts.bold, fontSize: 24, lineHeight: 32, color: '#EEF3FF' }}>{`/ ${total}`}</Text>
+            <Text style={{ fontFamily: fonts.semi, fontSize: 18, lineHeight: 26, color: '#EEF3FF', flex: 1 }}>{t('hero.done')}</Text>
+          </View>
+          <View style={{ height: 8, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.28)', overflow: 'hidden' }}>
+            <View style={{ height: 8, borderRadius: 4, backgroundColor: colors.white, width: `${(done / total) * 100}%` }} />
+          </View>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -79,8 +96,11 @@ function TaskList({ big }) {
   );
 }
 
-function TaskRow({ task, big, k, dispatch, state, t, last }) {
+const TILE_KINDS = ['Blue', 'Violet', 'Orange', 'Teal', 'Pink'];
+
+function TaskRow({ task, big, k, dispatch, state, t, last, index = 0 }) {
   const Icon = taskIcon(task);
+  const kind = TILE_KINDS[index % TILE_KINDS.length];
   return (
     <PressRow
       accessibilityRole="checkbox"
@@ -93,11 +113,11 @@ function TaskRow({ task, big, k, dispatch, state, t, last }) {
       }}
       style={[styles.taskRow, { minHeight: big ? 84 : 68 }, !last && styles.taskDivider]}
     >
-      <View style={[styles.taskIcon, { backgroundColor: task.done ? colors.leafTint : colors.indigoTint }]}>
+      <View style={[styles.taskIcon, { backgroundColor: task.done ? colors.leafTint : colors[`tile${kind}`] }]}>
         <Glyph
           icon={Icon}
           size={24 * Math.min(k, 1.15)}
-          color={task.done ? colors.leafDeep : colors.indigo}
+          color={task.done ? colors.leafDeep : colors[`tile${kind}Fg`]}
         />
       </View>
       <Text
@@ -120,7 +140,6 @@ function TaskRow({ task, big, k, dispatch, state, t, last }) {
 // it lands the violet stamp with the time, and the day's tasks are counted in tally marks below.
 function ImOkHero() {
   const { state, dispatch, t } = useStore();
-  const done = state.tasks.filter((x) => x.done).length;
   const [sentAt, setSentAt] = useState(null);
   const sent = sentAt != null;
   useEffect(() => {
@@ -153,14 +172,16 @@ function ImOkHero() {
       <View style={{ minHeight: sent ? 72 : 0, justifyContent: 'center' }}>
         <Stamp show={sent} word={t('imOk')} sub={time} rotate={-5} />
       </View>
-      <Perf />
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-        <Tally done={done} total={state.tasks.length} />
-        <Body bold style={{ flex: 1, color: sent ? colors.leafDeep : colors.inkSoft }}>
-          {sent ? t('sent.ok') : fmt(t('doneOf'), { done, total: state.tasks.length })}
-        </Body>
-      </View>
-      {!sent && <Caption>{t('imOkHint')}</Caption>}
+      {sent ? (
+        <>
+          <Perf />
+          <Body bold style={{ color: colors.leafDeep }}>
+            {t('sent.ok')}
+          </Body>
+        </>
+      ) : (
+        <Caption>{t('imOkHint')}</Caption>
+      )}
     </View>
   );
 }
@@ -518,7 +539,7 @@ export default function TodayScreen() {
 const styles = StyleSheet.create({
   taskRow: { flexDirection: 'row', alignItems: 'center', gap: 16, paddingHorizontal: 16 },
   taskDivider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.outlineVariant },
-  taskIcon: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
+  taskIcon: { width: 48, height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   slip: {
     backgroundColor: colors.paper,
     borderRadius: radii.lg,
@@ -526,6 +547,14 @@ const styles = StyleSheet.create({
     gap: 12,
     ...shadow.card,
   },
+  heroBlue: {
+    backgroundColor: colors.indigo,
+    borderRadius: radii.xl,
+    padding: 22,
+    gap: 4,
+    overflow: 'hidden',
+  },
+  blob: { position: 'absolute', borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.12)' },
   imOkButton: {
     minHeight: 96,
     borderRadius: radii.pill,

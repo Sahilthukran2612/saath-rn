@@ -10,6 +10,8 @@ import { BodySection, CheckinSection, FoodSection, SchoolSection } from '../comp
 import { useStore } from '../state/store';
 import { colors } from '../theme';
 
+const TILE_KINDS = ['Blue', 'Violet', 'Orange', 'Teal', 'Pink'];
+
 const SECTIONS = {
   ladder: { doodle: 'steps', Comp: LadderSection, teenOnly: true },
   visit: { doodle: 'note', Comp: VisitSection },
@@ -70,10 +72,23 @@ export default function PlanScreen() {
             <Caption>{t('planSub')}</Caption>
           </View>
           <ListGroup>
-            {ids.map((id) => (
+            {ids.map((id, i) => (
               <ListRow
                 key={id}
-                lead={<Doodle name={SECTIONS[id].doodle} size={44} />}
+                lead={
+                  <View
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 14,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: colors[`tile${TILE_KINDS[i % TILE_KINDS.length]}`],
+                    }}
+                  >
+                    <Doodle name={SECTIONS[id].doodle} size={34} color={colors[`tile${TILE_KINDS[i % TILE_KINDS.length]}Fg`]} />
+                  </View>
+                }
                 title={t(`sec.${id}`)}
                 chevron
                 onPress={() => setOpen(id)}

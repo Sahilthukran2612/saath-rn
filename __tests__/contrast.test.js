@@ -17,6 +17,7 @@ export const ratio = (a, b) => {
 
 const c = colors;
 // [text colour, background, what it is, minimum]
+const TILES = ['Blue', 'Violet', 'Orange', 'Teal', 'Pink'].map((k) => [c[`tile${k}Fg`], c[`tile${k}`], `icon on the ${k} tile`, 3.0]);
 const TEXT = [
   [c.ink, c.white, 'body text on a card', 4.5],
   [c.ink, c.mist, 'body text on the page', 4.5],
@@ -65,7 +66,7 @@ const SHAPES = [
 ];
 
 describe('text contrast (WCAG)', () => {
-  test.each(TEXT)('%s on %s: %s needs %s:1', (fg, bg, _what, min) => {
+  test.each([...TEXT, ...TILES])('%s on %s: %s needs %s:1', (fg, bg, _what, min) => {
     expect(ratio(fg, bg)).toBeGreaterThanOrEqual(min);
   });
   test('the formula agrees with known values', () => {

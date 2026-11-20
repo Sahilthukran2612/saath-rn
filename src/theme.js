@@ -2,10 +2,10 @@
 // stamp for "done", carbon-pink and slip-yellow second copies, ledger green for OK. Brick is for real
 // safety alerts only. Token names are kept from the earlier system so every screen inherits the world.
 export const colors = {
-  indigo: '#1B3FAE', // ballpoint blue: type accents, primary actions, doodles
-  indigoDeep: '#102A7A',
-  indigoTint: '#E7EDFC', // pale blue wash: selected states, quiet buttons
-  indigoSoft: '#BFCDF3',
+  indigo: '#1A5CFF', // electric blue: the hero, primary actions, type accents
+  indigoDeep: '#0E3FC4',
+  indigoTint: '#E8F0FF', // pale blue wash: selected states, quiet buttons
+  indigoSoft: '#B8CEFF',
   haldi: '#FFE066', // the yellow third copy of a slip
   haldiTint: '#FFF4BF',
   haldiDeep: '#5E4800', // text on the yellow slip
@@ -36,13 +36,26 @@ export const colors = {
   outline: '#717AA3',
   outlineVariant: '#BCC7E8',
 };
+// Pastel icon tiles: a rounded square with a tinted ground and a strong glyph, one hue per kind of thing.
+Object.assign(colors, {
+  tileBlue: '#E6EFFF', tileBlueFg: '#1A5CFF',
+  tileViolet: '#EFE7FF', tileVioletFg: '#6A3DE8',
+  tileOrange: '#FFEBD6', tileOrangeFg: '#B54F00',
+  tileTeal: '#D9F5F2', tileTealFg: '#0B7F78',
+  tilePink: '#FFE1E6', tilePinkFg: '#C2255C',
+});
 colors.paper = '#FFFFFF'; // slip and card background: white bill paper (dark: a deep blue-black slip)
 
 // The night palette: the same tokens, re-inked. `white` stays white (it is the text on coloured buttons);
 // backgrounds that were white use `paper`. The yellow and pink slips stay light, like stickers on a dark
 // counter, so their dark text keeps its contrast.
 export const darkColors = {
-  indigo: '#4F6FE0',
+  tileBlue: '#1B2A55', tileBlueFg: '#8FB0FF',
+  tileViolet: '#2B2350', tileVioletFg: '#B9A2FF',
+  tileOrange: '#3A2A18', tileOrangeFg: '#FFB366',
+  tileTeal: '#12363A', tileTealFg: '#6FE0D6',
+  tilePink: '#3D1F2B', tilePinkFg: '#FF9DB8',
+  indigo: '#4672EE',
   indigoDeep: '#C9D6FF', // used as text and icons on the tinted washes, so it turns light at night
   indigoTint: '#1E2754',
   indigoSoft: '#BFCDF3',

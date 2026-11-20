@@ -517,7 +517,7 @@ const styles = StyleSheet.create({
     minHeight: 64,
   },
   rowDivider: { height: StyleSheet.hairlineWidth, backgroundColor: colors.outlineVariant, marginRight: 16 },
-  iconBox: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  iconBox: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   track: { width: 52, height: 32, borderRadius: 16, borderWidth: 2 },
   back: {
     width: 48,
