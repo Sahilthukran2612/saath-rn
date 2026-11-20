@@ -411,6 +411,22 @@ function ProHome() {
   );
 }
 
+// ASHA or clinician outside demo mode: only the households that really added them. No made-up households.
+function RealProHome() {
+  const { state, t } = useStore();
+  return (
+    <View style={{ gap: 14 }}>
+      {state.circles.length === 0 ? (
+        <Card tone="haldi" style={{ gap: 6 }}>
+          <Body bold>{t('mh.empty')}</Body>
+          <Caption style={{ color: colors.ink }}>{t('mo.noCode')}</Caption>
+        </Card>
+      ) : null}
+      <CirclesSection />
+    </View>
+  );
+}
+
 // The home of someone who looks after a person: who they look after and what role they have, then the list.
 function MemberHome() {
   const { state, t } = useStore();
@@ -458,14 +474,17 @@ export default function TodayScreen() {
   else if (state.role === 'family') body = <FamilyHome />;
   else if (state.role === 'neighbour')
     body = (
-      <Card tone="tint" style={{ alignItems: 'center', paddingVertical: 28 }}>
-        <Glyph icon={ShieldCheck} size={44} color={colors.indigo} />
-        <Body bold style={{ textAlign: 'center' }}>
-          {t('safetyOnlyView')}
-        </Body>
-      </Card>
+      <View style={{ gap: 14 }}>
+        <Card tone="tint" style={{ alignItems: 'center', paddingVertical: 28 }}>
+          <Glyph icon={ShieldCheck} size={44} color={colors.indigo} />
+          <Body bold style={{ textAlign: 'center' }}>
+            {t('safetyOnlyView')}
+          </Body>
+        </Card>
+        {state.demo ? null : <CirclesSection />}
+      </View>
     );
-  else body = <ProHome />;
+  else body = state.demo ? <ProHome /> : <RealProHome />;
   return (
     <ScrollView
       keyboardShouldPersistTaps="handled"
