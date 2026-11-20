@@ -75,7 +75,7 @@ function TopSlip({ slip, index, total, onDone, lang, nowMs }) {
               paddingVertical: 4,
             }}
           >
-            <Text style={{ fontFamily: fonts.semi, fontSize: 16 * Math.min(k, 1.2), color: care ? colors.carbonDeep : colors.haldiDeep }}>
+            <Text style={{ fontFamily: fonts.semi, fontSize: 16 * Math.min(k, 1.2), color: care ? colors.carbonDeep : '#5E4800' }}>
               {t(`sg.kind.${slip.kind}`)}
             </Text>
           </View>

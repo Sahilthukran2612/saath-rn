@@ -30,7 +30,8 @@ const PAIRS = [
   [d.ink, d.indigoTint, 'text on a selected row', 4.5],
   [d.indigoDeep, d.indigoTint, 'title and quiet-button label on a wash', 4.5],
   [d.indigoDeep, d.paper, 'slip title on a card', 4.5],
-  [d.haldiDeep, d.haldi, 'text on the yellow slip', 4.5],
+  ['#5E4800', d.haldi, 'text on the yellow slip', 4.5],
+  [d.haldiDeep, d.haldiTint, 'warning badge and icons on the dark wash', 4.5],
   [d.carbonDeep, d.carbon, 'text on the pink slip', 4.5],
   // large or bold text and shapes: 3:1
   [d.white, d.indigo, 'primary button label (bold, large)', 4.0],

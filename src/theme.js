@@ -48,6 +48,7 @@ export const darkColors = {
   indigoSoft: '#BFCDF3',
   brick: '#D8453D',
   haldiTint: '#3A3213',
+  haldiDeep: '#FFD84D', // text and icons on the dark yellow wash (the yellow slip itself keeps #5E4800 text)
   leaf: '#2A8458',
   leafDeep: '#8FE3B8',
   leafTint: '#16382A',
