@@ -214,3 +214,17 @@ describe('WhatsApp link (free: the phone sends it, one tap)', () => {
     expect(text).not.toMatch(/is hurt|has fallen|emergency/i);
   });
 });
+
+describe('baseline explanation in Hindi', () => {
+  const { explainBaseline: explain, adjustBaseline: adjust, defaultBaseline: base } = require('../src/care');
+  test('normal and adjusted lines are in Hindi with the same numbers', () => {
+    const normal = explain(base(), 'hi');
+    expect(normal[0]).toMatch(/गिरने की जाँच: सामान्य/);
+    expect(normal[0]).toContain(String(base().impactG));
+    expect(normal[1]).toContain(String(base().inactiveHours));
+    expect(/[A-Za-z]{4,}/.test(normal.join(' '))).toBe(false);
+    const moved = explain(adjust(base(), 'fall', 'false_alarm'), 'hi').join(' ');
+    expect(moved).toMatch(/प्रतिक्रिया/);
+    expect(explain(base()).join(' ')).toMatch(/Fall check: normal/); // English is still the default
+  });
+});

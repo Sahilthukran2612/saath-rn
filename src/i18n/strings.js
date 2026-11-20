@@ -486,7 +486,9 @@ export const strings = {
     'acc.phone': 'Your mobile number',
     'join.link': 'I have an invite code',
     'inv.card': 'People who help you',
-    'pt.title': 'People I look after',
+    'pt.title': 'People I look after',
+    'sheet.close': 'Close',
+    'plate.alt': 'Plate model',
     'acc.open': 'Sign in or create account',
     'vis.due': 'Visit due',
     'vis.title': 'Household visit',
@@ -1197,7 +1199,9 @@ export const strings = {
     'acc.phone': 'आपका मोबाइल नंबर',
     'join.link': 'मेरे पास न्योते का कोड है',
     'inv.card': 'लोग जो आपकी मदद करते हैं',
-    'pt.title': 'जिनकी मैं देखभाल करता हूँ',
+    'pt.title': 'जिनकी मैं देखभाल करता हूँ',
+    'sheet.close': 'बंद करें',
+    'plate.alt': 'थाली का नमूना',
     'acc.open': 'साइन इन या खाता बनाएँ',
     'vis.due': 'मिलने का समय',
     'vis.title': 'घर का दौरा',

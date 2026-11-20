@@ -25,18 +25,28 @@ export function adjustBaseline(b, kind, feedback) {
 export const cfgFrom = (b) => ({ ...CFG, fallImpactG: b.impactG, inactiveHours: b.inactiveHours });
 
 // Plain sentences that say what the baseline is and why it moved.
-export function explainBaseline(b) {
+// lang is 'en' or 'hi'. The default stays English so existing callers and tests are unchanged.
+export function explainBaseline(b, lang = 'en') {
   const d = defaultBaseline();
+  const hi = lang === 'hi';
   const parts = [];
   parts.push(
     b.impactG === d.impactG
-      ? `Fall check: normal (impact ${b.impactG} g).`
-      : `Fall check: ${b.impactG > d.impactG ? 'less' : 'more'} sensitive than usual (impact ${b.impactG} g) because of your feedback.`
+      ? hi
+        ? `गिरने की जाँच: सामान्य (झटका ${b.impactG} g)।`
+        : `Fall check: normal (impact ${b.impactG} g).`
+      : hi
+        ? `गिरने की जाँच: आपकी प्रतिक्रिया के कारण सामान्य से ${b.impactG > d.impactG ? 'कम' : 'ज़्यादा'} संवेदनशील (झटका ${b.impactG} g)।`
+        : `Fall check: ${b.impactG > d.impactG ? 'less' : 'more'} sensitive than usual (impact ${b.impactG} g) because of your feedback.`
   );
   parts.push(
     b.inactiveHours === d.inactiveHours
-      ? `Quiet check: after ${b.inactiveHours} hours.`
-      : `Quiet check: after ${b.inactiveHours} hours (was ${d.inactiveHours}) because of your feedback.`
+      ? hi
+        ? `चुप्पी की जाँच: ${b.inactiveHours} घंटे बाद।`
+        : `Quiet check: after ${b.inactiveHours} hours.`
+      : hi
+        ? `चुप्पी की जाँच: ${b.inactiveHours} घंटे बाद (पहले ${d.inactiveHours} थे), आपकी प्रतिक्रिया के कारण।`
+        : `Quiet check: after ${b.inactiveHours} hours (was ${d.inactiveHours}) because of your feedback.`
   );
   return parts;
 }

@@ -64,7 +64,7 @@ export default function SafetyScreen() {
         <SectionTitle>{t('baselineTitle')}</SectionTitle>
         <View style={{ height: 8 }} />
         <ListGroup>
-          {explainBaseline(state.baseline).map((line, i) => (
+          {explainBaseline(state.baseline, state.lang).map((line, i) => (
             <ListRow key={line} icon={i === 0 ? Activity : Moon} title={line} />
           ))}
           <ListRow

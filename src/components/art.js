@@ -1,5 +1,6 @@
 import React from 'react';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import { useStore } from '../state/store';
 import { colors } from '../theme';
 
 // Mood faces drawn as SVG so they match the line weight of the icon set and scale cleanly.
@@ -38,13 +39,14 @@ export function MoodFace({ level = 3, size = 40, color = colors.indigo, fill = '
 
 // The plate model: half vegetables, a quarter protein, a quarter grain. Drawn, so it works offline and at any size.
 export function PlateDiagram({ size = 140 }) {
+  const { t } = useStore();
   const c = size / 2;
   const r = size / 2 - 6;
   const arc = (d, fill) => (
     <Path d={d} fill={fill} stroke={colors.white} strokeWidth={3} strokeLinejoin="round" />
   );
   return (
-    <Svg width={size} height={size} accessibilityLabel="Plate model">
+    <Svg width={size} height={size} accessibilityLabel={t('plate.alt')}>
       <Circle cx={c} cy={c} r={r + 4} fill={colors.white} stroke={colors.lineStrong} strokeWidth={2} />
       {arc(`M ${c - r} ${c} A ${r} ${r} 0 0 1 ${c + r} ${c} Z`, colors.leaf)}
       {arc(`M ${c} ${c} L ${c - r} ${c} A ${r} ${r} 0 0 0 ${c} ${c + r} Z`, colors.haldi)}

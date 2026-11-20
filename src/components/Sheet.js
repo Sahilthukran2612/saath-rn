@@ -3,6 +3,7 @@ import { Animated, Dimensions, Keyboard, Modal, PanResponder, Pressable, ScrollV
 import { X } from './icons';
 import { Title } from './ui';
 import { useReducedMotion } from './motion';
+import { useStore } from '../state/store';
 import { colors, radii } from '../theme';
 
 // A bottom drawer for forms, the way phones do it: it rises from the bottom edge on a critically damped spring, the
@@ -11,6 +12,7 @@ import { colors, radii } from '../theme';
 const H = Dimensions.get('window').height;
 
 export default function Sheet({ visible, onClose, title, children }) {
+  const { t } = useStore();
   const reduced = useReducedMotion();
   const [mounted, setMounted] = useState(visible);
   const [kb, setKb] = useState(0);
@@ -96,7 +98,7 @@ export default function Sheet({ visible, onClose, title, children }) {
             <Title style={{ fontSize: 22, flex: 1 }}>{title}</Title>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Close"
+              accessibilityLabel={t('sheet.close')}
               onPress={onClose}
               hitSlop={8}
               style={{ width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' }}
