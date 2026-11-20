@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View } from 'react-native';
 import { BigButton, Body, Caption, Card } from '../ui';
 import { Avatar, Badge, ListGroup, Segmented } from '../kit';
 import { useStore } from '../../state/store';
-import { cloudConfig, isConfigured, setMemberDial } from '../../services/cloud';
+import useJoinedDial, { sameSomeone } from '../../state/useJoinedDial';
 import { colors } from '../../theme';
 
 // People who joined this circle from their own phones, and what each of them sees. Changing the dial
@@ -11,38 +11,25 @@ import { colors } from '../../theme';
 // real control, not a label. In demo mode there is no server, so the change stays on this phone.
 export default function JoinedSection() {
   const { state, dispatch, t } = useStore();
-  const [msg, setMsg] = useState('');
-  const cfg = cloudConfig();
-  const live = isConfigured(cfg) && Boolean(state.cloud.access);
+  const { setDial, msg, live } = useJoinedDial();
   if (!live && !state.demo) return null;
-
-  const setDial = async (m, dial) => {
-    const before = m.dial;
-    setMsg('');
-    dispatch({ type: 'JOINED_DIAL', id: m.id, dial });
-    if (!live || m.id.startsWith('demo-')) return;
-    const r = await setMemberDial(cfg, state.cloud, m.id, dial);
-    if (r.session) dispatch({ type: 'CLOUD_SET', patch: r.session });
-    if (!r.ok) {
-      dispatch({ type: 'JOINED_DIAL', id: m.id, dial: before }); // the server did not take it: show the truth
-      setMsg(t('jm.offline'));
-    }
-  };
+  // People already in the list above (same name and role as a contact I added) are not repeated here.
+  const joinedOnly = state.joined.filter((j) => !state.members.some((c) => sameSomeone(c, j)));
 
   return (
     <View style={{ gap: 12 }}>
       <Body bold>{t('jm.title')}</Body>
-      {state.joined.length === 0 ? (
+      {joinedOnly.length === 0 ? (
         <Caption>{t('jm.none')}</Caption>
       ) : (
         <ListGroup>
-          {state.joined.map((m, i) => (
+          {joinedOnly.map((m, i) => (
             <View
               key={m.id}
               style={{
                 padding: 16,
                 gap: 12,
-                borderBottomWidth: i === state.joined.length - 1 ? 0 : 1,
+                borderBottomWidth: i === joinedOnly.length - 1 ? 0 : 1,
                 borderBottomColor: colors.line,
               }}
             >

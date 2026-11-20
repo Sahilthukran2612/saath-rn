@@ -11,6 +11,7 @@ import CirclesSection from '../components/circle/CirclesSection';
 import JoinedSection from '../components/circle/JoinedSection';
 import { useStore } from '../state/store';
 import { canShareItem } from '../logic';
+import useJoinedDial, { sameSomeone } from '../state/useJoinedDial';
 import { colors, shadow } from '../theme';
 
 // Names are stored like "Asha (daughter)". Show the name, and the relation only when it adds something.
@@ -24,6 +25,15 @@ function splitName(name, roleLabel) {
 function MemberRow({ m, last }) {
   const { state, dispatch, t } = useStore();
   const isPerson = state.role === 'person';
+  // A person who has joined from their own phone is the same person as this contact: one row, and the control moves
+  // the real (server-enforced) dial for them as well as the local one.
+  const joined = state.joined.find((j) => sameSomeone(m, j));
+  const { setDial } = useJoinedDial();
+  const dial = joined ? joined.dial : m.dial;
+  const setLevel = (d) => {
+    dispatch({ type: 'SET_DIAL', id: m.id, dial: d });
+    if (joined) setDial(joined, d);
+  };
   const visible = canShareItem({ involves: [m.id] }, { [m.id]: m.shareContact });
   const roleLabel = t(`role.${m.role}`);
   const { base, note } = splitName(m.name, roleLabel);
@@ -35,6 +45,7 @@ function MemberRow({ m, last }) {
           <Body bold>{base}</Body>
           <Caption>{note ? `${roleLabel}, ${note}` : roleLabel}</Caption>
         </View>
+        {joined ? <Badge label={t('circ.onSaath')} tone="leaf" /> : null}
         {isPerson ? (
           <View style={{ alignItems: 'center' }}>
             <Toggle
@@ -75,15 +86,15 @@ function MemberRow({ m, last }) {
           <View style={styles.inlineToggle}>
             <Body style={{ flex: 1 }}>{t('dial.in')}</Body>
             <Toggle
-              value={m.dial > 0}
+              value={dial > 0}
               label={t('dial.in')}
-              onValueChange={(on) => dispatch({ type: 'SET_DIAL', id: m.id, dial: on ? 1 : 0 })}
+              onValueChange={(on) => setLevel(on ? 1 : 0)}
             />
           </View>
-          {m.dial > 0 ? (
+          {dial > 0 ? (
             <Segmented
-              value={m.dial}
-              onChange={(dial) => dispatch({ type: 'SET_DIAL', id: m.id, dial })}
+              value={dial}
+              onChange={setLevel}
               options={[1, 2].map((d) => ({ value: d, label: t(`dial${d}`) }))}
             />
           ) : null}
