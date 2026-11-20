@@ -38,7 +38,7 @@ function Item({ id, label, Icon, on, onPress, k }) {
         <Glyph
           icon={Icon}
           size={24 * Math.min(k, 1.15)}
-          color={on ? colors.indigoDeep : colors.inkSoft}
+          color={on ? '#102A7A' : colors.inkSoft}
           strokeWidth={on ? 2.3 : 1.9}
         />
       </View>

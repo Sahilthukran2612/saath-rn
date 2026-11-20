@@ -16,7 +16,7 @@ const ROLE_TONE = {
   family: [colors.indigoTint, colors.indigo],
   neighbour: [colors.haldiTint, colors.haldiDeep],
   asha: [colors.leafTint, colors.leafDeep],
-  clinician: [colors.indigoSoft, colors.indigoDeep],
+  clinician: [colors.indigoSoft, '#102A7A'],
 };
 export function Avatar({ name = '', role = 'family', size = 44 }) {
   const initials =

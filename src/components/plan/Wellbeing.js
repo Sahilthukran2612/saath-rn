@@ -345,7 +345,7 @@ export function SchoolSection() {
       <View style={styles.schoolCard}>
         <View style={styles.schoolHead}>
           <Title style={{ color: colors.white, fontSize: 22 }}>{t('school.title')}</Title>
-          {card.name ? <Body style={{ color: colors.indigoSoft }}>{card.name}</Body> : null}
+          {card.name ? <Body style={{ color: colors.white }}>{card.name}</Body> : null}
         </View>
         <View style={{ padding: 18, gap: 14 }}>
           {steps.map((s, i) => (

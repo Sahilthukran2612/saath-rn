@@ -43,7 +43,7 @@ colors.paper = '#FFFFFF'; // slip and card background: white bill paper (dark: a
 // counter, so their dark text keeps its contrast.
 export const darkColors = {
   indigo: '#4F6FE0',
-  indigoDeep: '#102A7A',
+  indigoDeep: '#C9D6FF', // used as text and icons on the tinted washes, so it turns light at night
   indigoTint: '#1E2754',
   indigoSoft: '#BFCDF3',
   brick: '#D8453D',

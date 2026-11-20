@@ -32,7 +32,7 @@ export function LadderSection() {
   return (
     <View style={{ gap: 14 }}>
       <View style={styles.hero}>
-        <Caption style={{ color: colors.indigoSoft }}>{t('ladder.teenOnly')}</Caption>
+        <Caption style={{ color: colors.white }}>{t('ladder.teenOnly')}</Caption>
         <Title style={{ color: colors.white, fontSize: 26 }}>{t(`stage.${STAGES[stage]}`)}</Title>
         <StageTrack stage={stage} />
       </View>

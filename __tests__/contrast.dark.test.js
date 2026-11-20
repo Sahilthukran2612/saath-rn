@@ -28,7 +28,8 @@ const PAIRS = [
   [d.leafDeep, d.leafTint, 'done badge', 4.5],
   [d.stamp, d.paper, 'the stamp on a card', 4.5],
   [d.ink, d.indigoTint, 'text on a selected row', 4.5],
-  [d.white, d.indigoDeep, 'text on the dark hero', 4.5],
+  [d.indigoDeep, d.indigoTint, 'title and quiet-button label on a wash', 4.5],
+  [d.indigoDeep, d.paper, 'slip title on a card', 4.5],
   [d.haldiDeep, d.haldi, 'text on the yellow slip', 4.5],
   [d.carbonDeep, d.carbon, 'text on the pink slip', 4.5],
   // large or bold text and shapes: 3:1

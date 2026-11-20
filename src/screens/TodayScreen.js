@@ -170,7 +170,7 @@ function TeenHome() {
       <Reveal index={1}>
         <View style={styles.hero}>
           <Title style={{ color: colors.white, fontSize: 24 }}>{t('ladder')}</Title>
-          <Body style={{ color: colors.indigoSoft }}>{t(`stage.${STAGES[stage]}`)}</Body>
+          <Body style={{ color: colors.white }}>{t(`stage.${STAGES[stage]}`)}</Body>
           <StageTrack stage={stage} />
           <PressRow
             accessibilityRole="button"
