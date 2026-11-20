@@ -3,9 +3,8 @@ import { Animated, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Text from './AppText';
 import Svg, { Circle, Defs, LinearGradient, Path, Stop } from 'react-native-svg';
 import { ArrowLeft, Check, ChevronRight } from './icons';
-import { colors, fonts, radii, type } from '../theme';
+import { colors, fonts, radii, shadow, type } from '../theme';
 import { Body, Caption, Glyph, Title, useScale } from './ui';
-import Perf from './Perf';
 import { useSpringValue } from './motion';
 import { tap } from '../services/haptics';
 
@@ -91,7 +90,7 @@ export function ListRow({
         {trailing}
         {onPress && chevron === true ? <Glyph icon={ChevronRight} size={24} color={colors.inkFaint} /> : null}
       </View>
-      {!last ? <Perf style={{ marginLeft: hasLead ? 72 : 16, marginRight: 16 }} /> : null}
+      {!last ? <View style={{ height: 1, backgroundColor: colors.line, marginLeft: hasLead ? 72 : 16, marginRight: 16 }} /> : null}
     </View>
   );
   if (!onPress) return body;
@@ -505,10 +504,9 @@ export function SectionTitle({ children }) {
 const styles = StyleSheet.create({
   group: {
     backgroundColor: colors.paper,
-    borderRadius: radii.md,
-    borderWidth: 1.5,
-    borderColor: colors.indigo,
+    borderRadius: radii.lg,
     overflow: 'hidden',
+    ...shadow.card,
   },
   row: {
     flexDirection: 'row',

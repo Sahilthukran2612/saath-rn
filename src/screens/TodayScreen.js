@@ -31,7 +31,7 @@ import { can, glucoseAdvice } from '../logic';
 import { budgetSummary, refillStatus } from '../care';
 import { overallStage, STAGES } from '../plan';
 import { taskLabel } from '../taskLabel';
-import { colors, fonts, radii } from '../theme';
+import { colors, fonts, radii, shadow } from '../theme';
 import { speak } from '../services/voice';
 import { confirm } from '../services/haptics';
 
@@ -521,11 +521,10 @@ const styles = StyleSheet.create({
   taskIcon: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
   slip: {
     backgroundColor: colors.paper,
-    borderRadius: radii.md,
-    borderWidth: 1.5,
-    borderColor: colors.indigo,
+    borderRadius: radii.lg,
     padding: 16,
     gap: 12,
+    ...shadow.card,
   },
   imOkButton: {
     minHeight: 96,
@@ -540,11 +539,10 @@ const styles = StyleSheet.create({
   heroLink: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', minHeight: 48 },
   heroLight: {
     backgroundColor: colors.paper,
-    borderRadius: radii.md,
-    borderWidth: 1.5,
-    borderColor: colors.indigo,
+    borderRadius: radii.lg,
     padding: 20,
     gap: 8,
+    ...shadow.card,
   },
   statRow: { flexDirection: 'row', gap: 12, paddingHorizontal: 4 },
   rank: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },

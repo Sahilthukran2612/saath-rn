@@ -1,5 +1,6 @@
-import React from 'react';
-import { Pressable, View, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { Animated, Pressable, View, StyleSheet } from 'react-native';
+import { useReducedMotion } from './motion';
 import Text from './AppText';
 import { colors, fonts, type, sizes, text, shadow, radii, roles } from '../theme';
 import { useStore } from '../state/store';
@@ -21,21 +22,31 @@ function PressScale({
   rippleColor = 'rgba(38,48,107,0.14)',
   ...rest
 }) {
+  // Feedback starts on touch-down, not on release: the control gives a little under the finger on a critically
+  // damped spring, and comes back the instant it lets go. Reduced motion keeps only the ripple.
+  const reduced = useReducedMotion();
+  const [scale] = useState(() => new Animated.Value(1));
+  const to = (v) =>
+    reduced
+      ? null
+      : Animated.spring(scale, { toValue: v, damping: 20, stiffness: 420, mass: 1, useNativeDriver: true }).start();
   return (
-    <View style={containerStyle}>
+    <Animated.View style={[containerStyle, { transform: [{ scale }] }]}>
       <Pressable
         {...rest}
         disabled={disabled}
         android_ripple={{ color: rippleColor, foreground: true }}
         onPress={onPress}
         onPressIn={() => {
+          to(0.97);
           if (haptic) tap();
         }}
+        onPressOut={() => to(1)}
         style={({ pressed }) => [style, styles.clip, pressed && { opacity: 0.96 }]}
       >
         {({ pressed }) => (typeof children === 'function' ? children({ pressed }) : children)}
       </Pressable>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -227,11 +238,10 @@ const styles = StyleSheet.create({
   // a slip: white bill paper with a ballpoint-blue edge; tint is a pale wash, haldi the yellow copy, carbon the pink copy
   card: {
     backgroundColor: colors.paper,
-    borderRadius: radii.md,
-    borderWidth: 1.5,
-    borderColor: colors.indigo,
+    borderRadius: radii.lg,
     padding: sizes.gutter,
     gap: 10,
+    ...shadow.card,
   },
   cardTint: { backgroundColor: colors.indigoTint },
   cardHaldi: { backgroundColor: colors.haldiTint },

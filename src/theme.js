@@ -19,7 +19,7 @@ export const colors = {
   stampTint: '#EEE5F7',
   carbon: '#FFD9E4', // the pink second copy of a slip
   carbonDeep: '#7A1F45', // text on the pink slip
-  mist: '#FFFFFF',
+  mist: '#F2F4FA', // the page: a soft blue-grey, so white cards lift off it without an outline
   ink: '#10163A',
   inkSoft: '#39426B',
   inkFaint: '#525C86',

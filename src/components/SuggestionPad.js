@@ -13,7 +13,7 @@ import { useStore } from '../state/store';
 import { taskLabel } from '../taskLabel';
 import { buildPad, stampedToday } from '../suggestions';
 import { fmt } from '../circleFeed';
-import { colors, fonts, radii } from '../theme';
+import { colors, fonts, radii, shadow } from '../theme';
 
 // A pad of bill-book slips. The top slip is today's most useful small thing; behind it sit the pink and
 // yellow carbon copies of the next ones. "Stamp it" presses the violet stamp, then the slip tears off along
@@ -67,7 +67,7 @@ function TopSlip({ slip, index, total, onDone, lang, nowMs }) {
         opacity: x.interpolate({ inputRange: [0, 0.8, 1], outputRange: [1, 1, 0] }),
       }}
     >
-      <View style={{ backgroundColor: colors.paper, borderRadius: radii.md, borderWidth: 1.5, borderColor: colors.indigo, padding: 16, gap: 10 }}>
+      <View style={{ backgroundColor: colors.paper, borderRadius: radii.lg, padding: 16, gap: 10, ...shadow.raised }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View
             style={{
@@ -138,8 +138,8 @@ function TopSlip({ slip, index, total, onDone, lang, nowMs }) {
 // Carbon copies peeking out beneath the top slip: pink, then yellow, each a little off.
 function Copies({ count }) {
   const layers = [
-    { bg: colors.carbon, rot: '-0.5deg', dy: 7, dx: 2 },
-    { bg: colors.haldi, rot: '0.5deg', dy: 14, dx: -2 },
+    { bg: colors.carbon, rot: '0deg', dy: 6, dx: 0 },
+    { bg: colors.haldi, rot: '0deg', dy: 12, dx: 0 },
   ].slice(0, Math.min(count, 2));
   return (
     <>
@@ -152,14 +152,12 @@ function Copies({ count }) {
             importantForAccessibility="no-hide-descendants"
             style={{
               position: 'absolute',
-              left: 0,
-              right: 0,
+              left: l.dy,
+              right: l.dy,
               top: l.dy,
               bottom: -l.dy,
-              borderRadius: radii.md,
+              borderRadius: radii.lg,
               backgroundColor: l.bg,
-              borderWidth: 1.5,
-              borderColor: colors.indigo,
               transform: [{ rotate: l.rot }, { translateX: l.dx }],
             }}
           />
@@ -204,12 +202,12 @@ export default function SuggestionPad() {
         <Title style={{ fontSize: 22 }}>{t('sg.title')}</Title>
       </View>
       {pad.length === 0 ? (
-        <View style={{ backgroundColor: colors.paper, borderRadius: radii.md, borderWidth: 1.5, borderColor: colors.indigo, padding: 16, gap: 10 }}>
+        <View style={{ backgroundColor: colors.paper, borderRadius: radii.lg, padding: 16, gap: 10, ...shadow.raised }}>
           <Stamp show word={t('sg.stamped')} silent />
           <Body>{t('sg.allDone')}</Body>
         </View>
       ) : (
-        <View style={{ paddingBottom: pad.length > 1 ? 18 : 0 }}>
+        <View style={{ paddingBottom: pad.length > 1 ? 22 : 0 }}>
           <Copies count={pad.length - 1} />
           <TopSlip key={pad[0].id} slip={pad[0]} index={0} total={pad.length} onDone={onDone} lang={state.lang} nowMs={now} />
         </View>

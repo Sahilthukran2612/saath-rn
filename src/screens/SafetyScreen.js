@@ -18,7 +18,7 @@ import { useNav } from '../components/nav';
 import { useStore } from '../state/store';
 import { tallyToCsv } from '../services/export';
 import { explainBaseline } from '../care';
-import { colors, radii } from '../theme';
+import { colors, radii, shadow } from '../theme';
 
 // Simulated quiet: fast-forward a virtual clock to 14:00 with the last activity one hour
 // longer ago than the person's own quiet threshold, and let isInactive decide.
@@ -175,7 +175,7 @@ export default function SafetyScreen() {
 }
 
 const styles = StyleSheet.create({
-  hero: { backgroundColor: colors.paper, borderWidth: 1.5, borderColor: colors.indigo, borderRadius: radii.md, padding: 16, gap: 10 },
+  hero: { backgroundColor: colors.paper, borderRadius: radii.lg, padding: 16, gap: 10, ...shadow.card },
   watchChip: {
     flexDirection: 'row',
     alignItems: 'center',

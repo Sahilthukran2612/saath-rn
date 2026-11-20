@@ -5,7 +5,7 @@ import Doodle from '../components/doodles';
 import { Segmented } from '../components/kit';
 import { SaathMark } from '../components/art';
 import { useStore } from '../state/store';
-import { colors, radii } from '../theme';
+import { colors, radii, shadow } from '../theme';
 
 // The first question, because it decides everything after it: do I need care, or do I look after someone?
 // A person gets the setup for their own safety. Someone invited as family, neighbour, ASHA or clinician gets
@@ -18,11 +18,10 @@ function Choice({ doodle, title, note, onPress }) {
       onPress={onPress}
       style={{
         backgroundColor: colors.paper,
-        borderWidth: 1.5,
-        borderColor: colors.indigo,
-        borderRadius: radii.md,
+        borderRadius: radii.lg,
         padding: 20,
         gap: 8,
+        ...shadow.card,
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>

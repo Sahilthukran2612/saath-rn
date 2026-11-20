@@ -187,7 +187,7 @@ export default function AppShell({ sensing = true }) {
       .join('')
       .toUpperCase() || null;
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.surface }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.mist }}>
       <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
         <NavContext.Provider value={setTab}>
           <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />

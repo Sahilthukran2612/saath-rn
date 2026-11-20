@@ -12,7 +12,7 @@ import JoinedSection from '../components/circle/JoinedSection';
 import ContactsSection from '../components/circle/ContactsSection';
 import { useStore } from '../state/store';
 import { canShareItem } from '../logic';
-import { colors } from '../theme';
+import { colors, shadow } from '../theme';
 
 // Names are stored like "Asha (daughter)". Show the name, and the relation only when it adds something.
 function splitName(name, roleLabel) {
@@ -165,10 +165,9 @@ export default function CircleScreen() {
 const styles = StyleSheet.create({
   group: {
     backgroundColor: colors.paper,
-    borderWidth: 1.5,
-    borderColor: colors.indigo,
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: 'hidden',
+    ...shadow.card,
   },
   member: { padding: 16, gap: 12 },
   divider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
