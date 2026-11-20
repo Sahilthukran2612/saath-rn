@@ -567,11 +567,25 @@ function baseReducer(state, a) {
     // ever really placed (see AlertBanner), so a demo contact's fake number can never be dialled.
     case 'DEMO_ON': {
       const hasReal = state.members.some((m) => !m.demo);
+      // Two weeks of made-up readings and a medicine, so the charts have something to show. All flagged as demo.
+      const DAY = 24 * 3600000;
+      const sample = a.at
+        ? Array.from({ length: 14 }, (_, i) => i).flatMap((i) => [
+            { id: `demo-r${i}a`, mgdl: 96 + ((i * 17) % 38), at: a.at - (13 - i) * DAY - 5 * 3600000, demo: true },
+            { id: `demo-r${i}b`, mgdl: 118 + ((i * 29) % 52), at: a.at - (13 - i) * DAY - 1 * 3600000, demo: true },
+          ])
+        : SEED.readings;
+      const demoMeds = a.at && !state.medicines.length ? [{ id: 'demo-med', name: 'Metformin (demo)', dose: 'as on the prescription', when: 'afterBreakfast', demo: true }] : state.medicines;
+      const demoLog = a.at && !Object.keys(state.medLog).length
+        ? Object.fromEntries(Array.from({ length: 7 }, (_, i) => [dayOf(a.at - (6 - i) * DAY), i % 4 === 3 ? [] : ['demo-med']]))
+        : state.medLog;
       return {
         ...state,
         demo: true,
         members: hasReal ? state.members : SEED.members.map((m) => ({ ...m, demo: true })),
-        readings: state.readings.length ? state.readings : SEED.readings,
+        readings: state.readings.length ? state.readings : sample,
+        medicines: demoMeds,
+        medLog: demoLog,
         budget: state.budget.length ? state.budget : demoBudget(),
         meds: state.meds.name ? state.meds : { name: 'Metformin (demo)', pillsLeft: 24, perDay: 2, demo: true },
         testPlan: state.testPlan.perDay ? state.testPlan : { perDay: 2, strips: 20, demo: true },
@@ -585,6 +599,7 @@ function baseReducer(state, a) {
         role: 'person',
         members: state.members.filter((m) => !m.demo),
         readings: state.readings.filter((r) => !r.demo),
+        medicines: state.medicines.filter((m) => !m.demo),
         budget: state.budget.filter((b) => !b.demo),
         meds: state.meds.demo ? productionState.meds : state.meds,
         testPlan: state.testPlan.demo ? productionState.testPlan : state.testPlan,

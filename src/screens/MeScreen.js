@@ -249,7 +249,7 @@ export default function MeScreen() {
               <Toggle
                 value={state.demo}
                 label={t('demoMode')}
-                onValueChange={(v) => dispatch({ type: v ? 'DEMO_ON' : 'DEMO_OFF' })}
+                onValueChange={(v) => dispatch({ type: v ? 'DEMO_ON' : 'DEMO_OFF', at: Date.now() })}
               />
             }
           />
