@@ -20,7 +20,8 @@ function Root() {
         // no stored choice: follow the phone
       }
       // The Tailwind classes follow the phone's colour scheme, so the chosen look is set there too: 'auto' hands it back.
-      Appearance.setColorScheme(choice === 'dark' || choice === 'light' ? choice : null);
+      // ('unspecified', not null: null crashes the Android native module.)
+      Appearance.setColorScheme(choice === 'dark' || choice === 'light' ? choice : 'unspecified');
       applyTheme(choice, Appearance.getColorScheme());
       const Loaded = require('./App').default;
       if (live) setApp(() => Loaded);
