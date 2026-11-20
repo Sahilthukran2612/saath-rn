@@ -185,7 +185,8 @@ describe('contacts on the Circle tab', () => {
     await fireEvent.press(screen.getAllByLabelText('ASHA')[0]);
     await fireEvent.press(screen.getByLabelText('Add and send code'));
     await waitFor(() => expect(screen.getAllByText('Sunita').length).toBeGreaterThan(0));
-    await fireEvent.press(screen.getByLabelText('Remove Sunita'));
+    await fireEvent.press(screen.getByLabelText('Manage'));
+    await fireEvent.press(await screen.findByLabelText('Remove Sunita'));
     await waitFor(() => expect(screen.queryByText('Sunita')).toBeNull());
   });
 });

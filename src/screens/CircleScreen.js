@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Eye, Lock, Phone, ShieldCheck, X } from '../components/icons';
-import { Body, Caption, Card, Chip, Glyph, Title } from '../components/ui';
+import { Eye, MoreHorizontal, ShieldCheck, X } from '../components/icons';
+import { BigButton, Body, Caption, Card, Chip, Glyph, Title } from '../components/ui';
+import Sheet from '../components/Sheet';
 import { Avatar, Badge, ListGroup, ListRow, Segmented, Toggle, SectionTitle } from '../components/kit';
 import { Reveal } from '../components/motion';
 import Perf from '../components/Perf';
@@ -24,6 +25,7 @@ function splitName(name, roleLabel) {
 
 function MemberRow({ m, last }) {
   const { state, dispatch, t } = useStore();
+  const [manage, setManage] = useState(false);
   const isPerson = state.role === 'person';
   // A person who has joined from their own phone is the same person as this contact: one row, and the control moves
   // the real (server-enforced) dial for them as well as the local one.
@@ -37,77 +39,63 @@ function MemberRow({ m, last }) {
   const visible = canShareItem({ involves: [m.id] }, { [m.id]: m.shareContact });
   const roleLabel = t(`role.${m.role}`);
   const { base, note } = splitName(m.name, roleLabel);
+  // One quiet line under the name: who they are, and their number only if they agreed to show it.
+  const line = [note ? `${roleLabel}, ${note}` : roleLabel, visible ? m.phone : t('contactHidden')].filter(Boolean).join(' · ');
   return (
     <View style={styles.member}>
       <View style={styles.memberTop}>
         <Avatar name={m.name} role={m.role} size={48} />
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, gap: 2 }}>
           <Body bold>{base}</Body>
-          <Caption>{note ? `${roleLabel}, ${note}` : roleLabel}</Caption>
+          <Caption>{line}</Caption>
         </View>
-        {joined ? <Badge label={t('circ.onSaath')} tone="leaf" /> : null}
         {isPerson ? (
-          <View style={{ alignItems: 'center' }}>
-            <Toggle
-              value={m.timeOff}
-              label={t('timeOff')}
-              onValueChange={(on) => dispatch({ type: 'SET_TIME_OFF', id: m.id, on })}
-            />
-            <Caption>{t('timeOff')}</Caption>
+          <Toggle value={dial > 0} label={t('dial.in')} onValueChange={(on) => setLevel(on ? 1 : 0)} />
+        ) : (
+          <Badge label={t(`dial${m.dial}`)} tone={m.dial === 2 ? 'indigo' : m.dial === 1 ? 'leaf' : 'haldi'} />
+        )}
+      </View>
+      {isPerson && dial > 0 ? (
+        <Segmented value={dial} onChange={setLevel} options={[1, 2].map((d) => ({ value: d, label: t(`dial${d}`) }))} />
+      ) : null}
+      {state.mode === 'teen' && m.guardian ? <Caption>{t('guardianLimit')}</Caption> : null}
+      {isPerson || state.role === m.role ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          {joined ? <Badge label={t('circ.onSaath')} tone="leaf" /> : null}
+          {m.timeOff ? <Badge label={t('jm.timeOff')} tone="haldi" /> : null}
+          <View style={{ flex: 1 }} />
+          <Chip label={t('manage')} icon={MoreHorizontal} onPress={() => setManage(true)} />
+        </View>
+      ) : null}
+      <Sheet visible={manage} onClose={() => setManage(false)} title={base}>
+        {isPerson ? (
+          <View style={styles.inlineToggle}>
+            <Body style={{ flex: 1 }}>{t('timeOff')}</Body>
+            <Toggle value={m.timeOff} label={t('timeOff')} onValueChange={(on) => dispatch({ type: 'SET_TIME_OFF', id: m.id, on })} />
           </View>
         ) : null}
-      </View>
-      {/* Second-person consent: a member's number shows only if they agreed. */}
-      <View style={styles.contact}>
-        <Glyph icon={visible ? Phone : Lock} size={18} color={colors.inkSoft} />
-        <Caption>{visible ? m.phone : t('contactHidden')}</Caption>
-      </View>
-      {isPerson && !m.demo ? (
-        <View style={{ flexDirection: 'row' }}>
-          <Chip
-            label={t('ct.remove').replace('{name}', base)}
-            icon={X}
-            onPress={() => dispatch({ type: 'CONTACT_REMOVE', id: m.id })}
-          />
-        </View>
-      ) : null}
-      {state.role === m.role ? (
-        <View style={styles.inlineToggle}>
-          <Body>{t('shareMyNumber')}</Body>
-          <Toggle
-            value={m.shareContact}
-            label={t('shareMyNumber')}
-            onValueChange={(on) => dispatch({ type: 'SET_SHARE_CONTACT', id: m.id, on })}
-          />
-        </View>
-      ) : null}
-      {isPerson ? (
-        <View style={{ gap: 10 }}>
+        {state.role === m.role ? (
           <View style={styles.inlineToggle}>
-            <Body style={{ flex: 1 }}>{t('dial.in')}</Body>
-            <Toggle
-              value={dial > 0}
-              label={t('dial.in')}
-              onValueChange={(on) => setLevel(on ? 1 : 0)}
-            />
+            <Body style={{ flex: 1 }}>{t('shareMyNumber')}</Body>
+            <Toggle value={m.shareContact} label={t('shareMyNumber')} onValueChange={(on) => dispatch({ type: 'SET_SHARE_CONTACT', id: m.id, on })} />
           </View>
-          {dial > 0 ? (
-            <Segmented
-              value={dial}
-              onChange={setLevel}
-              options={[1, 2].map((d) => ({ value: d, label: t(`dial${d}`) }))}
-            />
-          ) : null}
-        </View>
-      ) : (
-        <Badge label={t(`dial${m.dial}`)} tone={m.dial === 2 ? 'indigo' : m.dial === 1 ? 'leaf' : 'haldi'} />
-      )}
-      {state.mode === 'teen' && m.guardian ? <Caption>{t('guardianLimit')}</Caption> : null}
+        ) : null}
+        {isPerson && !m.demo ? (
+          <BigButton
+            kind="outlined"
+            icon={X}
+            label={t('ct.remove').replace('{name}', base)}
+            onPress={() => {
+              setManage(false);
+              dispatch({ type: 'CONTACT_REMOVE', id: m.id });
+            }}
+          />
+        ) : null}
+      </Sheet>
       {!last ? <Perf style={{ marginTop: 4 }} /> : null}
     </View>
   );
 }
-
 export default function CircleScreen() {
   const { state, t } = useStore();
   const isPerson = state.role === 'person';

@@ -182,7 +182,7 @@ describe('component flows', () => {
   test('a member number is hidden until they agree', async () => {
     await mount({ mode: 'elder' });
     await fireEvent.press(screen.getByLabelText('Circle'));
-    expect(screen.getAllByText('Number hidden until they agree').length).toBe(2);
+    expect(screen.getAllByText(/Number hidden until they agree/).length).toBe(2);
   });
   test('new-diagnosis phase shows guidance on Today', async () => {
     await mount({ mode: 'elder', phase: 'new' });

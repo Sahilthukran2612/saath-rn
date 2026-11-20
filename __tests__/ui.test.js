@@ -226,7 +226,9 @@ describe('Circle', () => {
   test('Time off is a labelled switch', async () => {
     await mountApp({});
     await fireEvent.press(screen.getByLabelText('Circle'));
-    const first = screen.getAllByLabelText('Time off: off')[0];
+    // Time off lives in the person's Manage drawer, so it is not repeated on every card
+    await fireEvent.press(screen.getAllByLabelText('Manage')[0]);
+    const first = await screen.findByLabelText('Time off: off');
     await fireEvent.press(first);
     expect(screen.getAllByLabelText('Time off: on').length).toBe(1);
   });
