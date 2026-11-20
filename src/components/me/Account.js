@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { Cloud } from '../icons';
 import { BigButton, Body, Caption, Card, Chip } from '../ui';
 import { Field } from '../kit';
+import Sheet from '../Sheet';
 import { useStore } from '../../state/store';
 import {
   cloudConfig,
@@ -27,6 +28,7 @@ export default function Account() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [show, setShow] = useState(false);
+  const [sheet, setSheet] = useState(false);
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
   const cfg = cloudConfig();
@@ -97,16 +99,19 @@ export default function Account() {
       ) : (
         <View style={{ gap: 10 }}>
           <Caption>{t('acc.note')}</Caption>
-          <Field label={t('acc.phone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
-          <Field label={t('acc.pass')} value={password} onChangeText={setPassword} secureTextEntry={!show} />
-          <View style={{ flexDirection: 'row' }}>
-            <Chip label={show ? t('acc.hide') : t('acc.show')} onPress={() => setShow(!show)} />
-          </View>
-          {msg ? <Body bold>{msg}</Body> : null}
-          <BigButton kind="primary" label={busy ? t('acc.wait') : t('acc.continue')} onPress={submit} />
-          <Caption>{t('acc.noreset')}</Caption>
+          <BigButton kind="primary" label={t('acc.open')} onPress={() => setSheet(true)} />
           <BigButton kind="text" label={t('acc.quick')} onPress={quick} />
           <Caption>{t('acc.quickNote')}</Caption>
+          <Sheet visible={sheet} onClose={() => setSheet(false)} title={t('acc.open')}>
+            <Field label={t('acc.phone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+            <Field label={t('acc.pass')} value={password} onChangeText={setPassword} secureTextEntry={!show} />
+            <View style={{ flexDirection: 'row' }}>
+              <Chip label={show ? t('acc.hide') : t('acc.show')} onPress={() => setShow(!show)} />
+            </View>
+            {msg ? <Body bold>{msg}</Body> : null}
+            <BigButton kind="primary" label={busy ? t('acc.wait') : t('acc.continue')} onPress={submit} />
+            <Caption>{t('acc.noreset')}</Caption>
+          </Sheet>
         </View>
       )}
     </Card>

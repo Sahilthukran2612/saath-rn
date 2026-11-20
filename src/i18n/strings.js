@@ -486,7 +486,14 @@ export const strings = {
     'acc.phone': 'Your mobile number',
     'join.link': 'I have an invite code',
     'inv.card': 'People who help you',
-    'pt.title': 'People I look after',
+    'pt.title': 'People I look after',
+    'acc.open': 'Sign in or create account',
+    'vis.due': 'Visit due',
+    'vis.title': 'Household visit',
+    'vis.never': 'No visit noted yet.',
+    'vis.today': 'Visited today.',
+    'vis.ago': 'Last visit {n} days ago.',
+    'vis.mark': 'I visited today',
     'plan.meds': 'Medicines',
     'manage': 'Manage',
     'tasks.title': 'Today\'s tasks',
@@ -1190,7 +1197,14 @@ export const strings = {
     'acc.phone': 'आपका मोबाइल नंबर',
     'join.link': 'मेरे पास न्योते का कोड है',
     'inv.card': 'लोग जो आपकी मदद करते हैं',
-    'pt.title': 'जिनकी मैं देखभाल करता हूँ',
+    'pt.title': 'जिनकी मैं देखभाल करता हूँ',
+    'acc.open': 'साइन इन या खाता बनाएँ',
+    'vis.due': 'मिलने का समय',
+    'vis.title': 'घर का दौरा',
+    'vis.never': 'अभी कोई दौरा दर्ज नहीं।',
+    'vis.today': 'आज मिल चुके हैं।',
+    'vis.ago': 'आख़िरी दौरा {n} दिन पहले।',
+    'vis.mark': 'आज मिलकर आया',
     'plan.meds': 'दवाएँ',
     'manage': 'प्रबंधित करें',
     'tasks.title': 'आज के काम',

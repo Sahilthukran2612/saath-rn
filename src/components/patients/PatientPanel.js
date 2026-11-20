@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
-import { ClipboardList } from '../icons';
+import { Check, ClipboardList } from '../icons';
 import { BigButton, Body, Caption, Card } from '../ui';
 import Sheet from '../Sheet';
 import { Badge, ListGroup, ListRow, ScreenHeader, Toggle } from '../kit';
@@ -8,6 +8,7 @@ import CarePlanBuilder from '../circle/CarePlanBuilder';
 import { useStore } from '../../state/store';
 import { useNow } from '../useNow';
 import { cloudConfig, isConfigured, setMyTimeOff } from '../../services/cloud';
+import { visitStatus } from '../../visits';
 import { ago, describeEvent, fmt, isAlert, pendingAlert } from '../../circleFeed';
 
 // One person I look after, shown for my role with them. A guardian sees how they are doing; a neighbour sees safety
@@ -23,6 +24,7 @@ export default function PatientPanel({ circle, onBack }) {
   const signedIn = Boolean(state.cloud.access);
   const doctor = circle.role === 'clinician';
   const [planOpen, setPlanOpen] = useState(false);
+  const visit = visitStatus(state.visits[circle.household_id], now);
 
   // Time Off: stop routine updates from this person. The server still lets safety alerts through.
   const pause = async (on) => {
@@ -76,6 +78,15 @@ export default function PatientPanel({ circle, onBack }) {
         </ListGroup>
       )}
 
+      {circle.role === 'asha' ? (
+        <Card style={{ gap: 12 }}>
+          <Body bold>{t('vis.title')}</Body>
+          <Caption>
+            {visit.days == null ? t('vis.never') : visit.days === 0 ? t('vis.today') : t('vis.ago').replace('{n}', String(visit.days))}
+          </Caption>
+          <BigButton icon={Check} label={t('vis.mark')} onPress={() => dispatch({ type: 'VISIT_MARK', id: circle.household_id, at: Date.now() })} />
+        </Card>
+      ) : null}
       {doctor ? (
         <Card style={{ gap: 12 }}>
           <Body bold>{t('plan.build')}</Body>

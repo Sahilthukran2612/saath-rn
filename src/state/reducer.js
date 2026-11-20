@@ -105,6 +105,7 @@ export const initialState = {
   slips: { day: null, done: [], skipped: [] },
   carePlan: null, // the newest plan applied from a clinician: { version, author, at, notes, meds, tasks, seen }
   addPrefill: null, // a care-giver's card that was scanned: { name, phone, role }, waiting in the Add a person form
+  visits: {}, // household id -> time of my last visit (an ASHA's round). Kept on this phone, never sent
   joinCode: null, // an invite code that arrived by scanning a QR, waiting to be used on the join screen
   // [{ id, name, dose, when }]: typed by the person from their prescription. Saath never suggests a dose.
   // The demo starts with one made-up medicine (flagged) so the medicines chart has something to show.
@@ -685,6 +686,8 @@ function baseReducer(state, a) {
       return state.carePlan ? { ...state, carePlan: { ...state.carePlan, seen: true } } : state;
     case 'ADD_PREFILL':
       return { ...state, addPrefill: a.value || null };
+    case 'VISIT_MARK':
+      return { ...state, visits: { ...state.visits, [a.id]: a.at } };
     case 'USAGE_IF_NEW':
       return state.usage == null ? { ...state, usage: a.value } : state;
     case 'JOIN_CODE':

@@ -10,6 +10,7 @@ import { describeEvent, newest, pendingAlert } from '../../circleFeed';
 import JoinCard from '../circle/JoinCard';
 import PatientPanel from './PatientPanel';
 import AddMyPatient from './AddMyPatient';
+import { visitStatus } from '../../visits';
 import { colors, fonts, radii } from '../../theme';
 
 const ROLE_ORDER = ['family', 'clinician', 'asha', 'neighbour'];
@@ -54,7 +55,15 @@ export default function PatientsHome() {
           (grouped ? '' : `${t(`role.${c.role}`)} · `) +
           (latest ? describeEvent(latest, nameOf(c), t) : t('cf.empty'))
         }
-        trailing={<Badge tone={alert ? 'brick' : 'leaf'} label={alert ? t('tabSafety') : t('pt.ok')} />}
+        trailing={
+          alert ? (
+            <Badge tone="brick" label={t('tabSafety')} />
+          ) : c.role === 'asha' && visitStatus(state.visits[c.household_id], now).due ? (
+            <Badge tone="haldi" label={t('vis.due')} />
+          ) : (
+            <Badge tone="leaf" label={t('pt.ok')} />
+          )
+        }
         label={nameOf(c)}
         onPress={() => {
           setOpen(c.household_id);

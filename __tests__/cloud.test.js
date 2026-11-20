@@ -304,6 +304,7 @@ describe('account card', () => {
   test('asks for a number and a password, and refuses a bad number or a short password', async () => {
     configure();
     await open({});
+    await fireEvent.press(screen.getByLabelText('Sign in or create account'));
     await fireEvent.changeText(screen.getByLabelText('Your mobile number'), '123');
     await fireEvent.press(screen.getByLabelText('Continue'));
     expect(screen.getByText('Enter a 10-digit mobile number.')).toBeTruthy();
@@ -315,6 +316,7 @@ describe('account card', () => {
   test('there is one Continue button, no repeat-password box and no create/sign-in switch', async () => {
     configure();
     await open({});
+    await fireEvent.press(screen.getByLabelText('Sign in or create account'));
     expect(screen.getByLabelText('Continue')).toBeTruthy();
     expect(screen.queryByLabelText('Repeat the password')).toBeNull();
     expect(screen.queryByLabelText('Create account')).toBeNull();
@@ -328,6 +330,7 @@ describe('account card', () => {
       return reply(201, [{ id: 'h1', person_name: '' }]);
     });
     await open({});
+    await fireEvent.press(screen.getByLabelText('Sign in or create account'));
     expect(screen.getByText(/A forgotten password cannot be reset, so keep it safe/)).toBeTruthy();
     await fireEvent.changeText(screen.getByLabelText('Your mobile number'), '98765 43210');
     await fireEvent.changeText(screen.getByLabelText('Password (8 or more characters)'), 'abcdefgh1');
@@ -345,6 +348,7 @@ describe('account card', () => {
       return reply(201, [{ id: 'h1', person_name: '' }]);
     });
     await open({});
+    await fireEvent.press(screen.getByLabelText('Sign in or create account'));
     await fireEvent.changeText(screen.getByLabelText('Your mobile number'), '9876543210');
     await fireEvent.changeText(screen.getByLabelText('Password (8 or more characters)'), 'abcdefgh1');
     await fireEvent.press(screen.getByLabelText('Continue'));
@@ -359,6 +363,7 @@ describe('account card', () => {
       return reply(200, []);
     });
     await open({});
+    await fireEvent.press(screen.getByLabelText('Sign in or create account'));
     await fireEvent.changeText(screen.getByLabelText('Your mobile number'), '9876543210');
     await fireEvent.changeText(screen.getByLabelText('Password (8 or more characters)'), 'wrongpass1');
     await fireEvent.press(screen.getByLabelText('Continue'));
@@ -367,6 +372,7 @@ describe('account card', () => {
   test('the password can be shown and hidden', async () => {
     configure();
     await open({});
+    await fireEvent.press(screen.getByLabelText('Sign in or create account'));
     expect(screen.getByLabelText('Password (8 or more characters)').props.secureTextEntry).toBe(true);
     await fireEvent.press(screen.getByLabelText('Show'));
     expect(screen.getByLabelText('Password (8 or more characters)').props.secureTextEntry).toBe(false);
