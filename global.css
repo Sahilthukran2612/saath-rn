@@ -1,0 +1,82 @@
+﻿@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+
+@import "nativewind/theme";
+
+/* Saath's colours, named the way React Native Reusables names them, so every component picks them up.
+   Brick (destructive) is for real safety alerts only. The dark set follows the phone's own setting. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-leaf: var(--leaf);
+  --color-leaf-foreground: var(--leaf-foreground);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 28px;
+}
+
+:root {
+  --background: #f2f4fa;
+  --foreground: #10163a;
+  --card: #ffffff;
+  --card-foreground: #10163a;
+  --popover: #ffffff;
+  --popover-foreground: #10163a;
+  --primary: #1a5cff;
+  --primary-foreground: #ffffff;
+  --secondary: #e8f0ff;
+  --secondary-foreground: #0e3fc4;
+  --muted: #e8ecf8;
+  --muted-foreground: #525c86;
+  --accent: #e8f0ff;
+  --accent-foreground: #0e3fc4;
+  --destructive: #b3261e;
+  --border: #dce3f5;
+  --input: #717aa3;
+  --ring: #1a5cff;
+  --leaf: #1f6f4a;
+  --leaf-foreground: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0f1226;
+    --foreground: #ecf0fc;
+    --card: #1b2048;
+    --card-foreground: #ecf0fc;
+    --popover: #1b2048;
+    --popover-foreground: #ecf0fc;
+    --primary: #4672ee;
+    --primary-foreground: #ffffff;
+    --secondary: #1e2754;
+    --secondary-foreground: #c9d6ff;
+    --muted: #20264f;
+    --muted-foreground: #a3acd2;
+    --accent: #1e2754;
+    --accent-foreground: #c9d6ff;
+    --destructive: #d8453d;
+    --border: #2b3355;
+    --input: #8993bf;
+    --ring: #4672ee;
+    --leaf: #2a8458;
+    --leaf-foreground: #ffffff;
+  }
+}

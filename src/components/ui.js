@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Animated, Pressable, View, StyleSheet } from 'react-native';
+import { Button } from '@/components/ui/button';
+import { Text as UiText } from '@/components/ui/text';
+import { cn } from '@/lib/utils';
 import { useReducedMotion } from './motion';
 import Text from './AppText';
 import { colors, fonts, type, sizes, text, shadow, radii, roles } from '../theme';
@@ -10,6 +13,16 @@ import { tap } from '../services/haptics';
 // Large-text mode scales every size; OS font scaling still applies on top.
 export const useScale = () => (useStore().state.largeText ? 1.35 : 1);
 
+// The small spring every pressable control shares: it gives a little under the finger on touch-down and returns on
+// release. Reduced motion keeps only the ripple.
+function usePressSpring() {
+  const reduced = useReducedMotion();
+  const [scale] = useState(() => new Animated.Value(1));
+  const to = (v) => {
+    if (!reduced) Animated.spring(scale, { toValue: v, damping: 20, stiffness: 420, mass: 1, useNativeDriver: true }).start();
+  };
+  return { scale, to };
+}
 // Material state layer: a ripple clipped to the control's own shape, with a light haptic on touch-down.
 // `style` is the visible surface (background, radius, padding); `containerStyle` only places it.
 function PressScale({
@@ -132,62 +145,69 @@ export function Glyph({ icon: Icon, size = 24, color = colors.ink, strokeWidth =
   return <Icon size={size} color={color} strokeWidth={strokeWidth} />;
 }
 
-// Material buttons, full-pill, 56 tall. One filled button per screen. Kinds:
-//   primary  filled, indigo            ok       filled, leaf (done, "I'm OK")
+// Buttons are React Native Reusables' Button on NativeWind classes: full-pill, at least 56 tall. One filled button
+// per screen. Kinds:
+//   primary  filled, blue              ok       filled, leaf green (done, "I'm OK")
 //   alert    filled, brick (real safety alerts only)
-//   quiet    tonal (secondary container)
-//   outlined outline, no fill          text     no container, for the lowest emphasis
+//   quiet    tonal (secondary)         outlined outline, no fill      text   no container, lowest emphasis
+const BUTTON_VARIANT = { primary: 'default', ok: 'default', alert: 'destructive', quiet: 'secondary', outlined: 'outline', text: 'ghost' };
+
 export function BigButton({ label, icon, onPress, kind = 'primary', style, hint }) {
   const k = useScale();
-  const look = {
-    primary: { bg: colors.indigo, fg: colors.white, ripple: 'rgba(255,255,255,0.24)' },
-    ok: { bg: colors.leaf, fg: colors.white, ripple: 'rgba(255,255,255,0.24)' },
-    alert: { bg: colors.brick, fg: colors.white, ripple: 'rgba(255,255,255,0.24)' },
-    quiet: { bg: colors.indigoTint, fg: colors.indigoDeep, ripple: 'rgba(38,48,107,0.14)' },
-    outlined: { bg: 'transparent', fg: colors.indigo, ripple: 'rgba(38,48,107,0.12)', border: colors.outline },
-    text: { bg: 'transparent', fg: colors.indigo, ripple: 'rgba(38,48,107,0.12)' },
+  const press = usePressSpring();
+  const fg = {
+    primary: colors.white,
+    ok: colors.white,
+    alert: colors.white,
+    quiet: colors.indigoDeep,
+    outlined: colors.indigo,
+    text: colors.indigo,
   }[kind];
   return (
-    <PressScale
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityHint={hint}
-      onPress={onPress}
-      rippleColor={look.ripple}
-      style={[
-        styles.btn,
-        { backgroundColor: look.bg },
-        look.border ? { borderWidth: 1, borderColor: look.border } : null,
-        style,
-      ]}
-    >
-      <View style={styles.btnRow}>
-        {icon ? <Glyph icon={icon} size={24 * Math.min(k, 1.2)} color={look.fg} /> : null}
-        <Text
-          style={[
-            roleStyle(roles.labelLarge, 1),
-            { fontFamily: fonts.bold, fontSize: type.body * k, lineHeight: type.body * k * 1.3 },
-            { color: look.fg, textAlign: 'center', flexShrink: 1 },
-          ]}
+    <Animated.View style={{ transform: [{ scale: press.scale }] }}>
+      <Button
+        variant={BUTTON_VARIANT[kind]}
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        accessibilityHint={hint}
+        onPress={onPress}
+        onPressIn={() => {
+          press.to(0.97);
+          tap();
+        }}
+        onPressOut={() => press.to(1)}
+        className={cn('h-auto min-h-14 rounded-full px-6 py-3', kind === 'ok' && 'bg-leaf active:bg-leaf/90')}
+        style={style}
+      >
+        {icon ? <Glyph icon={icon} size={24 * Math.min(k, 1.2)} color={fg} /> : null}
+        <UiText
+          className="text-center"
+          style={{
+            fontFamily: fonts.bold,
+            fontSize: type.body * k,
+            lineHeight: type.body * k * 1.3,
+            color: fg,
+            flexShrink: 1,
+          }}
         >
           {label}
-        </Text>
-      </View>
-    </PressScale>
+        </UiText>
+      </Button>
+    </Animated.View>
   );
 }
 
-// A filled card (tonal surface, no border, no shadow). Depth is tone; nest nothing inside it.
+// A filled card: bill-white on the page, depth from a soft shadow. Tones are washes for notes and warnings.
 export function Card({ children, style, tone, ...rest }) {
   const toneStyle = tone === 'tint' ? styles.cardTint : tone === 'haldi' ? styles.cardHaldi : tone === 'carbon' ? styles.cardCarbon : null;
   return (
-    <View style={[styles.card, toneStyle, style]} {...rest}>
+    <View className="gap-2.5 rounded-lg bg-card p-5" style={[shadow.card, toneStyle, style]} {...rest}>
       {children}
     </View>
   );
 }
 
-// Filter chip: outlined at rest, secondary container with a leading check when selected.
+// Filter chip: outlined at rest, a blue wash with a leading check when selected.
 export function Chip({ label, active, onPress, icon }) {
   const k = useScale();
   const fg = active ? colors.indigoDeep : colors.inkSoft;
@@ -199,7 +219,7 @@ export function Chip({ label, active, onPress, icon }) {
       onPress={onPress}
       style={[styles.chip, active && styles.chipActive]}
     >
-      <View style={styles.chipRow}>
+      <View className="flex-row items-center gap-2">
         {active ? (
           <Glyph icon={Check} size={18 * Math.min(k, 1.2)} color={colors.indigoDeep} strokeWidth={2.4} />
         ) : icon ? (
@@ -220,7 +240,6 @@ export function Chip({ label, active, onPress, icon }) {
     </PressScale>
   );
 }
-
 // Tappable row used for the routine list (checkbox semantics are set by the caller).
 export const PressRow = PressScale;
 

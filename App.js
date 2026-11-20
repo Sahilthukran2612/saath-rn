@@ -1,3 +1,4 @@
+import './global.css';
 import React from 'react';
 import { useFonts } from 'expo-font';
 // Only the three weights Saath uses, so the other four are not packaged.
