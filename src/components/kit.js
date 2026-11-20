@@ -197,6 +197,7 @@ export function Field({
   multiline,
   secureTextEntry,
   onEndEditing,
+  onBlur,
 }) {
   const k = useScale();
   const [focus, setFocus] = React.useState(false);
@@ -214,7 +215,10 @@ export function Field({
         secureTextEntry={secureTextEntry}
         onEndEditing={onEndEditing}
         onFocus={() => setFocus(true)}
-        onBlur={() => setFocus(false)}
+        onBlur={() => {
+          setFocus(false);
+          if (onBlur) onBlur();
+        }}
         style={{
           minHeight: 56,
           fontFamily: fonts.regular,

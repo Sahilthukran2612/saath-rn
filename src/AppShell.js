@@ -174,7 +174,10 @@ export default function AppShell({ sensing = true }) {
 
   // Five destinations (the Material 3 maximum). A care-giver has two: their people and their circle.
   // "Me" is the account avatar in the top app bar for everyone.
-  const tabs = state.usage === 'member' ? NAV_TABS.filter(([id]) => ['today', 'circle'].includes(id)) : NAV_TABS;
+  // Care and Plan hold the person's own sugar log, medicine, food and handover. A neighbour, an ASHA or a clinician
+  // is not that person, so they get only what they act on: the people they look after, and the circle.
+  const onlyCircle = state.usage === 'member' || ['neighbour', 'asha', 'clinician'].includes(state.role);
+  const tabs = onlyCircle ? NAV_TABS.filter(([id]) => ['today', 'circle'].includes(id)) : NAV_TABS;
   const current = tab === 'me' || tabs.some(([id]) => id === tab) ? tab : 'today';
   const Screen = SCREENS[current];
   const onMe = current === 'me';

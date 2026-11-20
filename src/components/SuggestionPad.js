@@ -31,8 +31,8 @@ function TopSlip({ slip, index, total, onDone, lang, nowMs }) {
   const [stamped, setStamped] = useState(false);
   const [x] = useState(() => new Animated.Value(0));
   const busy = useRef(false);
-  const title = t(`sg.${slip.id}.t`);
-  const body = fmt(t(`sg.${slip.id}.b`), slip.params || {});
+  const title = fmt(t(`sg.${slip.id}.t`), slip.params || {});
+  const body = fmt(t(slip.variant ? `sg.${slip.id}.b${slip.variant + 1}` : `sg.${slip.id}.b`), slip.params || {});
   const care = slip.kind === 'care';
 
   const tear = (how) => {
@@ -186,9 +186,15 @@ export default function SuggestionPad() {
       ladder: state.ladder,
       condition: state.profile?.condition,
       tasks: state.tasks.map((x) => ({ ...x, title: taskLabel(x, t) })),
+      medicines: state.medicines,
+      medTaken: state.medTaken,
+      lang: state.lang,
+      slipStats: state.slipStats,
+      foodPrefs: state.foodPrefs,
+      labels: { breakfast: t('slot.breakfast'), lunch: t('slot.lunch'), snack: t('slot.snack'), dinner: t('slot.dinner') },
       engaged: state.demo || (state.tally?.imOk || 0) > 0 || state.tasks.some((x) => x.done),
     }),
-    [now, state.mode, state.phase, state.meds, state.testPlan, state.careEvents, state.meals, state.footChecks, state.checkins, state.readings, state.visitQuestions, state.ladder, state.profile?.condition, state.tasks, state.demo, state.tally, t],
+    [now, state.mode, state.phase, state.meds, state.testPlan, state.careEvents, state.meals, state.footChecks, state.checkins, state.readings, state.visitQuestions, state.ladder, state.profile?.condition, state.tasks, state.demo, state.tally, state.medicines, state.medTaken, state.lang, state.slipStats, state.foodPrefs, t],
   );
   const pad = useMemo(() => buildPad(ctx, state.slips), [ctx, state.slips]);
   const stampedCount = stampedToday(ctx, state.slips).length;

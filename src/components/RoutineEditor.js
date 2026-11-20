@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { Bell, BellRing, Minus, Pencil, Plus, RefreshCw, X } from './icons';
 import { BigButton, Caption, Card, Chip, Title } from './ui';
@@ -10,27 +10,37 @@ import { useNow } from './useNow';
 import { shouldNudge } from '../logic';
 import { speak } from '../services/voice';
 import { nowMs } from '../services/clock';
+import { taskLabel } from '../taskLabel';
 import { colors } from '../theme';
 
 // One task name. The text is local while typing and saved when the person finishes, so the offline
 // queue gets one change per edit, not one per letter.
 function TaskField({ task, label, removeLabel }) {
   const { dispatch, t } = useStore();
-  const [value, setValue] = useState(task.title);
-  const save = () => {
-    const v = value.trim();
-    if (v && v !== task.title) dispatch({ type: 'TASK_EDIT', id: task.id, title: v, at: nowMs() });
-    else setValue(task.title);
+  const [value, setValue] = useState(taskLabel(task, t));
+  const latest = useRef(value);
+  const timer = useRef(null);
+  // Saved a moment after typing stops, and when the box loses focus or the keyboard is closed. Android's back
+  // button closes the keyboard without ending the edit, so waiting for the end alone lost the change.
+  const save = (text = latest.current) => {
+    clearTimeout(timer.current);
+    const v = text.trim();
+    if (v && v !== taskLabel(task, t)) dispatch({ type: 'TASK_EDIT', id: task.id, title: v, at: nowMs() });
   };
+  const change = (text) => {
+    latest.current = text;
+    setValue(text);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => save(text), 700);
+  };
+  useEffect(() => () => clearTimeout(timer.current), []);
   const move = (delta) =>
     dispatch({ type: 'TASK_HOUR', id: task.id, hour: stepHour(task.hour, delta), at: nowMs() });
   const asleep = validHour(task.hour) && reminderPlan([task]).length === 0;
   return (
     <View style={{ gap: 8 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8 }}>
-        <View style={{ flex: 1 }}>
-          <Field label={label} value={value} onChangeText={setValue} onEndEditing={save} />
-        </View>
+      <Field label={label} value={value} onChangeText={change} onEndEditing={() => save()} onBlur={() => save()} />
+      <View style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
         <Chip
           label={removeLabel}
           icon={X}
@@ -119,7 +129,7 @@ export default function RoutineEditor() {
         <Card style={{ gap: 12 }}>
           <Title style={{ fontSize: 22 }}>{t('editRoutine')}</Title>
           {state.tasks.map((x) => (
-            <TaskField key={x.id} task={x} label={t('taskName')} removeLabel={`${t('remove')}: ${x.title}`} />
+            <TaskField key={x.id} task={x} label={t('taskName')} removeLabel={`${t('remove')}: ${taskLabel(x, t)}`} />
           ))}
           <Field label={t('taskName')} value={text} onChangeText={setText} />
           <BigButton icon={Plus} label={t('addTask')} onPress={add} />

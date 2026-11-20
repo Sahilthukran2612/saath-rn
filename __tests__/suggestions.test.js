@@ -16,6 +16,10 @@ const base = (over = {}) => ({
   readings: [],
   visitQuestions: [],
   ladder: [],
+  lang: 'en',
+  foodPrefs: { region: 'north', diet: 'veg', disliked: [], recent: [] },
+  slipStats: {},
+  labels: { breakfast: 'Breakfast', lunch: 'Lunch', snack: 'Snack', dinner: 'Dinner' },
   ...over,
 });
 const ids = (ctx) => allSlips(ctx).map((s) => s.id);
@@ -43,12 +47,12 @@ describe('suggestion rules', () => {
   });
 
   test('habits follow the clock', () => {
-    expect(ids(base({ nowMs: at(8) }))).toContain('shoes');
-    expect(ids(base({ nowMs: at(8), condition: 'Asthma' }))).not.toContain('shoes');
+    expect(ids(base({ nowMs: at(6) }))).toContain('shoes');
+    expect(ids(base({ nowMs: at(6), condition: 'Asthma' }))).not.toContain('shoes');
     expect(ids(base({ nowMs: at(8) }))).not.toContain('stretch');
     expect(ids(base({ nowMs: at(22) }))).toContain('sleep');
     expect(ids(base({ nowMs: at(22) }))).not.toContain('water');
-    expect(ids(base({ nowMs: at(12, 30) }))).toContain('plate');
+    expect(ids(base({ nowMs: at(12, 30) }))).toContain('meal');
   });
 
   test('the foot slip returns after a week and the weekly check-in once a week', () => {
@@ -85,7 +89,7 @@ describe('a hard week or a crisis never adds things to do', () => {
     const got = list.map((s) => s.id);
     expect(got).toContain('company');
     expect(got).toContain('rest');
-    for (const banned of ['walk', 'task', 'meal', 'plate', 'shoes', 'ladder', 'foot', 'reading']) {
+    for (const banned of ['walk', 'task', 'meal', 'shoes', 'ladder', 'foot', 'reading']) {
       expect(got).not.toContain(banned);
     }
     expect(list[0].id).toBe('company');
@@ -94,6 +98,49 @@ describe('a hard week or a crisis never adds things to do', () => {
     const got = ids(base({ phase: 'crisis', nowMs: at(8) }));
     expect(got).toContain('rest');
     expect(got).not.toContain('walk');
+  });
+});
+
+describe('suggestions adapt to the person', () => {
+  const at12 = (over) => base({ nowMs: at(12, 30), ...over });
+  test('the meal slip carries a generated idea in the person\'s language and region', () => {
+    const en = allSlips(at12()).find((s) => s.id === 'meal');
+    expect(en.params.slot).toBe('Lunch');
+    expect(en.params.idea.length).toBeGreaterThan(10);
+    const hi = allSlips(at12({ lang: 'hi' })).find((s) => s.id === 'meal');
+    expect(/[\u0900-\u097F]/.test(hi.params.idea)).toBe(true);
+  });
+  test('a vegetarian never gets meat or fish, and a food turned down is not suggested again', () => {
+    for (let d = 1; d <= 20; d++) {
+      const idea = allSlips(base({ nowMs: at(12, 30, d) })).find((s) => s.id === 'meal').params.idea;
+      expect(idea).not.toMatch(/chicken|fish|egg/i);
+    }
+    const none = { region: 'north', diet: 'veg', disliked: ['paneer', 'dal', 'moong', 'rajma', 'chana', 'curd'], recent: [] };
+    expect(allSlips(at12({ foodPrefs: none })).find((s) => s.id === 'meal')).toBeUndefined();
+  });
+  test('a habit the person keeps skipping drops, and one they stamp rises; care reminders never move', () => {
+    const plain = allSlips(at12()).find((s) => s.id === 'water').priority;
+    const skipped = allSlips(at12({ slipStats: { water: { done: 0, skipped: 4 } } })).find((s) => s.id === 'water');
+    const stamped = allSlips(at12({ slipStats: { water: { done: 5, skipped: 0 } } })).find((s) => s.id === 'water');
+    expect(skipped.priority).toBeLessThan(plain);
+    expect(stamped.priority).toBeGreaterThan(plain);
+    const low = { meds: { name: 'M', pillsLeft: 4, perDay: 2 } };
+    const a = allSlips(at12(low)).find((s) => s.id === 'refill').priority;
+    const b = allSlips(at12({ ...low, slipStats: { refill: { done: 0, skipped: 9 } } })).find((s) => s.id === 'refill').priority;
+    expect(b).toBe(a);
+  });
+  test('the wording and the habit set change from one day to the next', () => {
+    const variants = new Set();
+    const first = new Set();
+    for (let d = 1; d <= 14; d++) {
+      const afternoon = allSlips(base({ nowMs: at(15, 0, d) }));
+      afternoon.filter((s) => s.id === 'water').forEach((s) => variants.add(s.variant));
+      // no meal idea in this context, so the morning habits are water and shoes and the day decides the order
+      const morning = allSlips(base({ nowMs: at(8, 0, d), foodPrefs: null }));
+      first.add(morning.find((s) => s.kind === 'habit')?.id);
+    }
+    expect(variants.size).toBeGreaterThan(1);
+    expect(first.size).toBeGreaterThan(1);
   });
 });
 

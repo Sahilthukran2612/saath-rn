@@ -3,6 +3,7 @@ import { ScrollView, View } from 'react-native';
 import { Lock } from '../components/icons';
 import { Body, Caption, Card, Glyph, Title } from '../components/ui';
 import { Reveal } from '../components/motion';
+import Medicines from '../components/care/Medicines';
 import { BudgetCard, GlucoseCard, StockCard, SugarPromptCard } from '../components/care/CareCards';
 import { useStore } from '../state/store';
 import { can } from '../logic';
@@ -38,6 +39,9 @@ export default function CareScreen() {
         <Title style={{ fontSize: 32, letterSpacing: -0.6 }}>{t('tabCare')}</Title>
         <Caption>{t('careSub')}</Caption>
       </View>
+      <Reveal index={0}>
+        <Medicines />
+      </Reveal>
       <Reveal index={0}>
         <SugarPromptCard />
       </Reveal>

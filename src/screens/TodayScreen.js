@@ -21,6 +21,7 @@ import { useNow } from '../components/useNow';
 import { taskIcon } from '../components/taskIcons';
 import RoutineEditor from '../components/RoutineEditor';
 import SuggestionPad from '../components/SuggestionPad';
+import { MedicinesNow } from '../components/care/Medicines';
 import Stamp, { StampMark } from '../components/Stamp';
 import Perf from '../components/Perf';
 import Doodle from '../components/doodles';
@@ -210,7 +211,8 @@ function TeenHome() {
         </View>
       </Reveal>
       <Reveal index={2}>
-        <SuggestionPad />
+        <MedicinesNow />
+      <SuggestionPad />
       </Reveal>
       <Reveal index={2}>
         <Body bold>{t('privacyDial')}</Body>
@@ -284,7 +286,8 @@ function AdultHome() {
         </View>
       </Reveal>
       <Reveal index={2}>
-        <SuggestionPad />
+        <MedicinesNow />
+      <SuggestionPad />
       </Reveal>
       <Reveal index={2}>
         <View style={styles.statRow}>
@@ -324,7 +327,8 @@ function PersonHome() {
         <ImOkHero />
       </Reveal>
       <Reveal index={2}>
-        <SuggestionPad />
+        <MedicinesNow />
+      <SuggestionPad />
       </Reveal>
       <Reveal index={3}>
         <TaskList big />

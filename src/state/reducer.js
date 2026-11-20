@@ -1,4 +1,5 @@
 import { addReading } from '../heart';
+import { dayOf } from '../medicines';
 import { markSlip } from '../suggestions';
 import { CFG, clampDial, escalationChain, isDelegationActive, isInactive, validPhone } from '../logic';
 import { adjustBaseline, cfgFrom, defaultBaseline } from '../care';
@@ -96,7 +97,11 @@ export const initialState = {
   feeds: {}, // household_id -> latest events I am allowed to see (kept for offline reading)
   seen: {}, // household_id -> created_at of the newest event I have looked at
   baseline: defaultBaseline(), // personal thresholds, tuned by false-alarm and missed feedback
-  slips: { day: null, done: [], skipped: [] }, // suggestion slips stamped or put aside today (see suggestions.js)
+  slips: { day: null, done: [], skipped: [] },
+  medicines: [], // [{ id, name, dose, when }]: typed by the person from their prescription. Saath never suggests a dose
+  medTaken: { day: null, ids: [] }, // medicine ids marked as taken today (a time on this phone, nothing sent)
+  slipStats: {}, // slip id -> { done, skipped }: lets the pad learn which small things this person actually does
+  foodPrefs: { region: 'north', diet: 'veg', disliked: [], recent: [] }, // drives the on-device meal ideas (mealGenerator.js) // suggestion slips stamped or put aside today (see suggestions.js)
   careEvents: { lastInsulinAt: null, lastMealAt: null }, // times only. Saath never records or suggests a dose
   meds: { name: 'Metformin (demo)', pillsLeft: 24, perDay: 2 },
   testPlan: { perDay: 2, strips: 20 }, // set by the clinician; Saath only counts
@@ -604,8 +609,37 @@ function baseReducer(state, a) {
       return { ...state, feeds: { ...state.feeds, [a.id]: a.events.slice(0, 30) } };
     case 'SEEN_SET':
       return { ...state, seen: { ...state.seen, [a.id]: a.at } };
-    case 'SLIP':
-      return { ...state, slips: markSlip(state.slips, a.id, a.how, a.now) };
+    case 'SLIP': {
+      const prev = state.slipStats?.[a.id] || { done: 0, skipped: 0 };
+      const key = a.how === 'done' ? 'done' : 'skipped';
+      return {
+        ...state,
+        slips: markSlip(state.slips, a.id, a.how, a.now),
+        slipStats: { ...state.slipStats, [a.id]: { ...prev, [key]: prev[key] + 1 } },
+      };
+    }
+    case 'MED_ADD':
+      return { ...state, medicines: [...state.medicines, { id: a.id, name: a.name, dose: a.dose || '', when: a.when }].slice(-30) };
+    case 'MED_REMOVE':
+      return { ...state, medicines: state.medicines.filter((m) => m.id !== a.id) };
+    case 'MED_TAKEN': {
+      const today = dayOf(a.now);
+      const base = state.medTaken?.day === today ? state.medTaken : { day: today, ids: [] };
+      const ids = base.ids.includes(a.id) ? base.ids.filter((x) => x !== a.id) : [...base.ids, a.id];
+      return { ...state, medTaken: { day: today, ids } };
+    }
+    case 'FOOD_PREFS':
+      return { ...state, foodPrefs: { ...state.foodPrefs, ...a.patch } };
+    case 'FOOD_NOT': {
+      const f = state.foodPrefs;
+      return { ...state, foodPrefs: { ...f, disliked: [...new Set([...f.disliked, ...a.ids])].slice(-30) } };
+    }
+    case 'FOOD_TAKE': {
+      const f = state.foodPrefs;
+      return { ...state, foodPrefs: { ...f, recent: [...f.recent, ...a.ids].slice(-18) } };
+    }
+    case 'FOOD_RESET':
+      return { ...state, foodPrefs: { ...state.foodPrefs, disliked: [], recent: [] } };
     case 'INVITE_SYNCED':
       return { ...state, invites: state.invites.map((i) => (i.id === a.id ? { ...i, cloud: true } : i)) };
     case 'OUTBOX_SENT':

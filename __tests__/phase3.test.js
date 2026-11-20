@@ -76,10 +76,9 @@ describe('Plan screen', () => {
     expect(screen.getByLabelText('Handing over care')).toBeTruthy();
     expect(screen.getByLabelText('School plan')).toBeTruthy();
   });
-  test('a neighbour has no access to Plan', async () => {
+  test('a neighbour has no Plan tab', async () => {
     await mount({ role: 'neighbour' });
-    await fireEvent.press(screen.getByLabelText('Plan'));
-    expect(screen.getByText(/do not have access/)).toBeTruthy();
+    expect(screen.queryByLabelText('Plan')).toBeNull();
   });
   test('a family member sees only the ladder and can agree to a step', async () => {
     const ladder = [

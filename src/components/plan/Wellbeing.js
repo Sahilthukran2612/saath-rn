@@ -11,6 +11,7 @@ import { useNow } from '../useNow';
 import { nowMs } from '../../services/clock';
 import { FOOT_ITEMS, idrsScore, schoolCard, weekKey, weeklySummary } from '../../plan';
 import food from '../../content/food.json';
+import FoodIdeas from './FoodIdeas';
 import { colors, fonts, radii } from '../../theme';
 
 const row = { flexDirection: 'row', flexWrap: 'wrap', gap: 8 };
@@ -77,8 +78,6 @@ const MEALS = [
 export function FoodSection() {
   const { state, dispatch, t } = useStore();
   const lang = state.lang === 'hi' ? 'hi' : 'en';
-  const [region, setRegion] = useState('north');
-  const meals = food.regions.find((r) => r.id === region)?.meals ?? [];
   const today = new Date().toDateString();
   const todays = state.meals.filter((m) => new Date(m.at).toDateString() === today);
   const plateDots = [colors.leaf, colors.haldi, colors.indigoSoft];
@@ -87,6 +86,7 @@ export function FoodSection() {
       <Card tone="haldi">
         <Body bold>{t('food.verify')}</Body>
       </Card>
+      <FoodIdeas />
       <Card style={{ gap: 14 }}>
         <Title style={{ fontSize: 22 }}>{t('food.plate')}</Title>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
@@ -101,19 +101,6 @@ export function FoodSection() {
           </View>
         </View>
       </Card>
-      <View style={{ gap: 10 }}>
-        <SectionTitle>{t('food.region')}</SectionTitle>
-        <View style={row}>
-          {food.regions.map((r) => (
-            <Chip key={r.id} label={r[lang]} active={region === r.id} onPress={() => setRegion(r.id)} />
-          ))}
-        </View>
-        <ListGroup>
-          {meals.map((m) => (
-            <ListRow key={m.en} icon={Utensils} title={m[lang]} />
-          ))}
-        </ListGroup>
-      </View>
       <View style={{ gap: 10 }}>
         <SectionTitle>{t('food.fasting')}</SectionTitle>
         <ListGroup>

@@ -1,5 +1,7 @@
 import { refillStatus, stripsPlan } from './care';
 import { weekKey, weeklySummary } from './plan';
+import { suggestMeal } from './mealGenerator';
+import { overdueMedicines } from './medicines';
 
 // Suggestion slips for the person: a short pad of "one small thing" cards for today.
 //
@@ -27,7 +29,6 @@ export const dayKey = (ms) => {
 };
 
 const hourOf = (ms) => new Date(ms).getHours();
-const sameDay = (a, b) => dayKey(a) === dayKey(b);
 
 // Diabetes-specific cards (foot care, shoes) show unless the person has written a different condition.
 const diabetic = (c) => {
@@ -44,6 +45,19 @@ function lastAt(list) {
 // `doodle` names the drawn picture; `tab` is where the slip's button goes (optional).
 const RULES = [
   // ---- care reminders from the person's own entries ----
+  {
+    // A medicine whose time passed more than an hour ago and is not marked as taken. Names only: the slip never
+    // repeats a dose, and it never tells the person what to take.
+    id: 'med',
+    kind: 'care',
+    doodle: 'strip',
+    tab: 'care',
+    make: (c) => {
+      const late = overdueMedicines(c.medicines, c.medTaken, c.nowMs);
+      if (!late.length) return null;
+      return { priority: 92, params: { names: late.map((m) => m.name).slice(0, 3).join(', ') } };
+    },
+  },
   {
     // Something from the person's own daily list whose hour has passed and is not ticked. It only points at the
     // list: it never says what to take or how much.
@@ -167,24 +181,22 @@ const RULES = [
     },
   },
   {
+    // A meal idea made for this person: region, diet, the hour, what they were given lately, what they turned down.
+    // Shown near each mealtime when no meal has been logged in the last few hours.
     id: 'meal',
     kind: 'habit',
     doodle: 'plate',
     tab: 'plan',
     make: (c) => {
       const h = hourOf(c.nowMs);
-      const ate = c.lastMealAt != null && sameDay(c.lastMealAt, c.nowMs);
-      return h >= 9 && h < 12 && !ate ? { priority: 42, params: {} } : null;
-    },
-  },
-  {
-    id: 'plate',
-    kind: 'habit',
-    doodle: 'plate',
-    tab: 'plan',
-    make: (c) => {
-      const h = hourOf(c.nowMs);
-      return (h >= 11 && h < 14) || (h >= 18 && h < 21) ? { priority: 30, params: {} } : null;
+      const slot = h >= 7 && h < 10 ? 'breakfast' : h >= 12 && h < 15 ? 'lunch' : h >= 17 && h < 19 ? 'snack' : h >= 19 && h < 22 ? 'dinner' : null;
+      if (!slot || !c.foodPrefs) return null;
+      if (c.lastMealAt != null && c.nowMs - c.lastMealAt < 3 * HOUR) return null;
+      const f = c.foodPrefs;
+      const idea = suggestMeal({ region: f.region, diet: f.diet, slot, day: dayKey(c.nowMs), recent: f.recent, disliked: f.disliked });
+      if (!idea) return null;
+      const lang = c.lang === 'hi' ? 'hi' : 'en';
+      return { priority: 42, params: { slot: (c.labels && c.labels[slot]) || slot, idea: idea.text[lang] } };
     },
   },
   {
@@ -215,7 +227,30 @@ const RULES = [
 ];
 
 // After a hard week or in a crisis phase, only these may appear: no new things to do.
-const CALM_ONLY = new Set(['company', 'rest', 'checkin', 'refill', 'strips', 'visit', 'sleep', 'water']);
+const CALM_ONLY = new Set(['med', 'company', 'rest', 'checkin', 'refill', 'strips', 'visit', 'sleep', 'water']);
+
+// How many phrasings a habit slip has (sg.<id>.b, sg.<id>.b2, ...). One is chosen per day, so the wording is not
+// the same every morning.
+const VARIANTS = { water: 3, walk: 3, shoes: 3, sleep: 3, rest: 3 };
+
+function hash(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+// What this person's own choices say about a habit slip. Skipped more than stamped: it drops, by up to 30.
+// Stamped more than skipped: it rises a little. Care reminders are never adjusted: a refill must not be learned away.
+function learned(stats) {
+  const d = stats?.done || 0;
+  const s = stats?.skipped || 0;
+  if (s > d) return -Math.min(30, 8 * (s - d));
+  if (d > s) return Math.min(6, 2 * (d - s));
+  return 0;
+}
 
 export function allSlips(ctx) {
   const c = { ...ctx, lastMealAt: lastAt([{ at: ctx.careEvents?.lastMealAt }, ...(ctx.meals || [])]) };
@@ -224,7 +259,20 @@ export function allSlips(ctx) {
   for (const rule of RULES) {
     if (calm && !CALM_ONLY.has(rule.id)) continue;
     const made = rule.make(c);
-    if (made) out.push({ id: rule.id, kind: rule.kind, doodle: rule.doodle, tab: rule.tab || null, ...made });
+    if (!made) continue;
+    const day = dayKey(c.nowMs);
+    const habit = rule.kind === 'habit';
+    out.push({
+      id: rule.id,
+      kind: rule.kind,
+      doodle: rule.doodle,
+      tab: rule.tab || null,
+      ...made,
+      // Habits move with the person and the day: what they do, what they skip, and a small daily shuffle so the
+      // set rotates. Care reminders keep their priority exactly.
+      priority: habit ? made.priority + learned(c.slipStats?.[rule.id]) + (hash(`${day}|${rule.id}`) % 9) : made.priority,
+      variant: VARIANTS[rule.id] ? hash(`${day}|v|${rule.id}`) % VARIANTS[rule.id] : 0,
+    });
   }
   out.sort((a, b) => b.priority - a.priority || a.id.localeCompare(b.id));
   // Care reminders come first. Habits only fill what is left: at most two, and one when there are
