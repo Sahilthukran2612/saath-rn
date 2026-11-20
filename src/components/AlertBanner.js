@@ -7,6 +7,7 @@ import { Body, Caption, Glyph, PressRow, Title } from './ui';
 import { Avatar, ProgressRing } from './kit';
 import { Check, MessageCircle, Phone, Send, Siren } from './icons';
 import { useReducedMotion } from './motion';
+import Perf from './Perf';
 import { colors, fonts, radii } from '../theme';
 import { useStore } from '../state/store';
 import { speak } from '../services/voice';
@@ -189,12 +190,14 @@ export default function AlertBanner() {
                   <Body bold>{who.name}</Body>
                 </View>
               </View>
+              <Perf />
               {who.phone ? (
                 <View style={{ flexDirection: 'row', gap: 8 }}>
                   <PressRow
                     accessibilityRole="button"
                     accessibilityLabel={`${t('callNow')} ${who.name}`}
                     onPress={() => Linking.openURL(callLink(who.phone))}
+                    containerStyle={styles.actionCell}
                     style={styles.actionBtn}
                   >
                     <Glyph icon={Phone} size={22} color={colors.white} />
@@ -205,6 +208,7 @@ export default function AlertBanner() {
                       accessibilityRole="button"
                       accessibilityLabel={`${t('whatsapp')} ${who.name}`}
                       onPress={() => Linking.openURL(whatsappLink(who.phone, msg))}
+                      containerStyle={styles.actionCell}
                       style={[styles.actionBtn, { backgroundColor: colors.leaf }]}
                     >
                       <Glyph icon={Send} size={22} color={colors.white} />
@@ -215,6 +219,7 @@ export default function AlertBanner() {
                     accessibilityRole="button"
                     accessibilityLabel={`${t('sendMessage')} ${who.name}`}
                     onPress={() => Linking.openURL(smsLink(who.phone, msg))}
+                    containerStyle={styles.actionCell}
                     style={styles.actionBtn}
                   >
                     <Glyph icon={MessageCircle} size={22} color={colors.white} />
@@ -252,7 +257,7 @@ export default function AlertBanner() {
             </Body>
           ) : null}
           <Caption style={{ color: colors.white, opacity: 0.85, textAlign: 'center' }}>
-            {t('confidence')}: {Math.round(al.confidence * 100)}% ({al.reason})
+            {t('confidence')}: {Math.round(al.confidence * 100)}%{state.demo ? ` (${al.reason})` : ''}
           </Caption>
         </View>
 
@@ -292,13 +297,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // the contact being tried is a white bill slip on the red: ink edge, a dashed tear line under the name
   contact: {
     gap: 12,
     backgroundColor: colors.white,
-    borderRadius: radii.lg,
+    borderRadius: radii.md,
+    borderWidth: 2,
+    borderColor: '#10163A',
     padding: 14,
     alignSelf: 'stretch',
   },
+  actionCell: { flex: 1 },
   actionBtn: {
     flex: 1,
     minHeight: 56,

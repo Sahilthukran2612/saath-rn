@@ -407,7 +407,7 @@ function ProHome() {
                 })
               : t('noAccess')}
           </Body>
-          <Caption>{t('clinicianPlan')}</Caption>
+          <Caption>{t('pro.note')}</Caption>
         </Card>
       </Reveal>
     </>

@@ -206,7 +206,7 @@ export function Field({
       <Caption>{label}</Caption>
       <TextInput
         accessibilityLabel={label}
-        placeholder={placeholder ?? label}
+        placeholder={placeholder}
         placeholderTextColor={colors.inkFaint}
         value={value}
         onChangeText={onChangeText}
