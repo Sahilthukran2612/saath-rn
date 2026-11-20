@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Animated, Text, View } from 'react-native';
+import { Animated, View } from 'react-native';
+import Text from './AppText';
 import { colors, fonts } from '../theme';
 import { useReducedMotion } from './motion';
 import { confirm } from '../services/haptics';

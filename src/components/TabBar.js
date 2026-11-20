@@ -1,5 +1,6 @@
 import React from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, StyleSheet, View } from 'react-native';
+import Text from './AppText';
 import { HeartPulse, House, LayoutGrid, ShieldCheck, UserRound, Users } from './icons';
 import { colors, fonts, roles } from '../theme';
 import { PressRow, useScale, Glyph } from './ui';

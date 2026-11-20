@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { AppState, BackHandler, KeyboardAvoidingView, StyleSheet, View, Text } from 'react-native';
+import { AppState, BackHandler, KeyboardAvoidingView, StyleSheet, View } from 'react-native';
+import Text from './components/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useStore } from './state/store';

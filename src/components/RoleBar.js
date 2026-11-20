@@ -1,5 +1,6 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import Text from './AppText';
 import { Eye } from './icons';
 import { PressRow, Glyph } from './ui';
 import { useStore } from '../state/store';

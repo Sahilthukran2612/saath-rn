@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Image, Share, StyleSheet, Text, View } from 'react-native';
+import { Image, Share, StyleSheet, View } from 'react-native';
+import Text from '../AppText';
 import * as ImagePicker from 'expo-image-picker';
 import { Banana, Camera, Candy, Coffee, Heart, Send, Soup, Salad, Utensils, Wheat } from '../icons';
 import { BigButton, Body, Caption, Card, Chip, Glyph, PressRow, Title } from '../ui';

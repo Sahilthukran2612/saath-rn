@@ -1,6 +1,7 @@
 import CirclesSection from '../components/circle/CirclesSection';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import Text from '../components/AppText';
 import { Check, ChevronRight, Droplet, ShieldCheck, Wallet, Pill, Siren } from '../components/icons';
 import { Body, Caption, Card, Glyph, PressRow, Title, useScale } from '../components/ui';
 import {

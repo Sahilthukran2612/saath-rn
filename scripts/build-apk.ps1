@@ -88,6 +88,7 @@ try {
   try {
     if ($Release -and $Emulator) { .\gradlew.bat assembleRelease '-PreactNativeArchitectures=x86_64' --console=plain }
     elseif ($Release) { .\gradlew.bat assembleRelease '-PreactNativeArchitectures=arm64-v8a,armeabi-v7a' --console=plain }
+    elseif ($Emulator) { .\gradlew.bat assembleDebug '-PreactNativeArchitectures=x86_64' --console=plain }
     else { .\gradlew.bat assembleDebug --console=plain }
   } finally { Pop-Location }
   $gradleExit = $LASTEXITCODE
@@ -103,7 +104,7 @@ try {
 
 New-Item -ItemType Directory -Force "$Project\dist" | Out-Null
 if ($Release) { $from = "$Short\android\app\build\outputs\apk\release\app-release.apk"; $name = $(if ($Emulator) { 'saath-x86.apk' } else { 'saath.apk' }) }
-else { $from = "$Short\android\app\build\outputs\apk\debug\app-debug.apk"; $name = 'saath-debug.apk' }
+else { $from = "$Short\android\app\build\outputs\apk\debug\app-debug.apk"; $name = $(if ($Emulator) { 'saath-debug-x86.apk' } else { 'saath-debug.apk' }) }
 Copy-Item $from "$Project\dist\$name" -Force
 Write-Host "Done: $Project\dist\$name"
 Write-Host "Install: copy it to the phone and open it, or: adb install -r dist\$name"

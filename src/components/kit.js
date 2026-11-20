@@ -1,5 +1,6 @@
 import React from 'react';
-import { Animated, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Animated, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import Text from './AppText';
 import Svg, { Circle, Defs, LinearGradient, Path, Stop } from 'react-native-svg';
 import { ArrowLeft, Check, ChevronRight } from './icons';
 import { colors, fonts, radii, type } from '../theme';

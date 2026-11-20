@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Linking, Modal, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Linking, Modal, StyleSheet, View } from 'react-native';
+import Text from './AppText';
 import { callLink, escalationMessage, smsLink, whatsappLink } from '../care';
 import { CFG } from '../logic';
 import { Body, Caption, Glyph, PressRow, Title } from './ui';

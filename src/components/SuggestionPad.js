@@ -1,5 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { Animated, Easing, Text, View } from 'react-native';
+import { Animated, Easing, View } from 'react-native';
+import Text from './AppText';
 import { Body, Caption, Title, PressRow, Glyph, useScale } from './ui';
 import { ChevronRight } from './icons';
 import Doodle from './doodles';
