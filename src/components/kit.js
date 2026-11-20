@@ -258,6 +258,16 @@ export function StageTrack({ stage, width = 280, onDark = true }) {
   );
 }
 
+// The stage track, stretched to the width it is given.
+export function FitStageTrack(props) {
+  const [w, setW] = React.useState(0);
+  return (
+    <View onLayout={(e) => setW(Math.floor(e.nativeEvent.layout.width))}>
+      {w > 0 ? <StageTrack {...props} width={w} /> : <View style={{ height: 36 }} />}
+    </View>
+  );
+}
+
 // ---- Progress ring ----
 export function ProgressRing({
   size = 120,
@@ -491,7 +501,7 @@ export function Stat({ value, label, color = colors.indigo }) {
 // Section label above a list: Material "title medium".
 export function SectionTitle({ children }) {
   return (
-    <View style={{ paddingTop: 12, paddingHorizontal: 4 }}>
+    <View style={{ paddingTop: 12 }}>
       <Text accessibilityRole="header" style={{ fontFamily: fonts.semi, fontSize: 18, lineHeight: 24, color: colors.ink }}>
         {children}
       </Text>

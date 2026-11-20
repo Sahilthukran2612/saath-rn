@@ -4,7 +4,7 @@ import { Bell, BellRing, Minus, Pencil, Plus, RefreshCw, X } from './icons';
 import { BigButton, Caption, Card, Chip, Title } from './ui';
 import { formatHour, reminderPlan, stepHour, validHour } from '../reminders';
 import { askReminderPermission } from '../services/reminders';
-import { Field, ListGroup, ListRow, Toggle } from './kit';
+import { Field, ListGroup, ListRow, SectionTitle, Toggle } from './kit';
 import { useStore } from '../state/store';
 import { useNow } from './useNow';
 import { shouldNudge } from '../logic';
@@ -82,7 +82,8 @@ export default function RoutineEditor() {
   };
 
   return (
-    <View style={{ gap: 12 }}>
+    <View style={{ gap: 8 }}>
+      <SectionTitle>{t('rem.section')}</SectionTitle>
       <ListGroup>
         <ListRow
           icon={nudge.ok ? BellRing : Bell}

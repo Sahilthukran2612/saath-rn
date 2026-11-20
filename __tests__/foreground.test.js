@@ -63,6 +63,6 @@ describe('background watching (foreground service)', () => {
   test('the screen says a notice stays visible', async () => {
     await mount({});
     await openMe();
-    expect(screen.getByText(/A notice stays on your screen/)).toBeTruthy();
+    expect(screen.getByText(/A notice stays on screen/)).toBeTruthy();
   });
 });

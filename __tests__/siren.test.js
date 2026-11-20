@@ -65,7 +65,7 @@ describe('loud alarm when nobody answers', () => {
   test('the switch on the Me tab turns it on and off', async () => {
     await mount({});
     await fireEvent.press(screen.getByLabelText('Me'));
-    expect(screen.getByText(/Plays a loud siren on this phone so people nearby can hear it/)).toBeTruthy();
+    expect(screen.getByText(/Plays a loud siren here if no one answers/)).toBeTruthy();
     await fireEvent.press(screen.getByLabelText('Loud alarm when no one answers: off'));
     await waitFor(() => expect(screen.getByLabelText('Loud alarm when no one answers: on')).toBeTruthy());
     await fireEvent.press(screen.getByLabelText('Loud alarm when no one answers: on'));

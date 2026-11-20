@@ -14,7 +14,7 @@ import {
   ProgressRing,
   SectionTitle,
   Stat,
-  StageTrack,
+  FitStageTrack,
 } from '../components/kit';
 import { Reveal } from '../components/motion';
 import { useNav } from '../components/nav';
@@ -82,6 +82,8 @@ function TaskList({ big }) {
   const { state, dispatch, t } = useStore();
   const k = useScale();
   return (
+    <View style={{ gap: 8 }}>
+    <SectionTitle>{t('tasks.title')}</SectionTitle>
     <ListGroup>
       {state.tasks.map((task, i) => (
         <TaskRow
@@ -97,6 +99,7 @@ function TaskList({ big }) {
         />
       ))}
     </ListGroup>
+    </View>
   );
 }
 
@@ -204,22 +207,22 @@ function TeenHome() {
   return (
     <>
       <Reveal index={1}>
-        <View style={styles.hero}>
-          <Title style={{ color: colors.white, fontSize: 24 }}>{t('ladder')}</Title>
-          <Body style={{ color: colors.white }}>{t(`stage.${STAGES[stage]}`)}</Body>
-          <StageTrack stage={stage} />
+        <Card style={{ gap: 14 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Title style={{ fontSize: 22 }}>{t('ladder')}</Title>
+            <Badge tone="indigo" label={t(`stage.${STAGES[stage]}`)} />
+          </View>
+          <FitStageTrack stage={stage} onDark={false} />
           <PressRow
             accessibilityRole="button"
             accessibilityLabel={t('sec.ladder')}
             onPress={() => go('plan')}
             style={styles.heroLink}
           >
-            <Text style={{ fontFamily: fonts.semi, fontSize: 17, color: colors.white }}>
-              {t('sec.ladder')}
-            </Text>
-            <Glyph icon={ChevronRight} size={20} color={colors.white} />
+            <Text style={{ fontFamily: fonts.semi, fontSize: 17, color: colors.indigo }}>{t('sec.ladder')}</Text>
+            <Glyph icon={ChevronRight} size={20} color={colors.indigo} />
           </PressRow>
-        </View>
+        </Card>
       </Reveal>
       <Reveal index={2}>
         <TodayNudges />
@@ -526,7 +529,7 @@ export default function TodayScreen() {
 
 const styles = StyleSheet.create({
   taskRow: { flexDirection: 'row', alignItems: 'center', gap: 16, paddingHorizontal: 16 },
-  taskDivider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.outlineVariant },
+  taskDivider: { borderBottomWidth: 1, borderBottomColor: colors.line },
   taskIcon: { width: 48, height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   slip: {
     backgroundColor: colors.paper,
