@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { AppState, BackHandler, KeyboardAvoidingView, StyleSheet, View } from 'react-native';
+import { AppState, BackHandler, KeyboardAvoidingView, Linking, StyleSheet, View } from 'react-native';
+import { parseJoinUrl } from './joinLink';
 import Text from './components/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -69,6 +70,19 @@ export default function AppShell({ sensing = true }) {
   const { impactG, inactiveHours } = state.baseline;
   useCloudSync();
   useReminders();
+
+  // Scanning an invite's QR opens Saath with the code. A phone that has not been set up yet becomes a care-giver's.
+  useEffect(() => {
+    const take = (url) => {
+      const code = parseJoinUrl(url);
+      if (!code) return;
+      dispatch({ type: 'JOIN_CODE', code });
+      dispatch({ type: 'USAGE_IF_NEW', value: 'member' });
+    };
+    Linking.getInitialURL().then(take).catch(() => {});
+    const sub = Linking.addEventListener('url', (e) => take(e.url));
+    return () => sub.remove();
+  }, [dispatch]);
 
   useEffect(() => {
     // a phone used only to look after someone else has no one to watch: no motion sensing

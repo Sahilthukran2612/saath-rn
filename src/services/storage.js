@@ -35,6 +35,7 @@ const PERSIST = [
   'careEvents',
   'slips',
   'carePlan',
+  'joinCode',
   'medicines',
   'medTaken',
   'medLog',

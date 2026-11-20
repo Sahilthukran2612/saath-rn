@@ -100,6 +100,7 @@ export const initialState = {
   baseline: defaultBaseline(), // personal thresholds, tuned by false-alarm and missed feedback
   slips: { day: null, done: [], skipped: [] },
   carePlan: null, // the newest plan applied from a clinician: { version, author, at, notes, meds, tasks, seen }
+  joinCode: null, // an invite code that arrived by scanning a QR, waiting to be used on the join screen
   medicines: [], // [{ id, name, dose, when }]: typed by the person from their prescription. Saath never suggests a dose
   medTaken: { day: null, ids: [] },
   medLog: {}, // { 'YYYY-M-D': [medicine ids taken] }: the last 30 days, for the adherence chart // medicine ids marked as taken today (a time on this phone, nothing sent)
@@ -655,6 +656,10 @@ function baseReducer(state, a) {
     }
     case 'PLAN_SEEN':
       return state.carePlan ? { ...state, carePlan: { ...state.carePlan, seen: true } } : state;
+    case 'USAGE_IF_NEW':
+      return state.usage == null ? { ...state, usage: a.value } : state;
+    case 'JOIN_CODE':
+      return { ...state, joinCode: a.code || null };
     case 'FOOD_PREFS':
       return { ...state, foodPrefs: { ...state.foodPrefs, ...a.patch } };
     case 'FOOD_NOT': {

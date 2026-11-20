@@ -8,6 +8,8 @@ import { validPhone } from '../../logic';
 import { requestSync } from '../../state/useCloudSync';
 import { fmt } from '../../circleFeed';
 import Sheet from '../Sheet';
+import QRCode from 'react-native-qrcode-svg';
+import { joinUrl } from '../../joinLink';
 import { colors } from '../../theme';
 
 const ROLES = ['family', 'neighbour', 'asha', 'clinician'];
@@ -23,6 +25,7 @@ export default function InviteSection() {
   const [role, setRole] = useState('family');
   const [error, setError] = useState(false);
   const [open, setOpen] = useState(false);
+  const [qr, setQr] = useState(null); // the invite whose QR is showing
 
   // One step for everything: the person becomes someone Saath calls when an alert goes unanswered (a contact),
   // and gets a code to follow how you are on their own phone (an invite). No second form.
@@ -45,6 +48,7 @@ export default function InviteSection() {
     setName('');
     setPhone('');
     setOpen(false);
+    setQr({ name: name.trim(), code });
     try {
       await Share.share({ message: fmt(t('inv.message'), { code }) });
     } catch {
@@ -89,6 +93,17 @@ export default function InviteSection() {
         {error ? <Body style={{ color: colors.brick }}>{t('invalidPhone')}</Body> : null}
         <BigButton icon={Send} label={t('inviteShare')} onPress={send} />
       </Sheet>
+      <Sheet visible={!!qr} onClose={() => setQr(null)} title={t('inv.scan')}>
+        {qr ? (
+          <View style={{ alignItems: 'center', gap: 14 }}>
+            <View style={{ padding: 14, backgroundColor: '#FFFFFF', borderRadius: 16 }}>
+              <QRCode value={joinUrl(qr.code)} size={220} />
+            </View>
+            <Body bold>{fmt(t('inv.scanFor'), { name: qr.name })}</Body>
+            <Body style={{ fontSize: 26, letterSpacing: 4 }}>{qr.code}</Body>
+          </View>
+        ) : null}
+      </Sheet>
       {pending.length > 0 ? (
         <ListGroup>
           {pending.map((i) => (
@@ -98,8 +113,8 @@ export default function InviteSection() {
               title={i.name}
               subtitle={`${t(`role.${i.role}`)}. ${fmt(t('inv.code'), { code: i.code })}`}
               trailing={<Badge label={i.cloud ? t('inv.sentBadge') : t('invitePending')} tone={i.cloud ? 'leaf' : 'haldi'} />}
-              onPress={state.demo ? () => dispatch({ type: 'INVITE_ACCEPT', id: i.id }) : undefined}
-              label={t('inviteAcceptSim')}
+              onPress={state.demo ? () => dispatch({ type: 'INVITE_ACCEPT', id: i.id }) : () => setQr({ name: i.name, code: i.code })}
+              label={state.demo ? t('inviteAcceptSim') : t('inv.showQr')}
               chevron={false}
             />
           ))}

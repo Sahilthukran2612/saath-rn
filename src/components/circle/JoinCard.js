@@ -12,7 +12,8 @@ import { colors } from '../../theme';
 // comes from the invite, not from anything they choose. Used on the Circle tab and in the care-giver setup.
 export default function JoinCard({ onJoined }) {
   const { state, dispatch, t } = useStore();
-  const [code, setCode] = useState('');
+  const [typed, setCode] = useState(null);
+  const code = typed ?? state.joinCode ?? ''; // a scanned code fills the box; typing replaces it
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
   const cfg = cloudConfig();
@@ -28,6 +29,7 @@ export default function JoinCard({ onJoined }) {
       const c = await listCircles(cfg, { ...state.cloud, ...(r.session || {}) });
       if (c.ok) dispatch({ type: 'CIRCLES_SET', circles: c.circles });
       setCode('');
+      dispatch({ type: 'JOIN_CODE', code: null });
       setMsg(t('join.ok'));
       onJoined?.();
     } else {

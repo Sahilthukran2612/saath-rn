@@ -15,8 +15,9 @@ const ROLE_ORDER = ['family', 'clinician', 'asha', 'neighbour'];
 
 // Joining is the less common path, so it sits behind one plain link.
 function JoinLink() {
-  const { t } = useStore();
-  const [open, setOpen] = useState(false);
+  const { state, t } = useStore();
+  const [asked, setOpen] = useState(false);
+  const open = asked || !!state.joinCode; // a scanned code opens the box straight away
   if (open) return <JoinCard onJoined={() => setOpen(false)} />;
   return <BigButton kind="text" label={t('join.link')} onPress={() => setOpen(true)} />;
 }
