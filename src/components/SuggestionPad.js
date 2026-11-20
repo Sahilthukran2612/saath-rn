@@ -186,8 +186,9 @@ export default function SuggestionPad() {
       ladder: state.ladder,
       condition: state.profile?.condition,
       tasks: state.tasks.map((x) => ({ ...x, title: taskLabel(x, t) })),
+      engaged: state.demo || (state.tally?.imOk || 0) > 0 || state.tasks.some((x) => x.done),
     }),
-    [now, state.mode, state.phase, state.meds, state.testPlan, state.careEvents, state.meals, state.footChecks, state.checkins, state.readings, state.visitQuestions, state.ladder, state.profile?.condition, state.tasks, t],
+    [now, state.mode, state.phase, state.meds, state.testPlan, state.careEvents, state.meals, state.footChecks, state.checkins, state.readings, state.visitQuestions, state.ladder, state.profile?.condition, state.tasks, state.demo, state.tally, t],
   );
   const pad = useMemo(() => buildPad(ctx, state.slips), [ctx, state.slips]);
   const stampedCount = stampedToday(ctx, state.slips).length;

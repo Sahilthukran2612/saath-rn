@@ -63,10 +63,11 @@ describe('suggestion rules', () => {
       { id: 't1', title: 'Morning medicine', done: false, hour: 8 },
       { id: 't2', title: 'Lunch', done: false, hour: 13 },
     ];
-    expect(ids(base({ nowMs: at(8, 30), tasks }))).not.toContain('task'); // not yet an hour past
-    const late = allSlips(base({ nowMs: at(10), tasks })).find((s) => s.id === 'task');
+    expect(ids(base({ nowMs: at(10), tasks }))).not.toContain('task'); // a brand-new user is not nagged
+    expect(ids(base({ nowMs: at(8, 30), tasks, engaged: true }))).not.toContain('task'); // not yet an hour past
+    const late = allSlips(base({ nowMs: at(10), tasks, engaged: true })).find((s) => s.id === 'task');
     expect(late.params).toEqual({ title: 'Morning medicine', time: '8:00' });
-    expect(ids(base({ nowMs: at(10), tasks: [{ ...tasks[0], done: true }] }))).not.toContain('task');
+    expect(ids(base({ nowMs: at(10), engaged: true, tasks: [{ ...tasks[0], done: true }] }))).not.toContain('task');
     expect(strings.en['sg.task.b']).not.toMatch(/\d+\s?(mg|ml|tablet|dose|unit)/i);
   });
 
@@ -80,7 +81,7 @@ describe('suggestion rules', () => {
 describe('a hard week or a crisis never adds things to do', () => {
   const hard = { checkins: [{ week: '2026-W44', mood: 3, at: at(9, 0, 3) }, { week: '2026-W45', mood: 1, at: at(9) }] };
   test('after a hard week only company, rest and care reminders remain', () => {
-    const list = allSlips(base({ ...hard, nowMs: at(11, 0), meals: [{ id: 'm', at: at(10, 30) }], tasks: [{ id: 't', title: 'Morning medicine', done: false, hour: 8 }] }));
+    const list = allSlips(base({ ...hard, nowMs: at(11, 0), meals: [{ id: 'm', at: at(10, 30) }], engaged: true, tasks: [{ id: 't', title: 'Morning medicine', done: false, hour: 8 }] }));
     const got = list.map((s) => s.id);
     expect(got).toContain('company');
     expect(got).toContain('rest');
@@ -135,6 +136,7 @@ describe('slip wording', () => {
         ladder: [{ id: 'a', stage: 0 }],
         meals: [{ id: 'm', at: at(h) - 40 * 60000 }],
         readings: [{ id: 'r', mgdl: 100, at: at(h) - 30 * 3600000 }],
+        engaged: true,
         tasks: [{ id: 't', title: 'Lunch', done: false, hour: 1 }],
       }),
     ).forEach((s) => seen.add(s.id));

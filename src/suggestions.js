@@ -51,6 +51,8 @@ const RULES = [
     kind: 'care',
     doodle: 'note',
     make: (c) => {
+      // Never nag a brand-new user about starter tasks they did not make: wait until they have used the app.
+      if (!c.engaged) return null;
       const h = hourOf(c.nowMs);
       const late = (c.tasks || [])
         .filter((x) => x && !x.done && Number.isFinite(x.hour) && x.hour <= h - 1 && x.title)
