@@ -4,6 +4,8 @@ import Text from './AppText';
 import Svg, { Circle, Defs, LinearGradient, Path, Stop } from 'react-native-svg';
 import { ArrowLeft, Check, ChevronRight } from './icons';
 import { colors, fonts, radii, shadow, type } from '../theme';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import { Body, Caption, Glyph, Title, useScale } from './ui';
 import { useSpringValue } from './motion';
 import { tap } from '../services/haptics';
@@ -51,7 +53,7 @@ export function Avatar({ name = '', role = 'family', size = 44 }) {
 export function ListGroup({ children, style }) {
   const items = React.Children.toArray(children).filter(Boolean);
   return (
-    <View style={[styles.group, style]}>
+    <View className="overflow-hidden rounded-lg bg-card" style={[shadow.card, style]}>
       {items.map((c, i) => React.cloneElement(c, { last: i === items.length - 1 }))}
     </View>
   );
@@ -202,9 +204,9 @@ export function Field({
   const k = useScale();
   const [focus, setFocus] = React.useState(false);
   return (
-    <View style={{ gap: 4 }}>
+    <View className="gap-1">
       <Caption>{label}</Caption>
-      <TextInput
+      <Input
         accessibilityLabel={label}
         placeholder={placeholder}
         placeholderTextColor={colors.inkFaint}
@@ -219,22 +221,12 @@ export function Field({
           setFocus(false);
           if (onBlur) onBlur();
         }}
-        style={{
-          minHeight: 56,
-          fontFamily: fonts.regular,
-          fontSize: type.body * k,
-          color: colors.ink,
-          borderWidth: focus ? 2 : 1,
-          borderColor: focus ? colors.indigo : colors.outline,
-          borderRadius: radii.md,
-          paddingHorizontal: 16,
-          backgroundColor: colors.surface,
-        }}
+        className={cn('h-auto min-h-14 rounded-xl bg-card px-4', focus ? 'border-2 border-primary' : 'border border-input')}
+        style={{ fontFamily: fonts.regular, fontSize: type.body * k, color: colors.ink }}
       />
     </View>
   );
 }
-
 // ---- Stage track: four nodes joined by a line; the current stage is filled haldi ----
 export function StageTrack({ stage, width = 280, onDark = true }) {
   const pad = 18;
@@ -469,15 +461,7 @@ export function Badge({ label, tone = 'indigo' }) {
     brick: [colors.brickTint, colors.brick],
   }[tone];
   return (
-    <View
-      style={{
-        backgroundColor: t[0],
-        borderRadius: radii.sm,
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        alignSelf: 'flex-start',
-      }}
-    >
+    <View className="self-start rounded-md px-3 py-1" style={{ backgroundColor: t[0] }}>
       <Text style={{ fontFamily: fonts.semi, fontSize: 16, color: t[1] }}>{label}</Text>
     </View>
   );
