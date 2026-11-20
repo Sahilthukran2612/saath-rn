@@ -169,10 +169,11 @@ export function Segmented({ options, value, onChange }) {
           >
             {on ? <Glyph icon={Check} size={18} color={colors.indigoDeep} strokeWidth={2.6} /> : null}
             <Text
-              numberOfLines={1}
+              numberOfLines={2}
               style={{
                 fontFamily: fonts.semi,
                 fontSize: 16,
+                textAlign: 'center',
                 color: on ? colors.indigoDeep : colors.inkSoft,
                 flexShrink: 1,
               }}

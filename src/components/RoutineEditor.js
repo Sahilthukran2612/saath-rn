@@ -99,6 +99,7 @@ export default function RoutineEditor() {
             />
           }
         />
+        {state.demo ? (
         <ListRow
           icon={RefreshCw}
           title={t(state.online ? 'goOffline' : 'goOnline')}
@@ -111,6 +112,7 @@ export default function RoutineEditor() {
             />
           }
         />
+        ) : null}
         <ListRow icon={Pencil} title={t('editRoutine')} onPress={() => setOpen(!open)} chevron={false} />
       </ListGroup>
       {open ? (

@@ -136,8 +136,8 @@ function TopSlip({ slip, index, total, onDone, lang, nowMs }) {
 // Carbon copies peeking out beneath the top slip: pink, then yellow, each a little off.
 function Copies({ count }) {
   const layers = [
-    { bg: colors.carbon, rot: '-1.6deg', dy: 7, dx: 5 },
-    { bg: colors.haldi, rot: '1.4deg', dy: 14, dx: -4 },
+    { bg: colors.carbon, rot: '-0.5deg', dy: 7, dx: 2 },
+    { bg: colors.haldi, rot: '0.5deg', dy: 14, dx: -2 },
   ].slice(0, Math.min(count, 2));
   return (
     <>
