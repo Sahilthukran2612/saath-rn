@@ -4,6 +4,7 @@ import { ArrowRight, Check } from '../components/icons';
 import { BigButton, Body, Caption, Card, Chip, Title } from '../components/ui';
 import { Avatar, Field, ListGroup, ListRow, Segmented, Toggle, SectionTitle } from '../components/kit';
 import { SaathMark } from '../components/art';
+import SetupProgress from '../components/SetupProgress';
 import ContactsForm from '../components/circle/ContactsForm';
 import { useStore } from '../state/store';
 import useChoices from '../state/useChoices';
@@ -37,27 +38,7 @@ export default function OnboardingScreen() {
       contentContainerStyle={{ padding: 24, paddingTop: 32, gap: 18 }}
     >
       <SaathMark size={56} />
-      <View style={{ gap: 8 }}>
-        <View
-          accessibilityRole="progressbar"
-          accessibilityValue={{ min: 1, max: STEPS, now: step + 1 }}
-          style={{ height: 8, borderRadius: 4, backgroundColor: colors.indigoTint, overflow: 'hidden' }}
-        >
-          <View
-            style={{
-              height: 8,
-              borderRadius: 4,
-              backgroundColor: colors.indigo,
-              width: `${((step + 1) / STEPS) * 100}%`,
-            }}
-          />
-        </View>
-        <Caption>
-          {t('ob.step')
-            .replace('{n}', String(step + 1))
-            .replace('{total}', String(STEPS))}
-        </Caption>
-      </View>
+      <SetupProgress step={step} total={STEPS} />
 
       {step === 0 ? (
         <View style={{ gap: 16 }}>

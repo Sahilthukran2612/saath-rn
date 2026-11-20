@@ -4,6 +4,7 @@ import { ArrowRight, Check } from '../components/icons';
 import { BigButton, Body, Caption, Title } from '../components/ui';
 import { Field } from '../components/kit';
 import { SaathMark } from '../components/art';
+import SetupProgress from '../components/SetupProgress';
 import Account from '../components/me/Account';
 import JoinCard from '../components/circle/JoinCard';
 import { useStore } from '../state/store';
@@ -31,7 +32,7 @@ export default function MemberOnboardingScreen() {
   return (
     <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 24, paddingTop: 32, gap: 18 }}>
       <SaathMark size={56} />
-      <Caption>{t('ob.step').replace('{n}', String(step + 1)).replace('{total}', String(STEPS))}</Caption>
+      <SetupProgress step={step} total={STEPS} />
 
       {step === 0 ? (
         <View style={{ gap: 14 }}>
