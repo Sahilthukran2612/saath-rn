@@ -113,7 +113,8 @@ function TopSlip({ slip, index, total, onDone, lang, nowMs }) {
                   accessibilityRole="button"
                   accessibilityLabel={t('sg.open')}
                   onPress={() => go(slip.tab)}
-                  style={{ flex: 1, minHeight: 56, borderRadius: radii.pill, backgroundColor: colors.indigoTint, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 6 }}
+                  containerStyle={{ flex: 1 }}
+                  style={{ minHeight: 56, borderRadius: radii.pill, backgroundColor: colors.indigoTint, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 6 }}
                 >
                   <Text style={{ fontFamily: fonts.bold, fontSize: 18 * k, color: colors.indigoDeep }}>{t('sg.open')}</Text>
                   <Glyph icon={ChevronRight} size={20} color={colors.indigoDeep} />
@@ -123,7 +124,8 @@ function TopSlip({ slip, index, total, onDone, lang, nowMs }) {
                 accessibilityRole="button"
                 accessibilityLabel={t('sg.skip')}
                 onPress={() => tear('skip')}
-                style={{ flex: 1, minHeight: 56, borderRadius: radii.pill, alignItems: 'center', justifyContent: 'center' }}
+                containerStyle={{ flex: 1 }}
+                style={{ minHeight: 56, borderRadius: radii.pill, borderWidth: 1, borderColor: colors.line, alignItems: 'center', justifyContent: 'center' }}
               >
                 <Text style={{ fontFamily: fonts.semi, fontSize: 18 * k, color: colors.inkSoft }}>{t('sg.skip')}</Text>
               </PressRow>
@@ -214,7 +216,7 @@ export default function SuggestionPad() {
           <Body>{t('sg.allDone')}</Body>
         </View>
       ) : (
-        <View style={{ paddingBottom: pad.length > 1 ? 22 : 0 }}>
+        <View style={{ paddingBottom: pad.length > 1 ? 34 : 0 }}>
           <Copies count={pad.length - 1} />
           <TopSlip key={pad[0].id} slip={pad[0]} index={0} total={pad.length} onDone={onDone} lang={state.lang} nowMs={now} />
         </View>

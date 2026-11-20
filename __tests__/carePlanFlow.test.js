@@ -22,6 +22,7 @@ describe('a clinician publishes a care plan and the person sees it', () => {
   test('a doctor publishes a plan from the patient panel (demo mode applies it locally and says so)', async () => {
     await mount({ usage: 'member', demo: true, circles: [circle] });
     await fireEvent.press(await screen.findByLabelText('Amma (demo)'));
+    await fireEvent.press(await screen.findByLabelText('Edit care plan')); // the builder opens in a drawer
     await fireEvent.changeText(await screen.findByLabelText('Medicine name'), 'Metformin');
     await fireEvent.changeText(screen.getByLabelText('Dose as written on the prescription'), '500 mg after food');
     await fireEvent.press(screen.getByLabelText('Save medicine'));

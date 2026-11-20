@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AppState, BackHandler, KeyboardAvoidingView, Linking, StyleSheet, View } from 'react-native';
-import { parseJoinUrl } from './joinLink';
+import { parseAddUrl, parseJoinUrl } from './joinLink';
 import Text from './components/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -74,6 +74,13 @@ export default function AppShell({ sensing = true }) {
   // Scanning an invite's QR opens Saath with the code. A phone that has not been set up yet becomes a care-giver's.
   useEffect(() => {
     const take = (url) => {
+      const card = parseAddUrl(url);
+      if (card) {
+        // a care-giver's card: this phone belongs to the person who will be looked after
+        dispatch({ type: 'ADD_PREFILL', value: card });
+        dispatch({ type: 'USAGE_IF_NEW', value: 'person' });
+        return;
+      }
       const code = parseJoinUrl(url);
       if (!code) return;
       dispatch({ type: 'JOIN_CODE', code });

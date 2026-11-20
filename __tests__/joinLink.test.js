@@ -15,3 +15,26 @@ describe('join link', () => {
     expect(parseJoinUrl('saath://join/ab12cd34?x=1')).toBe('AB12CD34');
   });
 });
+
+describe('add link (a care-giver shows their card)', () => {
+  const { addUrl, parseAddUrl } = require('../src/joinLink');
+  test('name, role and number round-trip, including Hindi and spaces', () => {
+    const link = addUrl({ name: 'Dr. Rao', phone: '+91 98765 43210', role: 'clinician' });
+    expect(parseAddUrl(link)).toEqual({ role: 'clinician', phone: '9876543210', name: 'Dr. Rao' });
+    expect(parseAddUrl(addUrl({ name: 'डॉ. राव', phone: '9876543210', role: 'clinician' })).name).toBe('डॉ. राव');
+  });
+  test('an unknown role falls back to family when making a link', () => {
+    expect(parseAddUrl(addUrl({ name: 'Meena', phone: '9876543210', role: 'admin' })).role).toBe('family');
+  });
+  test('anything else is rejected', () => {
+    expect(parseAddUrl('saath://add/admin/9876543210/Meena')).toBeNull();
+    expect(parseAddUrl('saath://add/family/12345/Meena')).toBeNull();
+    expect(parseAddUrl('saath://add/family/9876543210/M')).toBeNull();
+    expect(parseAddUrl('saath://add/family/9876543210/%E0%A4%A')).toBeNull();
+    expect(parseAddUrl('https://x.test/add/family/9876543210/Meena')).toBeNull();
+    expect(parseAddUrl(null)).toBeNull();
+  });
+  test('markup in a name is stripped', () => {
+    expect(parseAddUrl('saath://add/family/9876543210/%3Cb%3EMeena').name).toBe('bMeena');
+  });
+});

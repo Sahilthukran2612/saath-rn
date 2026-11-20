@@ -26,6 +26,16 @@ export default function InviteSection() {
   const [error, setError] = useState(false);
   const [open, setOpen] = useState(false);
   const [qr, setQr] = useState(null); // the invite whose QR is showing
+  // A care-giver's scanned card fills the form and opens it, so the person only confirms.
+  const card = state.addPrefill;
+  const [seenCard, setSeenCard] = useState(null);
+  if (card && seenCard !== card) {
+    setSeenCard(card);
+    setName(card.name);
+    setPhone(card.phone);
+    setRole(card.role);
+    setOpen(true);
+  }
 
   // One step for everything: the person becomes someone Saath calls when an alert goes unanswered (a contact),
   // and gets a code to follow how you are on their own phone (an invite). No second form.
@@ -48,6 +58,7 @@ export default function InviteSection() {
     setName('');
     setPhone('');
     setOpen(false);
+    if (state.addPrefill) dispatch({ type: 'ADD_PREFILL', value: null });
     setQr({ name: name.trim(), code });
     try {
       await Share.share({ message: fmt(t('inv.message'), { code }) });

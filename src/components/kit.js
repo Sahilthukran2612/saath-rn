@@ -425,6 +425,16 @@ export function LineChart({ values, width = 300, height = 120, color = colors.in
   );
 }
 
+// A line chart that fills whatever space it is given, so it always reaches both edges of its card.
+export function FitLineChart(props) {
+  const [w, setW] = React.useState(0);
+  return (
+    <View onLayout={(e) => setW(Math.floor(e.nativeEvent.layout.width))}>
+      {w > 0 ? <LineChart {...props} width={w} /> : <View style={{ height: props.height || 120 }} />}
+    </View>
+  );
+}
+
 // ---- Header, badge, stat ----
 // A screen header inside a flow: an icon button for Back (48 target), then the headline.
 export function ScreenHeader({ title, subtitle, onBack, backLabel = 'Back', right }) {
@@ -469,7 +479,7 @@ export function Badge({ label, tone = 'indigo' }) {
 
 export function Stat({ value, label, color = colors.indigo }) {
   return (
-    <View style={{ flex: 1, gap: 0 }}>
+    <View style={{ flex: 1, gap: 2 }}>
       <Text style={{ fontFamily: fonts.bold, fontSize: 30, lineHeight: 36, letterSpacing: -0.4, color }}>
         {value}
       </Text>

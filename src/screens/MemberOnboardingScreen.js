@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { ArrowRight, Check } from '../components/icons';
-import { BigButton, Body, Caption, Title } from '../components/ui';
-import { Field } from '../components/kit';
+import { BigButton, Body, Caption, Chip, Title } from '../components/ui';
+import { Field, SectionTitle } from '../components/kit';
 import { SaathMark } from '../components/art';
 import SetupProgress from '../components/SetupProgress';
 import Account from '../components/me/Account';
@@ -37,8 +37,18 @@ export default function MemberOnboardingScreen() {
       {step === 0 ? (
         <View style={{ gap: 14 }}>
           <Title style={{ fontSize: 28 }}>{t('mo.nameTitle')}</Title>
-          <Body>{t('mo.nameNote')}</Body>
           <Field label={t('ob.name')} value={name} onChangeText={setName} />
+          <SectionTitle>{t('mo.who')}</SectionTitle>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            {['family', 'neighbour', 'asha', 'clinician'].map((r) => (
+              <Chip
+                key={r}
+                label={t(`role.${r}`)}
+                active={(state.profile.myRole || 'family') === r}
+                onPress={() => dispatch({ type: 'PROFILE_SET', patch: { myRole: r } })}
+              />
+            ))}
+          </View>
         </View>
       ) : null}
 

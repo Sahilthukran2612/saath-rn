@@ -104,6 +104,7 @@ export const initialState = {
   baseline: defaultBaseline(), // personal thresholds, tuned by false-alarm and missed feedback
   slips: { day: null, done: [], skipped: [] },
   carePlan: null, // the newest plan applied from a clinician: { version, author, at, notes, meds, tasks, seen }
+  addPrefill: null, // a care-giver's card that was scanned: { name, phone, role }, waiting in the Add a person form
   joinCode: null, // an invite code that arrived by scanning a QR, waiting to be used on the join screen
   // [{ id, name, dose, when }]: typed by the person from their prescription. Saath never suggests a dose.
   // The demo starts with one made-up medicine (flagged) so the medicines chart has something to show.
@@ -128,7 +129,7 @@ export const initialState = {
   autoSmsDenied: false, // the SMS permission was refused
   backgroundDenied: false, // the notification permission was refused, so the service did not start
   // Phase 3
-  profile: { name: '', condition: '', allergies: '', emergencyId: 'm1' },
+  profile: { name: '', condition: '', allergies: '', emergencyId: 'm1', myRole: null }, // myRole: how a care-giver describes themselves at sign-up
   ladder: initialLadder(),
   ladderApproval: false, // true: a parent must agree before the teen moves up a stage
   visitQuestions: [],
@@ -682,6 +683,8 @@ function baseReducer(state, a) {
     }
     case 'PLAN_SEEN':
       return state.carePlan ? { ...state, carePlan: { ...state.carePlan, seen: true } } : state;
+    case 'ADD_PREFILL':
+      return { ...state, addPrefill: a.value || null };
     case 'USAGE_IF_NEW':
       return state.usage == null ? { ...state, usage: a.value } : state;
     case 'JOIN_CODE':

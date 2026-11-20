@@ -486,7 +486,17 @@ export const strings = {
     'acc.phone': 'Your mobile number',
     'join.link': 'I have an invite code',
     'inv.card': 'People who help you',
-    'pt.title': 'People I look after',
+    'pt.title': 'People I look after',
+    'mo.who': 'I am a...',
+    'pt.titleDoctor': 'My patients',
+    'amp.title': 'Look after someone new',
+    'amp.titleDoctor': 'Add a patient',
+    'amp.btn': 'Show my card to add someone',
+    'amp.btnDoctor': 'Add my patient',
+    'amp.scan': 'Ask the person to scan this with Saath or their phone camera.',
+    'amp.then': 'They confirm once, then show you a code to scan back. No typing.',
+    'amp.needAccount': 'Sign in with your name and number first (Me tab), so your card has them.',
+    'plan.editBtn': 'Edit care plan',
     'inv.scan': 'Scan to join',
     'inv.scanFor': '{name}: scan this with your phone camera, or type the code below',
     'inv.showQr': 'Show QR code',
@@ -1176,7 +1186,17 @@ export const strings = {
     'acc.phone': 'आपका मोबाइल नंबर',
     'join.link': 'मेरे पास न्योते का कोड है',
     'inv.card': 'लोग जो आपकी मदद करते हैं',
-    'pt.title': 'जिनकी मैं देखभाल करता हूँ',
+    'pt.title': 'जिनकी मैं देखभाल करता हूँ',
+    'mo.who': 'मैं हूँ...',
+    'pt.titleDoctor': 'मेरे मरीज़',
+    'amp.title': 'किसी नए की देखभाल जोड़ें',
+    'amp.titleDoctor': 'मरीज़ जोड़ें',
+    'amp.btn': 'जोड़ने के लिए मेरा कार्ड दिखाएँ',
+    'amp.btnDoctor': 'मेरा मरीज़ जोड़ें',
+    'amp.scan': 'व्यक्ति से कहें कि इसे साथ या फ़ोन के कैमरे से स्कैन करें।',
+    'amp.then': 'वे एक बार पक्का करेंगे, फिर आपको स्कैन करने के लिए कोड दिखाएँगे। टाइप नहीं करना।',
+    'amp.needAccount': 'पहले अपने नाम और नंबर से साइन इन करें (मैं टैब), ताकि कार्ड में वे हों।',
+    'plan.editBtn': 'देखभाल योजना बदलें',
     'inv.scan': 'स्कैन करके जुड़ें',
     'inv.scanFor': '{name} अपने फ़ोन के कैमरे से यह कोड स्कैन करें, या ऊपर का कोड डालें',
     'inv.showQr': 'QR कोड दिखाएँ',

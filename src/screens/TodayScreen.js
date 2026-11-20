@@ -8,10 +8,11 @@ import {
   Avatar,
   Badge,
   CheckMark,
-  LineChart,
+  FitLineChart,
   ListGroup,
   ListRow,
   ProgressRing,
+  SectionTitle,
   Stat,
   StageTrack,
 } from '../components/kit';
@@ -186,6 +187,16 @@ function ImOkHero() {
     </View>
   );
 }
+// What needs attention now, as one stack with an even gap: a plan the doctor changed, medicines due, today's slips.
+function TodayNudges() {
+  return (
+    <View style={{ gap: 16 }}>
+      <PlanNotice />
+      <MedicinesNow />
+      <SuggestionPad />
+    </View>
+  );
+}
 function TeenHome() {
   const { state, t } = useStore();
   const go = useNav();
@@ -211,12 +222,10 @@ function TeenHome() {
         </View>
       </Reveal>
       <Reveal index={2}>
-        <PlanNotice />
-      <MedicinesNow />
-      <SuggestionPad />
+        <TodayNudges />
       </Reveal>
       <Reveal index={2}>
-        <Body bold>{t('privacyDial')}</Body>
+        <SectionTitle>{t('privacyDial')}</SectionTitle>
         <View style={{ height: 8 }} />
         <ListGroup>
           {state.members.map((m) => (
@@ -276,32 +285,27 @@ function AdultHome() {
           </View>
           <Caption>{last ? t('lastReading') : t('noReading')}</Caption>
           {shown.length > 1 ? (
-            <LineChart
-              values={shown.slice(-8).map((r) => r.mgdl)}
-              width={300}
-              height={96}
-              label={t('sugarLog')}
-            />
+            <FitLineChart values={shown.slice(-8).map((r) => r.mgdl)} height={96} label={t('sugarLog')} />
           ) : null}
           <Body>{adviceText(state.lang, advice.level)}</Body>
         </View>
       </Reveal>
       <Reveal index={2}>
-        <PlanNotice />
-      <MedicinesNow />
-      <SuggestionPad />
+        <TodayNudges />
       </Reveal>
       <Reveal index={2}>
-        <View style={styles.statRow}>
-          <Stat
-            value={refill.daysLeft ?? '–'}
-            label={`${t('refill')}: ${t('daysLeft')}`}
-            color={refill.level === 'now' ? colors.madder : colors.indigo}
-          />
-          <Stat value={state.testPlan.strips} label={t('stripsLeft')} />
-          <Stat value={`₹${spend.thisMonth}`} label={t('spend')} />
-        </View>
-        <View style={{ height: 8 }} />
+        <View style={{ gap: 12 }}>
+        <Card>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            <Stat
+              value={refill.daysLeft ?? '–'}
+              label={t('daysLeft')}
+              color={refill.level === 'now' ? colors.madder : colors.indigo}
+            />
+            <Stat value={state.testPlan.strips} label={t('stripsLeft')} />
+            <Stat value={`₹${spend.thisMonth}`} label={t('spend')} />
+          </View>
+        </Card>
         <ListGroup>
           <ListRow
             icon={Pill}
@@ -311,6 +315,7 @@ function AdultHome() {
           />
           <ListRow icon={Wallet} title={t('budgetTitle')} onPress={() => go('care')} />
         </ListGroup>
+        </View>
       </Reveal>
       <Reveal index={3}>
         <TaskList />
@@ -329,9 +334,7 @@ function PersonHome() {
         <ImOkHero />
       </Reveal>
       <Reveal index={2}>
-        <PlanNotice />
-      <MedicinesNow />
-      <SuggestionPad />
+        <TodayNudges />
       </Reveal>
       <Reveal index={3}>
         <TaskList big />

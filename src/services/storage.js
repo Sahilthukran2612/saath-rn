@@ -36,6 +36,7 @@ const PERSIST = [
   'slips',
   'carePlan',
   'joinCode',
+  'addPrefill',
   'medicines',
   'medTaken',
   'medLog',

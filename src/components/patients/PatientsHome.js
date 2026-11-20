@@ -9,6 +9,7 @@ import { nowMs } from '../../services/clock';
 import { describeEvent, newest, pendingAlert } from '../../circleFeed';
 import JoinCard from '../circle/JoinCard';
 import PatientPanel from './PatientPanel';
+import AddMyPatient from './AddMyPatient';
 import { colors, fonts, radii } from '../../theme';
 
 const ROLE_ORDER = ['family', 'clinician', 'asha', 'neighbour'];
@@ -67,7 +68,9 @@ export default function PatientsHome() {
         style={{ backgroundColor: needing ? colors.brick : colors.indigo, borderRadius: radii.xl, padding: 22, gap: 4 }}
         accessibilityRole="header"
       >
-        <Text style={{ fontFamily: fonts.semi, fontSize: 16, lineHeight: 22, color: '#EEF3FF' }}>{t('pt.title')}</Text>
+        <Text style={{ fontFamily: fonts.semi, fontSize: 16, lineHeight: 22, color: '#EEF3FF' }}>
+          {t(state.profile.myRole === 'clinician' ? 'pt.titleDoctor' : 'pt.title')}
+        </Text>
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 10 }}>
           <Text style={{ fontFamily: fonts.bold, fontSize: 56, lineHeight: 64, color: colors.white }}>{all.length}</Text>
           <Text style={{ fontFamily: fonts.semi, fontSize: 20, lineHeight: 28, color: '#EEF3FF', flex: 1 }}>
@@ -110,6 +113,7 @@ export default function PatientsHome() {
           ) : null}
         </Card>
       ) : null}
+      <AddMyPatient />
       <JoinLink />
     </View>
   );

@@ -70,7 +70,6 @@ export default function CarePlanBuilder({ circle }) {
 
   return (
     <View style={{ gap: 14 }}>
-      <Title style={{ fontSize: 22 }}>{t('plan.build')}</Title>
 
       <SectionTitle>{t('med.title')}</SectionTitle>
       {draft.meds.length > 0 ? (

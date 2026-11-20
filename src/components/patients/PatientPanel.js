@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View } from 'react-native';
-import { Body, Caption, Card } from '../ui';
+import { ClipboardList } from '../icons';
+import { BigButton, Body, Caption, Card } from '../ui';
+import Sheet from '../Sheet';
 import { Badge, ListGroup, ListRow, ScreenHeader, Toggle } from '../kit';
 import CarePlanBuilder from '../circle/CarePlanBuilder';
 import { useStore } from '../../state/store';
@@ -20,6 +22,7 @@ export default function PatientPanel({ circle, onBack }) {
   const alert = pendingAlert(feed, state.seen[circle.household_id], now);
   const signedIn = Boolean(state.cloud.access);
   const doctor = circle.role === 'clinician';
+  const [planOpen, setPlanOpen] = useState(false);
 
   // Time Off: stop routine updates from this person. The server still lets safety alerts through.
   const pause = async (on) => {
@@ -73,7 +76,15 @@ export default function PatientPanel({ circle, onBack }) {
         </ListGroup>
       )}
 
-      {doctor ? <CarePlanBuilder circle={circle} /> : null}
+      {doctor ? (
+        <Card style={{ gap: 12 }}>
+          <Body bold>{t('plan.build')}</Body>
+          <BigButton icon={ClipboardList} label={t('plan.editBtn')} onPress={() => setPlanOpen(true)} />
+        </Card>
+      ) : null}
+      <Sheet visible={planOpen} onClose={() => setPlanOpen(false)} title={t('plan.build')}>
+        <CarePlanBuilder circle={circle} />
+      </Sheet>
     </View>
   );
 }

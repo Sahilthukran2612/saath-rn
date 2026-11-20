@@ -11,6 +11,7 @@ import { shouldNudge } from '../logic';
 import { speak } from '../services/voice';
 import { nowMs } from '../services/clock';
 import { taskLabel } from '../taskLabel';
+import Sheet from './Sheet';
 import { colors } from '../theme';
 
 // One task name. The text is local while typing and saved when the person finishes, so the offline
@@ -123,18 +124,15 @@ export default function RoutineEditor() {
           }
         />
         ) : null}
-        <ListRow icon={Pencil} title={t('editRoutine')} onPress={() => setOpen(!open)} chevron={false} />
+        <ListRow icon={Pencil} title={t('editRoutine')} onPress={() => setOpen(true)} chevron />
       </ListGroup>
-      {open ? (
-        <Card style={{ gap: 12 }}>
-          <Title style={{ fontSize: 22 }}>{t('editRoutine')}</Title>
-          {state.tasks.map((x) => (
-            <TaskField key={x.id} task={x} label={t('taskName')} removeLabel={`${t('remove')}: ${taskLabel(x, t)}`} />
-          ))}
-          <Field label={t('taskName')} value={text} onChangeText={setText} />
-          <BigButton icon={Plus} label={t('addTask')} onPress={add} />
-        </Card>
-      ) : null}
+      <Sheet visible={open} onClose={() => setOpen(false)} title={t('editRoutine')}>
+        {state.tasks.map((x) => (
+          <TaskField key={x.id} task={x} label={t('taskName')} removeLabel={`${t('remove')}: ${taskLabel(x, t)}`} />
+        ))}
+        <Field label={t('taskName')} value={text} onChangeText={setText} />
+        <BigButton icon={Plus} label={t('addTask')} onPress={add} />
+      </Sheet>
     </View>
   );
 }
