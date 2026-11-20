@@ -37,6 +37,7 @@ const PERSIST = [
   'carePlan',
   'medicines',
   'medTaken',
+  'medLog',
   'slipStats',
   'foodPrefs',
   'meds',

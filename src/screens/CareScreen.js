@@ -4,7 +4,8 @@ import { Lock } from '../components/icons';
 import { Body, Caption, Card, Glyph, Title } from '../components/ui';
 import { Reveal } from '../components/motion';
 import Medicines from '../components/care/Medicines';
-import { BudgetCard, GlucoseCard, StockCard, SugarPromptCard } from '../components/care/CareCards';
+import { BudgetCard, StockCard, SugarPromptCard } from '../components/care/CareCards';
+import { AdherenceChart, HeartAnalytics, SugarAnalytics } from '../components/care/CareCharts';
 import { useStore } from '../state/store';
 import { can } from '../logic';
 import { colors } from '../theme';
@@ -46,7 +47,13 @@ export default function CareScreen() {
         <SugarPromptCard />
       </Reveal>
       <Reveal index={1}>
-        <GlucoseCard />
+        <SugarAnalytics />
+      </Reveal>
+      <Reveal index={1}>
+        <AdherenceChart />
+      </Reveal>
+      <Reveal index={1}>
+        <HeartAnalytics />
       </Reveal>
       <Reveal index={2}>
         <StockCard />

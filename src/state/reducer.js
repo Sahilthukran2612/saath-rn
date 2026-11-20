@@ -101,7 +101,8 @@ export const initialState = {
   slips: { day: null, done: [], skipped: [] },
   carePlan: null, // the newest plan applied from a clinician: { version, author, at, notes, meds, tasks, seen }
   medicines: [], // [{ id, name, dose, when }]: typed by the person from their prescription. Saath never suggests a dose
-  medTaken: { day: null, ids: [] }, // medicine ids marked as taken today (a time on this phone, nothing sent)
+  medTaken: { day: null, ids: [] },
+  medLog: {}, // { 'YYYY-M-D': [medicine ids taken] }: the last 30 days, for the adherence chart // medicine ids marked as taken today (a time on this phone, nothing sent)
   slipStats: {}, // slip id -> { done, skipped }: lets the pad learn which small things this person actually does
   foodPrefs: { region: 'north', diet: 'veg', disliked: [], recent: [] }, // drives the on-device meal ideas (mealGenerator.js) // suggestion slips stamped or put aside today (see suggestions.js)
   careEvents: { lastInsulinAt: null, lastMealAt: null }, // times only. Saath never records or suggests a dose
@@ -637,7 +638,15 @@ function baseReducer(state, a) {
       const today = dayOf(a.now);
       const base = state.medTaken?.day === today ? state.medTaken : { day: today, ids: [] };
       const ids = base.ids.includes(a.id) ? base.ids.filter((x) => x !== a.id) : [...base.ids, a.id];
-      return { ...state, medTaken: { day: today, ids } };
+      const log = { ...state.medLog, [today]: ids };
+      // keys are 'YYYY-M-D' without padding, so order them as dates, not as text
+      const asTime = (k) => {
+        const [y, m, d] = k.split('-').map(Number);
+        return new Date(y, m - 1, d).getTime();
+      };
+      const days = Object.keys(log).sort((x, y) => asTime(x) - asTime(y));
+      for (const d of days.slice(0, Math.max(0, days.length - 30))) delete log[d];
+      return { ...state, medTaken: { day: today, ids }, medLog: log };
     }
     case 'PLAN_APPLY': {
       // Only a newer plan is applied, so polling again never redoes or undoes anything.

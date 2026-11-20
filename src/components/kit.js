@@ -381,12 +381,12 @@ function smoothPath(pts) {
   }
   return d;
 }
-export function LineChart({ values, width = 300, height = 120, color = colors.indigo, label }) {
+export function LineChart({ values, width = 300, height = 120, color = colors.indigo, label, floor = 70, ceil = 180, markOutliers = true }) {
   if (values.length < 2) return null;
   const padX = 14;
   const padY = 16;
-  const lo = Math.min(...values, 70) - 10;
-  const hi = Math.max(...values, 180) + 10;
+  const lo = Math.min(...values, floor) - 10;
+  const hi = Math.max(...values, ceil) + 10;
   const pts = values.map((v, i) => ({
     x: padX + (i * (width - padX * 2)) / (values.length - 1),
     y: padY + ((hi - v) * (height - padY * 2)) / (hi - lo),
@@ -406,7 +406,7 @@ export function LineChart({ values, width = 300, height = 120, color = colors.in
         <Path d={area} fill="url(#fill)" />
         <Path d={line} stroke={color} strokeWidth={3} fill="none" strokeLinecap="round" />
         {pts.map((p, i) => {
-          const out = p.v < 70 || p.v > 250;
+          const out = markOutliers && (p.v < 70 || p.v > 250);
           const lastPt = i === pts.length - 1;
           return (
             <Circle
