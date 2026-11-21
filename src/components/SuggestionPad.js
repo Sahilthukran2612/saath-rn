@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, View } from 'react-native';
 import Text from './AppText';
 import { Body, Caption, Title, PressRow, Glyph, useScale } from './ui';
@@ -11,7 +11,9 @@ import { useNow } from './useNow';
 import { useNav } from './nav';
 import { useStore } from '../state/store';
 import { taskLabel } from '../taskLabel';
-import { buildPad, stampedToday } from '../suggestions';
+import { buildPad, dayKey, stampedToday } from '../suggestions';
+import { buildAiContext } from '../ai/context';
+import { fetchAiCards } from '../ai/client';
 import { fmt } from '../circleFeed';
 import { colors, fonts, radii, shadow } from '../theme';
 
@@ -31,8 +33,9 @@ function TopSlip({ slip, index, total, onDone, lang, nowMs }) {
   const [stamped, setStamped] = useState(false);
   const [x] = useState(() => new Animated.Value(0));
   const busy = useRef(false);
-  const title = fmt(t(`sg.${slip.id}.t`), slip.params || {});
-  const body = fmt(t(slip.variant ? `sg.${slip.id}.b${slip.variant + 1}` : `sg.${slip.id}.b`), slip.params || {});
+  // a generated card carries its own words; a rule-based one looks its words up by id
+  const title = slip.ai ? slip.title : fmt(t(`sg.${slip.id}.t`), slip.params || {});
+  const body = slip.ai ? slip.body : fmt(t(slip.variant ? `sg.${slip.id}.b${slip.variant + 1}` : `sg.${slip.id}.b`), slip.params || {});
   const care = slip.kind === 'care';
 
   const tear = (how) => {
@@ -198,7 +201,27 @@ export default function SuggestionPad() {
     }),
     [now, state.mode, state.phase, state.meds, state.testPlan, state.careEvents, state.meals, state.footChecks, state.checkins, state.readings, state.visitQuestions, state.ladder, state.profile?.condition, state.tasks, state.tally, state.medicines, state.medTaken, state.lang, state.slipStats, state.foodPrefs, t],
   );
-  const pad = useMemo(() => buildPad(ctx, state.slips), [ctx, state.slips]);
+  const slipState = state.slips;
+  const fresh = state.aiCards && state.aiCards.lang === state.lang ? state.aiCards.cards : null;
+  const pad = useMemo(() => buildPad(ctx, slipState, state.aiOn ? fresh : null), [ctx, slipState, state.aiOn, fresh]);
+
+  // Ask for new generated cards when there are none, they are from another day or language, or they are 3 hours old.
+  // One try at a time, and after a failure not again for ten minutes. Offline, the rule-based pad simply stays.
+  const busy = useRef(0);
+  const stale = !state.aiCards || state.aiCards.lang !== state.lang || dayKey(state.aiCards.at) !== dayKey(now) || now - state.aiCards.at > 3 * 3600000;
+  useEffect(() => {
+    if (!state.aiOn || !state.hydrated || state.alert || !stale) return undefined;
+    if (Date.now() - busy.current < 10 * 60000) return undefined;
+    busy.current = Date.now();
+    let live = true;
+    fetchAiCards(buildAiContext(state, Date.now())).then((r) => {
+      if (live && r.ok) dispatch({ type: 'AI_CARDS', at: Date.now(), lang: state.lang, cards: r.cards });
+    });
+    return () => {
+      live = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.aiOn, state.hydrated, state.lang, stale]);
   const stampedCount = stampedToday(ctx, state.slips).length;
   const onDone = (id, how) => dispatch({ type: 'SLIP', id, how, now: Date.now() });
 

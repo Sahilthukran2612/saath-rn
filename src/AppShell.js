@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { AppState, BackHandler, KeyboardAvoidingView, Linking, StyleSheet, View } from 'react-native';
 import { parseAddUrl, parseJoinUrl } from './joinLink';
-import { looksAfterOthers } from './who';
+import { isDoctor, looksAfterOthers } from './who';
+import ChatWindow from './components/ai/ChatWindow';
 import Text from './components/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -275,8 +276,9 @@ export default function AppShell({ sensing = true }) {
                 <Screen />
               </Reveal>
             ) : null}
+            {tabs.length > 1 ? <TabBar tab={current} onChange={setTab} t={t} tabs={tabs} /> : null}
+            {state.hydrated && !onMe && !isDoctor(state) ? <ChatWindow bottom={tabs.length > 1 ? 100 : 20} /> : null}
           </View>
-          {tabs.length > 1 ? <TabBar tab={current} onChange={setTab} t={t} tabs={tabs} /> : null}
         </NavContext.Provider>
       </KeyboardAvoidingView>
     </SafeAreaView>

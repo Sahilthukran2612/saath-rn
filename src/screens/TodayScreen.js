@@ -437,7 +437,7 @@ export default function TodayScreen() {
   const { state, t } = useStore();
   if (looksAfterOthers(state))
     return (
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 20, paddingTop: 8, gap: 18 }}>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 20, paddingTop: 8, paddingBottom: 128, gap: 18 }}>
         <PatientsHome />
       </ScrollView>
     );
@@ -463,7 +463,7 @@ export default function TodayScreen() {
   return (
     <ScrollView
       keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{ padding: 20, paddingTop: 8, gap: 18 }}
+      contentContainerStyle={{ padding: 20, paddingTop: 8, paddingBottom: 128, gap: 18 }}
     >
       <Greeting />
       {body}

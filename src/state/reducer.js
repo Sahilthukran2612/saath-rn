@@ -54,6 +54,9 @@ export const initialState = {
   medTaken: { day: null, ids: [] },
   // { 'YYYY-M-D': [medicine ids taken] }: the last 30 days, for the adherence chart.
   medLog: {},
+  aiOn: true, // generated suggestion cards and the chat helper (needs internet; an anonymous summary is sent, see src/ai/context.js)
+  aiCards: null, // { at, lang, cards: [...] } the newest generated cards, kept for offline use
+  aiChat: [], // the last messages with the helper: [{ id, role: 'user' | 'assistant', text }]. Stays on this phone
   slipStats: {}, // slip id -> { done, skipped }: lets the pad learn which small things this person actually does
   foodPrefs: { region: 'north', diet: 'veg', disliked: [], recent: [] }, // drives the on-device meal ideas (mealGenerator.js) // suggestion slips stamped or put aside today (see suggestions.js)
   careEvents: { lastInsulinAt: null, lastMealAt: null }, // times only. Saath never records or suggests a dose
@@ -476,6 +479,12 @@ function baseReducer(state, a) {
         slipStats: { ...state.slipStats, [a.id]: { ...prev, [key]: prev[key] + 1 } },
       };
     }
+    case 'AI_CARDS':
+      return { ...state, aiCards: { at: a.at, lang: a.lang, cards: (a.cards || []).slice(0, 7) } };
+    case 'AI_CHAT_ADD':
+      return { ...state, aiChat: [...(state.aiChat || []), { id: a.id, role: a.role === 'assistant' ? 'assistant' : 'user', text: String(a.text).slice(0, 700) }].slice(-30) };
+    case 'AI_CHAT_CLEAR':
+      return { ...state, aiChat: [] };
     case 'MED_ADD':
       return { ...state, medicines: [...state.medicines, { id: a.id, name: a.name, dose: a.dose || '', when: a.when }].slice(-30) };
     case 'MED_REMOVE':

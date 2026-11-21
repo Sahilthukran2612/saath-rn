@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Moon, Languages, MessageCircle, Phone, RotateCcw, ShieldCheck, Siren, Type } from '../components/icons';
+import { Moon, Languages, MessageCircle, Phone, RotateCcw, ShieldCheck, Siren, Sparkles, Type } from '../components/icons';
 import { BigButton, Body, Caption, Title } from '../components/ui';
 import { Avatar, Badge, ListGroup, ListRow, SectionTitle, Segmented, Toggle } from '../components/kit';
 import { Reveal } from '../components/motion';
@@ -91,7 +91,7 @@ function ThemeRow() {
   );
 }
 
-const styles = StyleSheet.create({ warn: { color: colors.madder, paddingHorizontal: 4, paddingTop: 8 } });
+const styles = StyleSheet.create({ warn: { color: colors.madder, paddingHorizontal: 4, paddingTop: 8, paddingBottom: 128 } });
 export default function MeScreen() {
   const { state, dispatch, t } = useStore();
   const set = (key, value) => dispatch({ type: 'SET', key, value });
@@ -101,7 +101,7 @@ export default function MeScreen() {
   return (
     <ScrollView
       keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{ padding: 20, paddingTop: 8, gap: 18 }}
+      contentContainerStyle={{ padding: 20, paddingTop: 8, paddingBottom: 128, gap: 18 }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
         <Avatar name={state.profile.name || t('role.person')} role="person" size={64} />
@@ -228,6 +228,12 @@ export default function MeScreen() {
         <ListGroup>
           <LanguageRow lang={state.lang} onChange={(v) => set('lang', v)} label={t('language')} />
           <ThemeRow />
+          <ListRow
+            icon={Sparkles}
+            title={t('ai.setting')}
+            subtitle={t('ai.settingNote')}
+            trailing={<Toggle value={state.aiOn !== false} label={t('ai.setting')} onValueChange={(v) => set('aiOn', v)} />}
+          />
           <ListRow
             icon={Type}
             title={t('largeText')}

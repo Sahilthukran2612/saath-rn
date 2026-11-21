@@ -21,7 +21,7 @@ export default function CareScreen() {
 
   if (!allowed) {
     return (
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 20, paddingTop: 8 }}>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 20, paddingTop: 8, paddingBottom: 128 }}>
         <Card tone="tint" style={{ alignItems: 'center', paddingVertical: 32, gap: 12 }}>
           <Glyph icon={Lock} size={40} color={colors.indigo} />
           <Body bold style={{ textAlign: 'center' }}>
@@ -34,7 +34,7 @@ export default function CareScreen() {
   return (
     <ScrollView
       keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{ padding: 20, paddingTop: 8, gap: 16 }}
+      contentContainerStyle={{ padding: 20, paddingTop: 8, paddingBottom: 128, gap: 16 }}
     >
       <View style={{ gap: 2 }}>
         <Title style={{ fontSize: 32, letterSpacing: -0.6 }}>{t('tabCare')}</Title>

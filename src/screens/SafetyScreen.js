@@ -29,7 +29,7 @@ export default function SafetyScreen() {
   return (
     <ScrollView
       keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{ padding: 20, paddingTop: 8, gap: 18 }}
+      contentContainerStyle={{ padding: 20, paddingTop: 8, paddingBottom: 128, gap: 18 }}
     >
       <View style={{ gap: 2 }}>
         <Title style={{ fontSize: 32 }}>{t('tabSafety')}</Title>

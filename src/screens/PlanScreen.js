@@ -42,7 +42,7 @@ export default function PlanScreen() {
 
   if (ids.length === 0) {
     return (
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 20, paddingTop: 8 }}>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 20, paddingTop: 8, paddingBottom: 128 }}>
         <Card tone="tint" style={{ alignItems: 'center', paddingVertical: 32, gap: 12 }}>
           <Glyph icon={Lock} size={40} color={colors.indigo} />
           <Body bold style={{ textAlign: 'center' }}>
@@ -56,7 +56,7 @@ export default function PlanScreen() {
   return (
     <ScrollView
       keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{ padding: 20, paddingTop: 8, gap: 16 }}
+      contentContainerStyle={{ padding: 20, paddingTop: 8, paddingBottom: 128, gap: 16 }}
     >
       {viewing ? (
         <>

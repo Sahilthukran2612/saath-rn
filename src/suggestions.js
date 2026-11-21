@@ -283,13 +283,22 @@ export function allSlips(ctx) {
   return out.filter((s) => s.kind === 'care' || ++habits <= habitCap);
 }
 
-// Today's pad: ranked, minus anything done or skipped today, and never more than PAD_SIZE.
-export function buildPad(ctx, slips = { day: null, done: [], skipped: [] }) {
+// How many cards the pad shows when generated ones are available, and the fewest worth showing.
+export const AI_PAD_SIZE = 7;
+export const AI_MIN = 3;
+
+// Today's pad: ranked, minus anything done or skipped today. Rule-based care reminders always come first, because a
+// refill or a medicine must not depend on a server. Generated cards (`extra`, already checked by src/ai/guard.js)
+// fill the rest, up to seven. With none, or in a hard week, it is the offline rule-based pad of at most PAD_SIZE.
+export function buildPad(ctx, slips = { day: null, done: [], skipped: [] }, extra = []) {
   const today = dayKey(ctx.nowMs);
   const gone = slips.day === today ? new Set([...(slips.done || []), ...(slips.skipped || [])]) : new Set();
-  return allSlips(ctx)
-    .filter((s) => !gone.has(s.id))
-    .slice(0, PAD_SIZE);
+  const rules = allSlips(ctx).filter((s) => !gone.has(s.id));
+  const calm = weeklySummary(ctx.checkins || []).id === 'hard' || ctx.phase === 'crisis';
+  const generated = calm ? [] : (extra || []).filter((s) => !gone.has(s.id));
+  if (generated.length < AI_MIN) return rules.slice(0, PAD_SIZE);
+  const care = rules.filter((s) => s.kind === 'care');
+  return [...care, ...generated].slice(0, AI_PAD_SIZE);
 }
 
 // Slips stamped today, for the "all stamped" state.
