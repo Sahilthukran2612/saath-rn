@@ -151,6 +151,15 @@ describe('the suggestion pad with generated cards', () => {
     expect(buildPad({ ...ctx, phase: 'crisis' }, undefined, ai).every((s) => !s.ai)).toBe(true);
   });
 
+  test('a generated card about the same thing as a rule-based one is left out', () => {
+    const rule = require('../src/suggestions').allSlips(ctx).find((s) => s.doodle !== 'note');
+    expect(rule).toBeTruthy();
+    const dup = { id: 'ai-dup', kind: 'ai', ai: true, title: 'Same again', body: 'Says what the rule card already says.', doodle: rule.doodle, tab: null, priority: 90 };
+    const pad = buildPad(ctx, undefined, [dup, ...ai]);
+    expect(pad.some((s) => s.id === 'ai-dup')).toBe(false);
+    expect(pad.some((s) => s.ai)).toBe(true);
+  });
+
   test('a card already stamped today is not shown again', () => {
     const slips = { day: '2026-10-21', done: [], skipped: [] };
     const pad = buildPad(ctx, { ...slips, day: require('../src/suggestions').dayKey(ctx.nowMs), done: ['ai-0', 'ai-1'] }, ai);

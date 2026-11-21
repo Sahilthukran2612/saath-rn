@@ -295,7 +295,10 @@ export function buildPad(ctx, slips = { day: null, done: [], skipped: [] }, extr
   const gone = slips.day === today ? new Set([...(slips.done || []), ...(slips.skipped || [])]) : new Set();
   const rules = allSlips(ctx).filter((s) => !gone.has(s.id));
   const calm = weeklySummary(ctx.checkins || []).id === 'hard' || ctx.phase === 'crisis';
-  const generated = calm ? [] : (extra || []).filter((s) => !gone.has(s.id));
+  // A generated card about the same thing as a rule-based one (same drawing: feet, water, a walk...) is left out,
+  // even if the rule-based one was already stamped or put aside today, so the same advice never shows twice.
+  const covered = new Set(allSlips(ctx).map((s) => s.doodle));
+  const generated = calm ? [] : (extra || []).filter((s) => !gone.has(s.id) && (s.doodle === 'note' || !covered.has(s.doodle)));
   if (generated.length < AI_MIN) return rules.slice(0, PAD_SIZE);
   const care = rules.filter((s) => s.kind === 'care');
   return [...care, ...generated].slice(0, AI_PAD_SIZE);
