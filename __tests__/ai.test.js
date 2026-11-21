@@ -238,7 +238,7 @@ describe('the floating helper', () => {
     await waitFor(() => expect(screen.getByLabelText('Amma')).toBeTruthy());
     expect(screen.queryByLabelText('Ask Saath for help')).toBeNull();
     await fireEvent.press(screen.getByLabelText('Me'));
-    expect(await screen.findByText('I look after someone')).toBeTruthy();
+    expect((await screen.findAllByText('I look after someone')).length).toBeGreaterThan(0); // the Me tab opened
     expect(screen.queryByText('Smart cards and helper')).toBeNull();
   });
 
