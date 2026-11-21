@@ -10,8 +10,8 @@ Both work without it: with no internet, no server or the switch off, Today shows
 | Part | Status |
 |---|---|
 | Safety guard on every reply, emergency detection, anonymous summary, card handling, pad merge, chat window | Built, 30 tests (`__tests__/ai.test.js`), English and Hindi |
-| Relay function (`docs/supabase/functions/ai/index.ts`) and cap (`docs/supabase/ai.sql`) | Written. **Not deployed, never run against xAI.** |
-| Real replies, and how well the model follows the rules | Tried by hand against Groq with one card request, one Hindi question and one dose question (refused). Not yet seen inside the app |
+| Relay function (`supabase/functions/ai/index.ts`, copy in `docs/supabase/functions/ai/`) and cap (`docs/supabase/ai.sql`) | **Deployed to the live project on 2026-11-22.** Called live: cards, a chat reply, a refused insulin question and a bad request all behaved. Secret `GROQ_API_KEY` is set on the server |
+| Real replies, and how well the model follows the rules | A handful of samples only, from Groq directly and through the live relay. A clinician and a Hindi speaker should read many more |
 
 ## How it is wired
 
@@ -34,7 +34,7 @@ name, phone number, medicine name or dose, sugar number, contact, location or se
 - In a hard phase or a hard week, generated cards are left out; only the calm rule-based ones show.
 - Rule-based care reminders (medicine, refill, strips, visit) always come first. They never depend on a server.
 
-## To switch it on (needs you)
+## To switch it on (done on 2026-11-22; kept so it can be repeated)
 
 1. Get a Groq API key at console.groq.com (starts `gsk_`). The free tier has rate limits; a heavy day can hit them, and then the app falls back to the rule-based cards.
 2. Run `docs/supabase/ai.sql` in the Supabase SQL editor (or `npx supabase db query --remote --yes -f docs/supabase/ai.sql`).
