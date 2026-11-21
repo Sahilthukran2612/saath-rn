@@ -6,6 +6,7 @@ import { HeartPulse, House, LayoutGrid, ShieldCheck, UserRound, Users } from './
 import { colors, fonts, roles, themeName } from '../theme';
 import { PressRow, useScale, Glyph } from './ui';
 import { useSpringValue } from './motion';
+import useKeyboardVisible from './useKeyboard';
 
 // Five destinations. "Me" lives behind the account avatar in the top app bar. It stays in this list so the
 // screen can still be routed to.
@@ -67,10 +68,10 @@ function Mirror() {
     <Svg width="100%" height="100%" style={StyleSheet.absoluteFill} pointerEvents="none">
       <Defs>
         <LinearGradient id="body" x1="0" y1="0" x2="0" y2="1">
-          <Stop offset="0" stopColor={top} stopOpacity={dark ? 0.2 : 0.97} />
-          <Stop offset="0.48" stopColor={dark ? '#7C8CF0' : '#DCE6FF'} stopOpacity={dark ? 0.12 : 0.86} />
-          <Stop offset="0.52" stopColor={dark ? '#0F1226' : '#C7D6FA'} stopOpacity={dark ? 0.55 : 0.84} />
-          <Stop offset="1" stopColor={dark ? '#20264F' : '#EEF3FF'} stopOpacity={dark ? 0.78 : 0.94} />
+          <Stop offset="0" stopColor={top} stopOpacity={dark ? 0.3 : 0.99} />
+          <Stop offset="0.48" stopColor={dark ? '#7C8CF0' : '#DCE6FF'} stopOpacity={dark ? 0.2 : 0.94} />
+          <Stop offset="0.52" stopColor={dark ? '#0F1226' : '#C7D6FA'} stopOpacity={dark ? 0.7 : 0.93} />
+          <Stop offset="1" stopColor={dark ? '#20264F' : '#EEF3FF'} stopOpacity={dark ? 0.88 : 0.98} />
         </LinearGradient>
         <LinearGradient id="sheen" x1="0" y1="0" x2="1" y2="0.35">
           <Stop offset="0" stopColor="#FFFFFF" stopOpacity="0" />
@@ -88,6 +89,8 @@ function Mirror() {
 export default function TabBar({ tab, onChange, t, tabs = NAV_TABS }) {
   const k = useScale();
   const dark = themeName === 'dark';
+  const typing = useKeyboardVisible();
+  if (typing) return null; // while the keyboard is up the bar would float in the middle of the screen
   return (
     <View pointerEvents="box-none" style={styles.wrap}>
       <View style={[styles.bar, { borderColor: dark ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.95)' }]}>

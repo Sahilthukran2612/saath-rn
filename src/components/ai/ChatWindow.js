@@ -6,6 +6,7 @@ import { Send, Sparkles, Trash, X } from '../icons';
 import { useStore } from '../../state/store';
 import { useNav } from '../nav';
 import { useReducedMotion } from '../motion';
+import useKeyboardVisible from '../useKeyboard';
 import { buildAiContext } from '../../ai/context';
 import { fetchAiReply } from '../../ai/client';
 import { nowMs } from '../../services/clock';
@@ -49,6 +50,7 @@ export default function ChatWindow({ bottom = 96 }) {
   const go = useNav();
   const reduced = useReducedMotion();
   const k = useScale();
+  const typing = useKeyboardVisible();
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
@@ -120,8 +122,8 @@ export default function ChatWindow({ bottom = 96 }) {
         position: 'absolute',
         left: 12,
         right: 12,
-        bottom,
-        top: 70,
+        bottom: typing ? 12 : bottom,
+        top: 12,
         backgroundColor: colors.paper,
         borderRadius: 28,
         overflow: 'hidden',
