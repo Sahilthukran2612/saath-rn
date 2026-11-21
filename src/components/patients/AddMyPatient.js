@@ -14,7 +14,7 @@ export default function AddMyPatient() {
   const { state, t } = useStore();
   const [open, setOpen] = useState(false);
   const doctor = isDoctor(state);
-  const role = doctor ? 'clinician' : state.profile.myRole || 'family';
+  const role = doctor ? 'clinician' : 'family';
   const phone = state.cloud.phone || '';
   const ready = phone.length === 10 && (state.profile.name || '').trim().length >= 2;
   return (

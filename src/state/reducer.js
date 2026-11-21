@@ -6,83 +6,24 @@ import { CFG, clampDial, escalationChain, isDelegationActive, isInactive, validP
 import { adjustBaseline, cfgFrom, defaultBaseline } from '../care';
 import { addCheckin, approveAdvance, declineAdvance, initialLadder, requestAdvance, stepBack } from '../plan';
 
-const DAY = 86400000;
-// Demo budget: clearly labelled in the UI. Dates are relative so the trend always makes sense.
-const demoBudget = () => {
-  const now = Date.now();
-  return [
-    { id: 'b1', amount: 420, cat: 'medicine', at: now - 2 * DAY, demo: true },
-    { id: 'b2', amount: 260, cat: 'strips', at: now - 5 * DAY, demo: true },
-    { id: 'b3', amount: 380, cat: 'medicine', at: now - 33 * DAY, demo: true },
-    { id: 'b4', amount: 120, cat: 'travel', at: now - 36 * DAY, demo: true },
-  ];
-};
-
-export const SEED = {
-  members: [
-    // Demo numbers are fake. shareContact is that member's own consent to show their number to the circle.
-    {
-      id: 'm1',
-      name: 'Asha (daughter)',
-      role: 'family',
-      dial: 2,
-      timeOff: false,
-      guardian: true,
-      phone: '9000000001',
-      shareContact: true,
-    },
-    {
-      id: 'm2',
-      name: 'Ramesh (neighbour)',
-      role: 'neighbour',
-      dial: 0,
-      timeOff: false,
-      phone: '9000000002',
-      shareContact: false,
-    },
-    {
-      id: 'm3',
-      name: 'Sunita (ASHA)',
-      role: 'asha',
-      dial: 1,
-      timeOff: false,
-      phone: '9000000003',
-      shareContact: false,
-    },
-    {
-      id: 'm4',
-      name: 'Dr. Rao (clinic)',
-      role: 'clinician',
-      dial: 1,
-      timeOff: false,
-      phone: '9000000004',
-      shareContact: true,
-    },
-  ],
-  tasks: [
-    { id: 't1', icon: '💊', title: 'Morning medicine', done: false, hour: 8 },
-    { id: 't2', icon: '🍚', title: 'Lunch', done: false, hour: 13 },
-    { id: 't3', icon: '🚶', title: 'Evening walk', done: false, hour: 18 },
-    { id: 't4', icon: '🩸', title: 'Sugar check', done: false, hour: 20 },
-  ],
-  // Two weeks of made-up readings, flagged as demo, so the charts have something to show before anything is logged.
-  readings: Array.from({ length: 14 }, (_, i) => i).flatMap((i) => [
-    { id: `demo-r${i}a`, mgdl: 96 + ((i * 17) % 38), at: Date.now() - (13 - i) * 86400000 - 5 * 3600000, demo: true },
-    { id: `demo-r${i}b`, mgdl: 118 + ((i * 29) % 52), at: Date.now() - (13 - i) * 86400000 - 3600000, demo: true },
-  ]),
-};
+// The routine a new install starts with. The person edits it under Me.
+const DEFAULT_TASKS = [
+  { id: 't1', icon: '💊', title: 'Morning medicine', done: false, hour: 8 },
+  { id: 't2', icon: '🍚', title: 'Lunch', done: false, hour: 13 },
+  { id: 't3', icon: '🚶', title: 'Evening walk', done: false, hour: 18 },
+  { id: 't4', icon: '🩸', title: 'Sugar check', done: false, hour: 20 },
+];
 
 export const initialState = {
   hydrated: false,
-  demo: true, // Demo mode: shows the role switcher and seeded demo data
   mode: 'elder', // 'teen' | 'elder' | 'adult'
-  role: 'person', // viewer role (demo switcher until real accounts exist, Phase 4)
+  role: 'person', // how this phone is viewing: always 'person' now; kept for the reducer's audit trail
   phase: 'stable', // 'new' | 'stable' | 'crisis'
   largeText: false,
   lang: 'en',
-  members: SEED.members,
-  tasks: SEED.tasks,
-  readings: SEED.readings,
+  members: [], // the person's own emergency contacts, added in setup. Never pre-filled with made-up people
+  tasks: DEFAULT_TASKS,
+  readings: [],
   audit: [],
   alert: null,
   tally: { alerts: 0, imOk: 0, escalated: 0, falseAlarm: 0, missed: 0 },
@@ -108,19 +49,17 @@ export const initialState = {
   visits: {}, // household id -> time of my last visit (an ASHA's round). Kept on this phone, never sent
   joinCode: null, // an invite code that arrived by scanning a QR, waiting to be used on the join screen
   // [{ id, name, dose, when }]: typed by the person from their prescription. Saath never suggests a dose.
-  // The demo starts with one made-up medicine (flagged) so the medicines chart has something to show.
-  medicines: [{ id: 'demo-med', name: 'Metformin (demo)', dose: 'as on the prescription', when: 'afterBreakfast', demo: true }],
+  // [{ id, name, dose, when }]: typed by the person from their prescription. Saath never suggests a dose.
+  medicines: [],
   medTaken: { day: null, ids: [] },
-  // { 'YYYY-M-D': [medicine ids taken] }: the last 30 days, for the adherence chart. The demo starts with a week of it.
-  medLog: Object.fromEntries(
-    Array.from({ length: 7 }, (_, i) => [dayOf(Date.now() - (6 - i) * 86400000), i % 4 === 3 ? [] : ['demo-med']]),
-  ),
+  // { 'YYYY-M-D': [medicine ids taken] }: the last 30 days, for the adherence chart.
+  medLog: {},
   slipStats: {}, // slip id -> { done, skipped }: lets the pad learn which small things this person actually does
   foodPrefs: { region: 'north', diet: 'veg', disliked: [], recent: [] }, // drives the on-device meal ideas (mealGenerator.js) // suggestion slips stamped or put aside today (see suggestions.js)
   careEvents: { lastInsulinAt: null, lastMealAt: null }, // times only. Saath never records or suggests a dose
-  meds: { name: 'Metformin (demo)', pillsLeft: 24, perDay: 2 },
-  testPlan: { perDay: 2, strips: 20 }, // set by the clinician; Saath only counts
-  budget: demoBudget(),
+  meds: { name: '', pillsLeft: 0, perDay: 0 },
+  testPlan: { perDay: 0, strips: 0 }, // set by the clinician; Saath only counts
+  budget: [],
   background: false, // "keep watching in the background" (visible foreground service)
   heart: { device: null, readings: [], contact: true }, // Bluetooth heart-rate band. In memory only: never stored or sent
   siren: false, // a loud wail on this phone when nobody answers an alert (opt-in)
@@ -130,7 +69,7 @@ export const initialState = {
   autoSmsDenied: false, // the SMS permission was refused
   backgroundDenied: false, // the notification permission was refused, so the service did not start
   // Phase 3
-  profile: { name: '', condition: '', allergies: '', emergencyId: 'm1', myRole: null }, // myRole: how a care-giver describes themselves at sign-up
+  profile: { name: '', condition: '', allergies: '', emergencyId: null, myRole: null }, // myRole: how a care-giver describes themselves at sign-up
   ladder: initialLadder(),
   ladderApproval: false, // true: a parent must agree before the teen moves up a stage
   visitQuestions: [],
@@ -140,33 +79,16 @@ export const initialState = {
   footPhotos: [], // [{ uri, at }] stay on the phone, never analysed
   waist: [], // [{ cm, at }]
   risk: null, // { answers, result, at } latest questionnaire
-  usage: 'person', // 'person' (I need care), 'member' (I look after someone), 'both'. null until chosen on a fresh install
-  onboarded: true, // false on a fresh install: the setup flow runs once (see productionState)
+  usage: null, // 'person' (I need care), 'member' (guardian, neighbour, ASHA), 'doctor', 'both'. null until the first screen asks
+  onboarded: false, // the setup flow runs once
   autoCall: false, // dial the contacts one by one when nobody answers an alert (installed app only)
   autoCallDenied: false, // the phone permissions for calling were refused
 };
 
-// What a real install starts with: no demo people, no fake phone numbers, no invented readings or costs.
-// A fake number must never be reachable by the automatic calls, so the real list starts empty and the
-// person adds their own contacts in the setup flow. Demo mode (Me) can still load demo data for a
-// presentation, and removes it again. Tests and the Expo Go development build keep `initialState`.
-export const productionState = {
-  ...initialState,
-  demo: false,
-  usage: null, // the first screen asks: I need care, or I look after someone
-  onboarded: false,
-  members: [],
-  readings: [],
-  medicines: [],
-  medLog: {},
-  budget: [],
-  meds: { name: '', pillsLeft: 0, perDay: 0 },
-  testPlan: { perDay: 0, strips: 0 },
-  profile: { name: '', condition: '', allergies: '', emergencyId: null },
-};
-
-// `__DEV__` is false in an installed release build, true in Expo Go and in tests.
-export const startState = __DEV__ ? initialState : productionState;
+// What a fresh install starts with. There is no demo mode: no made-up people, numbers, readings or costs, and nothing
+// is simulated. `productionState` is the same object under its older name.
+export const productionState = initialState;
+export const startState = initialState;
 
 function emptyCloud() {
   return { phone: '', userId: null, access: null, refresh: null, householdId: null };
@@ -479,61 +401,6 @@ function baseReducer(state, a) {
       if (last && last.viewer === a.viewer && last.item === a.item) return state;
       return { ...state, audit: [...state.audit, { viewer: a.viewer, item: a.item, at: a.at }].slice(-100) };
     }
-    // Demo only: a simulated band. Readings are back-dated and the person is marked as still, so the
-    // "high or low while still" note can be shown at once instead of after minutes of waiting.
-    case 'HEART_SIM':
-      return {
-        ...state,
-        lastActiveMs: a.at - 10 * 60 * 1000,
-        heart: {
-          device: state.heart.device || { id: 'sim', name: 'Simulated band' },
-          contact: true,
-          readings: [0, 2, -1, 1].map((jitter, i) => ({ bpm: a.bpm + jitter, at: a.at - (3 - i) * 30000 })),
-        },
-      };
-    // Demo only: a person I look after, and what they send. It goes through the same feed, banner and
-    // wording as the real server data, so the screens shown are the real ones.
-    case 'DEMO_CIRCLE_ADD': {
-      // Three made-up people, one for each way of looking after someone, so every dashboard can be shown with no server.
-      if (state.circles.some((c) => c.household_id === 'demo-amma')) return state;
-      const iso = (min) => new Date(a.at - min * 60000).toISOString();
-      const demo = [
-        { household_id: 'demo-amma', role: 'family', dial: 1, time_off: false, person_name: 'Amma (demo)' },
-        { household_id: 'demo-chacha', role: 'neighbour', dial: 0, time_off: false, person_name: 'Chacha (demo)' },
-        { household_id: 'demo-sita', role: 'clinician', dial: 2, time_off: false, person_name: 'Sita (demo)' },
-      ];
-      // A doctor's phone gets only a patient; a guardian's, neighbour's or ASHA's gets only the people they look after.
-      const shown = state.usage === 'doctor' ? demo.filter((c) => c.role === 'clinician') : state.usage === 'member' ? demo.filter((c) => c.role !== 'clinician') : demo;
-      return {
-        ...state,
-        circles: [...state.circles, ...shown],
-        feeds: {
-          ...state.feeds,
-          'demo-amma': [
-            { id: 'demo-2', event_type: 1, kind: 'task_done', detail: 'Lunch', created_at: iso(25) },
-            { id: 'demo-1', event_type: 0, kind: 'im_ok', detail: null, created_at: iso(180) },
-          ],
-          'demo-chacha': [{ id: 'demo-c1', event_type: 0, kind: 'im_ok', detail: null, created_at: iso(300) }],
-          'demo-sita': [
-            { id: 'demo-s2', event_type: 1, kind: 'task_done', detail: 'Morning medicine', created_at: iso(90) },
-            { id: 'demo-s1', event_type: 0, kind: 'im_ok', detail: null, created_at: iso(240) },
-          ],
-        },
-      };
-    }    case 'DEMO_CIRCLE_EVENT': {
-      const id = a.id || 'demo-amma';
-      const feed = state.feeds[id];
-      if (!feed) return state;
-      const safety = a.kind === 'fall' || a.kind === 'quiet' || a.kind === 'false_alarm';
-      const e = {
-        id: `demo-${a.at}`,
-        event_type: safety || a.kind === 'im_ok' ? 0 : 1,
-        kind: a.kind,
-        detail: null,
-        created_at: new Date(a.at).toISOString(),
-      };
-      return { ...state, feeds: { ...state.feeds, [id]: [e, ...feed].slice(0, 30) } };
-    }
     case 'HEART_DEVICE':
       return { ...state, heart: { device: a.device, readings: [], contact: true } };
     case 'HEART_READING':
@@ -553,14 +420,14 @@ function baseReducer(state, a) {
       const name = String(a.name || '').trim();
       const digits = String(a.phone || '').replace(/\D/g, '').slice(-10);
       const role = ['family', 'neighbour', 'asha', 'clinician'].includes(a.role) ? a.role : 'family';
-      const real = state.members.filter((m) => !m.demo);
+      const real = state.members;
       if (name.length < 2 || !validPhone(digits) || real.length >= 12) return state;
       if (real.some((m) => String(m.phone).replace(/\D/g, '').slice(-10) === digits)) return state;
       const member = { id: a.id, name, role, dial: 0, timeOff: false, phone: digits, shareContact: true };
       return {
         ...state,
-        members: [...state.members.filter((m) => !m.demo), member],
-        profile: state.profile.emergencyId && !state.members.find((m) => m.id === state.profile.emergencyId)?.demo
+        members: [...state.members, member],
+        profile: state.profile.emergencyId && state.members.some((m) => m.id === state.profile.emergencyId)
           ? state.profile
           : { ...state.profile, emergencyId: a.id },
       };
@@ -574,57 +441,8 @@ function baseReducer(state, a) {
         invites: state.invites.filter((i) => !(i.id === a.id && i.status === 'pending')),
         profile:
           state.profile.emergencyId === a.id
-            ? { ...state.profile, emergencyId: members.find((m) => !m.demo)?.id ?? null }
+            ? { ...state.profile, emergencyId: members[0]?.id ?? null }
             : state.profile,
-      };
-    }
-    // Presentation data on request. It is flagged, so DEMO_OFF removes exactly what DEMO_ON added, and real
-    // contacts, readings and costs the person entered are never touched. While demo is on, no call or SMS is
-    // ever really placed (see AlertBanner), so a demo contact's fake number can never be dialled.
-    case 'DEMO_ON': {
-      const hasReal = state.members.some((m) => !m.demo);
-      // Two weeks of made-up readings and a medicine, so the charts have something to show. All flagged as demo.
-      const DAY = 24 * 3600000;
-      const sample = a.at
-        ? Array.from({ length: 14 }, (_, i) => i).flatMap((i) => [
-            { id: `demo-r${i}a`, mgdl: 96 + ((i * 17) % 38), at: a.at - (13 - i) * DAY - 5 * 3600000, demo: true },
-            { id: `demo-r${i}b`, mgdl: 118 + ((i * 29) % 52), at: a.at - (13 - i) * DAY - 1 * 3600000, demo: true },
-          ])
-        : SEED.readings;
-      const demoMeds = a.at && !state.medicines.length ? [{ id: 'demo-med', name: 'Metformin (demo)', dose: 'as on the prescription', when: 'afterBreakfast', demo: true }] : state.medicines;
-      const demoLog = a.at && !Object.keys(state.medLog).length
-        ? Object.fromEntries(Array.from({ length: 7 }, (_, i) => [dayOf(a.at - (6 - i) * DAY), i % 4 === 3 ? [] : ['demo-med']]))
-        : state.medLog;
-      return {
-        ...state,
-        demo: true,
-        members: hasReal ? state.members : SEED.members.map((m) => ({ ...m, demo: true })),
-        readings: state.readings.length ? state.readings : sample,
-        medicines: demoMeds,
-        medLog: demoLog,
-        budget: state.budget.length ? state.budget : demoBudget(),
-        meds: state.meds.name ? state.meds : { name: 'Metformin (demo)', pillsLeft: 24, perDay: 2, demo: true },
-        testPlan: state.testPlan.perDay ? state.testPlan : { perDay: 2, strips: 20, demo: true },
-      };
-    }
-    case 'DEMO_OFF': {
-      const keep = (obj) => Object.fromEntries(Object.entries(obj).filter(([k]) => !k.startsWith('demo-')));
-      return {
-        ...state,
-        demo: false,
-        role: 'person',
-        members: state.members.filter((m) => !m.demo),
-        readings: state.readings.filter((r) => !r.demo),
-        medicines: state.medicines.filter((m) => !m.demo),
-        budget: state.budget.filter((b) => !b.demo),
-        meds: state.meds.demo ? productionState.meds : state.meds,
-        testPlan: state.testPlan.demo ? productionState.testPlan : state.testPlan,
-        joined: state.joined.filter((m) => !String(m.id).startsWith('demo-')),
-        circles: state.circles.filter((c) => !String(c.household_id).startsWith('demo-')),
-        feeds: keep(state.feeds),
-        profile: state.members.find((m) => m.id === state.profile.emergencyId)?.demo
-          ? { ...state.profile, emergencyId: null }
-          : state.profile,
       };
     }
     case 'CLOUD_SET':
@@ -643,10 +461,6 @@ function baseReducer(state, a) {
         ...state,
         circles: state.circles.map((c) => (c.household_id === a.id ? { ...c, time_off: !!a.on } : c)),
       };
-    case 'DEMO_JOINED_ADD':
-      return state.joined.some((m) => m.id === 'demo-asha')
-        ? state
-        : { ...state, joined: [...state.joined, { id: 'demo-asha', name: 'Asha (demo)', role: 'family', dial: 0, time_off: false, share_contact: false }] };
     case 'CIRCLES_SET':
       return { ...state, circles: a.circles };
     case 'FEED_SET':

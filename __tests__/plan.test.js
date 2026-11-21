@@ -67,14 +67,14 @@ describe('visit summary', () => {
     testPlan: { strips: 8 },
     nowMs: 1,
   };
-  test('ignores demo readings and reports facts only', () => {
-    const s = visitSummary({ ...base, readings: [{ mgdl: 100, demo: true }, { mgdl: 120 }, { mgdl: 140 }] });
+  test('reports facts only', () => {
+    const s = visitSummary({ ...base, readings: [{ mgdl: 120 }, { mgdl: 140 }] });
     expect(s.lines[0]).toMatchObject({ id: 'sugar', n: 2, avg: 130, last: 140 });
     expect(s.lines[1]).toMatchObject({ done: 1, total: 2 });
     expect(s.lines[2]).toMatchObject({ pills: 10, days: 5 });
   });
-  test('no real readings says so instead of inventing numbers', () => {
-    expect(visitSummary({ ...base, readings: [{ mgdl: 100, demo: true }] }).lines[0].id).toBe('noSugar');
+  test('no readings says so instead of inventing numbers', () => {
+    expect(visitSummary({ ...base, readings: [] }).lines[0].id).toBe('noSugar');
   });
 });
 

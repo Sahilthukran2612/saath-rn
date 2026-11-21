@@ -8,7 +8,6 @@ const KEY = 'saath/state/v2';
 const REG_KEY = 'saath/profiles/v1';
 // Alert state is never persisted: a stale countdown after a restart would be wrong.
 const PERSIST = [
-  'demo',
   'mode',
   'phase',
   'largeText',

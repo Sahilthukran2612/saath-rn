@@ -59,13 +59,6 @@ describe('sending an invite', () => {
     expect(screen.queryByText('Waiting')).toBeTruthy(); // still waiting: nothing was accepted locally
   });
 
-  test('in demo mode the row still simulates a join, and says so', async () => {
-    await invite({ demo: true });
-    expect(await screen.findByText(/Demo: tapping a waiting person/)).toBeTruthy();
-    await fireEvent.press(screen.getByLabelText('Mark joined (demo)'));
-    await waitFor(() => expect(screen.queryByText('Waiting')).toBeNull());
-  });
-
   test('a freshly made invite starts as Waiting until it reaches the server', async () => {
     await invite({ demo: false, cloud: SIGNED, invites: [] });
     expect(await screen.findByText('Waiting')).toBeTruthy();

@@ -119,11 +119,10 @@ export default function AlertBanner() {
   }, [al?.id, al?.phase, al?.stepIndex, state.autoSms]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Dial the contacts one by one, without a tap, once the countdown has ended with no answer. The clock waits
-  // while a call is up (CALL_START), and the next contact is dialled when it ends (CALL_END). Demo mode never
-  // places a real call: a demo contact's number is fake.
+  // while a call is up (CALL_START), and the next contact is dialled when it ends (CALL_END). A call is only placed to a number the person typed themselves.
   const called = useRef(new Set());
   useEffect(() => {
-    if (!al || al.phase !== 'escalating' || !state.autoCall || state.demo || !callsAvailable || !step?.phone) return;
+    if (!al || al.phase !== 'escalating' || !state.autoCall || !callsAvailable || !step?.phone) return;
     const key = `${al.id}:${al.stepIndex}`;
     if (called.current.has(key)) return;
     called.current.add(key);
@@ -229,12 +228,7 @@ export default function AlertBanner() {
               ) : null}
             </View>
           ) : null}
-          {/* Demo (Expo Go, no SMS module): show what would be sent instead of sending it */}
-          {state.autoSms && !smsAvailable && state.demo && who?.phone ? (
-            <Caption style={{ color: colors.white, textAlign: 'center' }}>
-              {t('sms.simulated').replace('{name}', who.name).replace('{text}', msg)}
-            </Caption>
-          ) : autoSent.ok !== null && autoSent.key.startsWith(`${al.id}:`) ? (
+          {autoSent.ok !== null && autoSent.key.startsWith(`${al.id}:`) ? (
             <Caption style={{ color: colors.white, textAlign: 'center' }}>
               {autoSent.ok ? t('sms.sentTo').replace('{name}', autoSent.name) : t('sms.failed')}
             </Caption>
@@ -244,11 +238,6 @@ export default function AlertBanner() {
               {t('call.calling').replace('{name}', who.name)}
             </Body>
           ) : null}
-          {state.autoCall && state.demo && who?.phone ? (
-            <Caption style={{ color: colors.white, textAlign: 'center' }}>
-              {t('call.simulated').replace('{name}', who.name)}
-            </Caption>
-          ) : null}
           {al.phase === 'done' ? (
             <Body style={{ color: colors.white, textAlign: 'center' }}>
               {al.reached
@@ -257,7 +246,7 @@ export default function AlertBanner() {
             </Body>
           ) : null}
           <Caption style={{ color: colors.white, opacity: 0.85, textAlign: 'center' }}>
-            {t('confidence')}: {Math.round(al.confidence * 100)}%{state.demo ? ` (${al.reason})` : ''}
+            {t('confidence')}: {Math.round(al.confidence * 100)}%
           </Caption>
         </View>
 

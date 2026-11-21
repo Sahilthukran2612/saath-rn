@@ -1,4 +1,5 @@
-import { reducer, initialState } from '../src/state/reducer';
+import { reducer } from '../src/state/reducer';
+import { seededState as initialState } from '../testSupport/fixtures';
 import { CFG } from '../src/logic';
 import { tallyToCsv } from '../src/services/export';
 

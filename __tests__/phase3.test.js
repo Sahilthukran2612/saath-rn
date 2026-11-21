@@ -2,7 +2,8 @@ import React from 'react';
 import { Share } from 'react-native';
 import * as Print from 'expo-print';
 import { render, screen, fireEvent } from '@testing-library/react-native';
-import { reducer, initialState } from '../src/state/reducer';
+import { reducer } from '../src/state/reducer';
+import { seededState as initialState } from '../testSupport/fixtures';
 import { StoreProvider } from '../src/state/store';
 import AppShell from '../src/AppShell';
 
@@ -92,8 +93,8 @@ describe('Plan screen', () => {
     await fireEvent.press(screen.getByLabelText('Is my testing plan right for me?'));
     expect(screen.getByText(/1\. Is my testing plan right for me\?/)).toBeTruthy();
   });
-  test('visit prep never invents sugar readings from demo data', async () => {
-    await mount({});
+  test('visit prep never invents sugar readings when none were logged', async () => {
+    await mount({ readings: [] });
     await openPlan('Visit prep');
     expect(screen.getByText(/No sugar readings logged yet/)).toBeTruthy();
   });

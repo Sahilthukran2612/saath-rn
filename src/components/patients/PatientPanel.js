@@ -29,7 +29,7 @@ export default function PatientPanel({ circle, onBack }) {
   // Time Off: stop routine updates from this person. The server still lets safety alerts through.
   const pause = async (on) => {
     dispatch({ type: 'CIRCLE_TIMEOFF', id: circle.household_id, on });
-    if (!signedIn || circle.household_id.startsWith('demo-') || !isConfigured(cfg)) return;
+    if (!signedIn || !isConfigured(cfg)) return;
     const r = await setMyTimeOff(cfg, state.cloud, circle.household_id, on);
     if (r.session) dispatch({ type: 'CLOUD_SET', patch: r.session });
     if (!r.ok) dispatch({ type: 'CIRCLE_TIMEOFF', id: circle.household_id, on: !on });

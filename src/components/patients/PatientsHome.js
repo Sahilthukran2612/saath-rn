@@ -5,7 +5,7 @@ import { BigButton, Body, Caption, Card } from '../ui';
 import { Avatar, Badge, ListGroup, ListRow, SectionTitle } from '../kit';
 import { useStore } from '../../state/store';
 import { useNow } from '../useNow';
-import { nowMs } from '../../services/clock';
+
 import { describeEvent, newest, pendingAlert } from '../../circleFeed';
 import JoinCard from '../circle/JoinCard';
 import PatientPanel from './PatientPanel';
@@ -41,7 +41,6 @@ export default function PatientsHome() {
   const all = circlesFor(state);
   const hidden = hiddenCount(state);
   const doctor = isDoctor(state);
-  const demoTarget = all.find((c) => String(c.household_id).startsWith('demo-'));
   const needing = all.filter(alertOf).length;
   const roles = doctor ? [] : ROLE_ORDER.filter((r) => all.some((c) => c.role === r));
   const grouped = roles.length > 1;
@@ -117,18 +116,6 @@ export default function PatientsHome() {
         </ListGroup>
       )}
 
-      {state.demo ? (
-        <Card tone="haldi" style={{ gap: 10 }}>
-          <Caption style={{ color: colors.ink }}>{t('demo.circleNote')}</Caption>
-          <BigButton kind="quiet" label={t('demo.circleAdd')} onPress={() => dispatch({ type: 'DEMO_CIRCLE_ADD', at: nowMs() })} />
-          {demoTarget ? (
-            <>
-              <BigButton kind="quiet" label={t('demo.circleFall')} onPress={() => dispatch({ type: 'DEMO_CIRCLE_EVENT', id: demoTarget.household_id, kind: 'fall', at: nowMs() })} />
-              <BigButton kind="quiet" label={t('demo.circleOk')} onPress={() => dispatch({ type: 'DEMO_CIRCLE_EVENT', id: demoTarget.household_id, kind: 'im_ok', at: nowMs() })} />
-            </>
-          ) : null}
-        </Card>
-      ) : null}
       {hidden > 0 ? (
         <Card tone="haldi">
           <Caption style={{ color: colors.ink }}>{t(doctor ? 'pt.hiddenDoctor' : 'pt.hiddenMember').replace('{n}', String(hidden))}</Caption>

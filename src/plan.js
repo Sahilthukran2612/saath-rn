@@ -1,4 +1,4 @@
-// Phase 3 logic: handover, visit prep, health passport, wellbeing, risk screening, school card.
+﻿// Phase 3 logic: handover, visit prep, health passport, wellbeing, risk screening, school card.
 // Pure functions. Screening and summaries only: nothing here diagnoses or sets a dose.
 import { canShareItem } from './logic';
 import { glucoseTrend, refillStatus } from './care';
@@ -33,7 +33,7 @@ export const overallStage = (ladder) => (ladder.length ? Math.min(...ladder.map(
 // ---- Visit prep ----
 // Plain facts for the next clinic visit. No advice, no judgement.
 export function visitSummary({ readings, tasks, meds, testPlan, nowMs }) {
-  const real = readings.filter((r) => !r.demo);
+  const real = readings;
   const t = glucoseTrend(real);
   const lines = [];
   lines.push(t.count > 0 ? { id: 'sugar', n: t.count, avg: t.avg, last: t.last } : { id: 'noSugar' });
@@ -55,7 +55,7 @@ export function passportPayload({ profile, meds, readings, members, share }) {
   if (profile.allergies) out.a = profile.allergies;
   if (share.meds) out.m = `${meds.name}`;
   if (share.sugar) {
-    const t = glucoseTrend(readings.filter((r) => !r.demo));
+    const t = glucoseTrend(readings);
     if (t.count > 0) out.s = { n: t.count, avg: t.avg, last: t.last };
   }
   if (share.contact && profile.emergencyId) {

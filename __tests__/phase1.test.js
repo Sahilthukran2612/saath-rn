@@ -12,7 +12,8 @@ import {
   canReceive,
   EVENT_TYPE,
 } from '../src/logic';
-import { reducer, initialState } from '../src/state/reducer';
+import { reducer } from '../src/state/reducer';
+import { seededState as initialState } from '../testSupport/fixtures';
 import { StoreProvider } from '../src/state/store';
 import AppShell from '../src/AppShell';
 

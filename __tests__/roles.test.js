@@ -2,7 +2,8 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import { StoreProvider } from '../src/state/store';
 import AppShell from '../src/AppShell';
-import { productionState, initialState, reducer } from '../src/state/reducer';
+import { productionState, reducer } from '../src/state/reducer';
+import { seededState as initialState } from '../testSupport/fixtures';
 import * as sensing from '../src/services/sensing';
 import { createInvite } from '../src/services/cloud';
 

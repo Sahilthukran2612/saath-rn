@@ -1,7 +1,8 @@
 import React from 'react';
 import { Linking } from 'react-native';
 import { render, screen, fireEvent } from '@testing-library/react-native';
-import { reducer, initialState, SEED } from '../src/state/reducer';
+import { reducer } from '../src/state/reducer';
+import { seededState as initialState, SEED } from '../testSupport/fixtures';
 import { StoreProvider } from '../src/state/store';
 import AppShell from '../src/AppShell';
 import { defaultBaseline } from '../src/care';
@@ -71,10 +72,6 @@ describe('care data', () => {
     const s = run(initialState, { type: 'BUDGET_ADD', id: 'x', amount: 100, cat: 'travel', at: Date.now() });
     expect(s.budget).toHaveLength(initialState.budget.length + 1);
   });
-  test('demo budget and reading are labelled demo', () => {
-    expect(initialState.budget.every((b) => b.demo)).toBe(true);
-    expect(SEED.readings[0].demo).toBe(true);
-  });
 });
 
 const mount = (preload) =>
@@ -91,7 +88,6 @@ describe('Care and alert screens', () => {
     expect(screen.getByText('Sugar log')).toBeTruthy();
     expect(screen.getByText('Medicine stock')).toBeTruthy();
     expect(screen.getByText('Care budget')).toBeTruthy();
-    expect(screen.getAllByText(/Demo data/).length).toBeGreaterThan(0);
   });
   test('insulin logged 3 hours ago with no meal shows a prompt with the safe steps', async () => {
     await mount({ careEvents: { lastInsulinAt: Date.now() - 3 * 3600000, lastMealAt: null } });

@@ -3,7 +3,8 @@ import { render, screen, fireEvent } from '@testing-library/react-native';
 import { StoreProvider } from '../src/state/store';
 import AppShell from '../src/AppShell';
 import { visitStatus } from '../src/visits';
-import { reducer, initialState, productionState } from '../src/state/reducer';
+import { reducer, productionState } from '../src/state/reducer';
+import { seededState as initialState } from '../testSupport/fixtures';
 
 jest.mock('../src/services/sensing', () => ({ startFallListener: jest.fn(() => () => {}) }));
 beforeEach(() => {

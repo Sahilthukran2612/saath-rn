@@ -36,3 +36,13 @@ jest.mock('expo-secure-store', () => {
     deleteItemAsync: jest.fn(async (k) => void mem.delete(k)),
   };
 });
+
+// Screen tests mount the app with no preload and expect a household that is already set up. The installed app
+// starts empty (a real first launch asks who you are), so the tests, and only the tests, start from this seed.
+jest.mock('./src/state/reducer', () => {
+  const actual = jest.requireActual('./src/state/reducer');
+  const { makeSeeded } = jest.requireActual('./testSupport/seed');
+  const seeded = makeSeeded(actual.initialState);
+  // productionState stays the real, empty install; initialState and startState are the set-up household.
+  return { ...actual, initialState: seeded, startState: seeded };
+});

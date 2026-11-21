@@ -45,7 +45,8 @@ describe('shared phone: lock screen', () => {
     await waitFor(() => expect(screen.getByText('Wrong PIN. 4 tries left.')).toBeTruthy());
     await fireEvent.changeText(screen.getByLabelText('Enter your PIN'), '1234');
     await fireEvent.press(screen.getByLabelText('Open'));
-    await waitFor(() => expect(screen.getByLabelText('Circle')).toBeTruthy());
+    // a person with nothing saved yet starts with the first question, like any new install
+    await waitFor(() => expect(screen.getByText('How will you use Saath?')).toBeTruthy());
   });
 
   test('a PIN that is not four digits is refused without a try being used', async () => {
@@ -78,9 +79,7 @@ describe('shared phone: lock screen', () => {
     await fireEvent.changeText(screen.getByLabelText('Name'), 'Sunita');
     await fireEvent.changeText(screen.getByLabelText('Choose a 4-digit PIN'), '2222');
     await fireEvent.press(screen.getByLabelText('Add person'));
-    await waitFor(() => expect(screen.getByLabelText('Circle')).toBeTruthy());
-    await fireEvent.press(screen.getByLabelText('Me'));
-    expect(screen.getAllByText('Sunita').length).toBeGreaterThan(0);
+    await waitFor(() => expect(screen.getByText('How will you use Saath?')).toBeTruthy());
   });
 
   test('a new person is refused without a name or a valid PIN', async () => {

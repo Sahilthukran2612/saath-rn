@@ -4,7 +4,8 @@ import * as SecureStore from 'expo-secure-store';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import { StoreProvider } from '../src/state/store';
 import AppShell from '../src/AppShell';
-import { initialState, reducer } from '../src/state/reducer';
+import { reducer } from '../src/state/reducer';
+import { seededState as initialState } from '../testSupport/fixtures';
 import { load, save } from '../src/services/storage';
 import { strings, t as translate } from '../src/i18n/strings';
 import {

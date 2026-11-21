@@ -22,7 +22,7 @@ export default function ContactsForm() {
 
   const add = () => {
     if (name.trim().length < 2 || !validPhone(last10(phone))) return setMsg(t('ct.bad'));
-    if (state.members.some((m) => !m.demo && last10(m.phone) === last10(phone))) return setMsg(t('ct.dup'));
+    if (state.members.some((m) => last10(m.phone) === last10(phone))) return setMsg(t('ct.dup'));
     dispatch({ type: 'CONTACT_ADD', id: String(nowMs()), name, phone: last10(phone), role });
     setName('');
     setPhone('');

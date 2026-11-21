@@ -1,4 +1,4 @@
-// All UI text lives here (English + Hindi). Keep sentences short; every prompt is also spoken.
+﻿// All UI text lives here (English + Hindi). Keep sentences short; every prompt is also spoken.
 export const strings = {
   en: {
     tabToday: 'Today',
@@ -13,8 +13,6 @@ export const strings = {
     calling: 'Reaching',
     nobodyReached: 'No one answered yet. Please call someone you trust.',
     falseAlarm: 'False alarm',
-    simulateFall: 'Simulate a fall',
-    simulateQuiet: 'Simulate long quiet',
     missedEvent: 'Missed event',
     exportCsv: 'Export trial CSV',
     resetTally: 'Reset counts',
@@ -34,12 +32,10 @@ export const strings = {
     timeOff: 'Time off',
     whoViewed: 'Who viewed what',
     nobodyViewed: 'No one has viewed your information yet.',
-    demoBanner: 'Demo data. Not a real person.',
     clinicianPlan: "Follow your clinician's plan, or call family, a clinic or an ASHA.",
     addReading: 'Add sugar reading',
     noAccess: 'You do not have access to this. Ask the person to share it.',
     largeText: 'Large text',
-    demoMode: 'Demo mode',
     language: 'Language',
     'theme.title': 'Look',
     'theme.auto': 'Phone',
@@ -72,7 +68,6 @@ export const strings = {
     invitePhone: 'Phone number',
     inviteShare: 'Add and send code',
     invitePending: 'Waiting',
-    inviteAcceptSim: 'Mark joined (demo)',
     invalidPhone: 'Enter a 10-digit mobile number.',
     helpButton: 'Ask for help',
     helpSent: 'Help request sent',
@@ -92,8 +87,6 @@ export const strings = {
     remindersPaused: 'Reminders paused',
     remindersOn: 'Reminders on',
     waiting: 'Waiting to sync',
-    goOnline: 'Go online (demo)',
-    goOffline: 'Go offline (demo)',
     guidanceNew: 'New diagnosis: take it one step at a time. Ask your clinician, family or an ASHA anything.',
     guidanceCrisis: 'A hard time: lean on your circle. Call family, a clinic or an ASHA.',
     guardianLimit: 'A guardian keeps at least Routine.',
@@ -134,7 +127,6 @@ export const strings = {
     'jm.sees': '{name} sees: {level}',
     'jm.offline': 'Could not save the change. Try again when you have a connection.',
     'jm.timeOff': 'On Time Off',
-    'demo.joinedAdd': 'Demo: someone joins with my invite',
     'cf.timeOff': 'Pause routine updates from them',
     'cf.timeOffNote': 'Safety alerts still reach you.',
     'siren.title': 'Loud alarm when no one answers',
@@ -178,7 +170,6 @@ export const strings = {
     'inv.failed': 'Could not send it. Check the internet and try again.',
     'inv.sent': 'Sent. They can join with the code now.',
     'inv.again': 'Share the code again',
-    'inv.demoNote': 'Demo: tapping a waiting person marks them as joined on this phone only.',
     'inv.sameNumber': 'They must create their Saath account with this same phone number, or the code will not work.',
     'join.boundNote': 'This code only works for the phone number the person entered for you. Sign in with that number.',
     'acc.create': 'Create account',
@@ -198,9 +189,7 @@ export const strings = {
     'call.note': 'Calls your contacts one by one if no one answers. Uses your phone plan.',
     'call.unavailable': 'This needs the installed Saath app, not Expo Go.',
     'call.denied': 'Allow phone calls so Saath can call your contacts, then try again.',
-    'call.demoNote': 'Demo: calls are shown on screen, not placed.',
     'call.calling': 'Calling {name} now...',
-    'call.simulated': 'Demo: would call {name} now',
     'call.reached': 'Someone answered the call to {name}.',
     'trial.realWarn': 'Calls and messages are on. A trial that runs to the end will really reach your contacts. Tap I\'m OK to stop it.',
     'ct.title': 'Emergency contacts',
@@ -238,17 +227,6 @@ export const strings = {
     'rem.later': 'Later',
     'rem.sleep': 'This is in the sleep window, so no reminder will show.',
     'rem.denied': 'Allow notifications so reminders can show, then try again.',
-    'hr.simulate': 'Try a simulated band',
-    'hr.simRest': 'Resting',
-    'hr.simHigh': 'High while resting',
-    'hr.simLow': 'Low while resting',
-    'hr.simNote': 'Demo: these readings are made up to show the screen.',
-    'sms.demoNote': 'Demo: the message is shown on screen, not sent.',
-    'sms.simulated': 'Demo: would send to {name}: {text}',
-    'demo.circleAdd': 'Demo: add a person I look after',
-    'demo.circleFall': 'Demo: they may have fallen',
-    'demo.circleOk': 'Demo: they say they are OK',
-    'demo.circleNote': 'These buttons stand in for another phone, so the real screens can be shown without a server.',
     'hr.title': 'Heart-rate band',
     'hr.note': 'Connect a Bluetooth heart-rate band or chest strap. Saath reads the rate on this phone only and never stores or sends it. It cannot tell whether you are ill.',
     'hr.connect': 'Find my band',
@@ -295,7 +273,6 @@ export const strings = {
     'me.phase': 'Where are you now',
     'me.settings': 'Settings',
     resetData: 'Reset app data',
-    syncDemo: 'Sync (demo)',
     consentSub: 'This takes a minute and keeps you safe.',
     planSub: 'Handover, visits and healthy habits',
     'meal.rice': 'Rice',
@@ -459,7 +436,6 @@ export const strings = {
     'advice.ok': 'In the usual range. Nice work logging it.',
     missedFall: 'Missed fall',
     missedQuiet: 'Missed quiet',
-    demoData: 'Demo data',
     'sp.title': 'Shared phone',
     'sp.note':
       'Several people can use this phone. Each has their own data and a 4-digit PIN. The PIN keeps casual eyes out; it is not strong protection.',
@@ -486,7 +462,17 @@ export const strings = {
     'acc.phone': 'Your mobile number',
     'join.link': 'I have an invite code',
     'inv.card': 'People who help you',
-    'pt.title': 'People I look after',
+    'pt.title': 'People I look after',
+
+
+
+
+
+
+
+
+
+
     'rc.doctor': 'I am a doctor',
     'rc.doctorNote': 'Your patients only. You add them, plan their care, and see how they are doing.',
     'mo.nameTitleDoctor': 'About you, doctor',
@@ -638,7 +624,6 @@ export const strings = {
     'plan.notes': 'A note for the person',
     'plan.publish': 'Publish plan',
     'plan.empty': 'Add at least one medicine, task, check count or note.',
-    'plan.demoApplied': 'Demo: applied to this phone as their phone would. Open the Person view to see it.',
     'plan.needSignIn': 'Sign in on the Me tab first.',
     'plan.sending': 'Sending...',
     'plan.sent': 'Published. Their phone updates by itself next time it is online and open.',
@@ -732,8 +717,6 @@ export const strings = {
     calling: 'संपर्क कर रहे हैं',
     nobodyReached: 'अभी कोई नहीं मिला। कृपया किसी अपने को फ़ोन करें।',
     falseAlarm: 'गलत अलार्म',
-    simulateFall: 'गिरना आज़माएँ',
-    simulateQuiet: 'लंबी शांति आज़माएँ',
     missedEvent: 'छूटी घटना',
     exportCsv: 'परीक्षण CSV भेजें',
     resetTally: 'गिनती शून्य करें',
@@ -753,12 +736,10 @@ export const strings = {
     timeOff: 'छुट्टी',
     whoViewed: 'किसने क्या देखा',
     nobodyViewed: 'अभी किसी ने आपकी जानकारी नहीं देखी।',
-    demoBanner: 'डेमो डेटा। असली व्यक्ति नहीं।',
     clinicianPlan: 'अपने डॉक्टर की योजना मानें, या परिवार, क्लिनिक या आशा को फ़ोन करें।',
     addReading: 'शुगर रीडिंग जोड़ें',
     noAccess: 'आपके पास यह देखने की अनुमति नहीं है। व्यक्ति से साझा करने को कहें।',
     largeText: 'बड़े अक्षर',
-    demoMode: 'डेमो मोड',
     language: 'भाषा',
     'theme.title': 'रूप',
     'theme.auto': 'फ़ोन जैसा',
@@ -790,7 +771,6 @@ export const strings = {
     invitePhone: 'फ़ोन नंबर',
     inviteShare: 'जोड़ें और कोड भेजें',
     invitePending: 'इंतज़ार',
-    inviteAcceptSim: 'जुड़ गए (डेमो)',
     invalidPhone: '10 अंकों का मोबाइल नंबर डालें।',
     helpButton: 'मदद माँगें',
     helpSent: 'मदद का अनुरोध भेजा',
@@ -810,8 +790,6 @@ export const strings = {
     remindersPaused: 'रिमाइंडर रुके हैं',
     remindersOn: 'रिमाइंडर चालू',
     waiting: 'सिंक का इंतज़ार',
-    goOnline: 'ऑनलाइन जाएँ (डेमो)',
-    goOffline: 'ऑफ़लाइन जाएँ (डेमो)',
     guidanceNew: 'नई बीमारी: एक-एक कदम चलें। डॉक्टर, परिवार या आशा से कुछ भी पूछें।',
     guidanceCrisis: 'मुश्किल समय: अपनों का सहारा लें। परिवार, क्लिनिक या आशा को फ़ोन करें।',
     guardianLimit: 'अभिभावक को कम से कम दिनचर्या दिखती है।',
@@ -852,7 +830,6 @@ export const strings = {
     'jm.sees': '{name} देखते हैं: {level}',
     'jm.offline': 'बदलाव सहेज नहीं सके। कनेक्शन मिलने पर फिर कोशिश करें।',
     'jm.timeOff': 'छुट्टी पर',
-    'demo.joinedAdd': 'डेमो: कोई मेरे न्योते से जुड़ता है',
     'cf.timeOff': 'उनके रोज़ के अपडेट रोकें',
     'cf.timeOffNote': 'सुरक्षा अलर्ट फिर भी आपको मिलेंगे।',
     'siren.title': 'कोई जवाब न दे तो तेज़ अलार्म',
@@ -896,7 +873,6 @@ export const strings = {
     'inv.failed': 'भेज नहीं सके। इंटरनेट देखें और फिर कोशिश करें।',
     'inv.sent': 'भेज दिया गया। अब वे कोड से जुड़ सकते हैं।',
     'inv.again': 'कोड फिर से भेजें',
-    'inv.demoNote': 'डेमो: इंतज़ार वाले व्यक्ति को दबाने से वह सिर्फ़ इसी फ़ोन पर जुड़ा हुआ दिखता है।',
     'inv.sameNumber': 'उन्हें साथ में इसी फ़ोन नंबर से अपना खाता बनाना होगा, वरना कोड काम नहीं करेगा।',
     'join.boundNote': 'यह कोड सिर्फ़ उसी फ़ोन नंबर पर काम करता है जो उस व्यक्ति ने आपके लिए डाला था। उसी नंबर से साइन इन करें।',
     'acc.create': 'खाता बनाएँ',
@@ -916,9 +892,7 @@ export const strings = {
     'call.note': 'कोई जवाब न दे तो संपर्कों को एक-एक करके फ़ोन लगाता है। आपके फ़ोन प्लान से।',
     'call.unavailable': 'इसके लिए इंस्टॉल किया हुआ साथ ऐप चाहिए, Expo Go नहीं।',
     'call.denied': 'फ़ोन करने की अनुमति दें ताकि साथ आपके संपर्कों को फ़ोन कर सके, फिर कोशिश करें।',
-    'call.demoNote': 'डेमो: कॉल स्क्रीन पर दिखती हैं, लगाई नहीं जातीं।',
     'call.calling': '{name} को अभी फ़ोन लगा रहे हैं...',
-    'call.simulated': 'डेमो: अभी {name} को फ़ोन लगाया जाता',
     'call.reached': '{name} को की गई कॉल किसी ने उठाई।',
     'trial.realWarn': 'कॉल और संदेश चालू हैं। जो परीक्षण अंत तक चलेगा वह सचमुच आपके संपर्कों तक पहुँचेगा। रोकने के लिए "मैं ठीक हूँ" दबाएँ।',
     'ct.title': 'आपातकालीन संपर्क',
@@ -956,17 +930,6 @@ export const strings = {
     'rem.later': 'बाद में',
     'rem.sleep': 'यह सोने के समय में है, इसलिए याद नहीं दिलाया जाएगा।',
     'rem.denied': 'सूचनाओं की अनुमति दें ताकि याद दिलाना दिख सके, फिर कोशिश करें।',
-    'hr.simulate': 'नकली बैंड आज़माएँ',
-    'hr.simRest': 'आराम में',
-    'hr.simHigh': 'आराम में तेज़',
-    'hr.simLow': 'आराम में धीमी',
-    'hr.simNote': 'डेमो: ये रीडिंग स्क्रीन दिखाने के लिए बनाई गई हैं।',
-    'sms.demoNote': 'डेमो: संदेश स्क्रीन पर दिखता है, भेजा नहीं जाता।',
-    'sms.simulated': 'डेमो: {name} को भेजते: {text}',
-    'demo.circleAdd': 'डेमो: अपने घेरे में एक व्यक्ति जोड़ें',
-    'demo.circleFall': 'डेमो: शायद वे गिर गए हैं',
-    'demo.circleOk': 'डेमो: वे कहते हैं कि वे ठीक हैं',
-    'demo.circleNote': 'ये बटन दूसरे फ़ोन की जगह हैं, ताकि बिना सर्वर के असली स्क्रीन दिखाई जा सकें।',
     'hr.title': 'हार्ट-रेट बैंड',
     'hr.note': 'ब्लूटूथ हार्ट-रेट बैंड या चेस्ट स्ट्रैप जोड़ें। साथ दर इसी फ़ोन पर पढ़ता है, कभी सहेजता या भेजता नहीं। यह नहीं बता सकता कि आप बीमार हैं या नहीं।',
     'hr.connect': 'मेरा बैंड खोजें',
@@ -1014,7 +977,6 @@ export const strings = {
     'me.phase': 'अभी आप कहाँ हैं',
     'me.settings': 'सेटिंग',
     resetData: 'ऐप का डेटा मिटाएँ',
-    syncDemo: 'सिंक (डेमो)',
     consentSub: 'इसमें एक मिनट लगता है और आप सुरक्षित रहते हैं।',
     planSub: 'ज़िम्मेदारी, डॉक्टर की मुलाकात और अच्छी आदतें',
     'meal.rice': 'चावल',
@@ -1178,7 +1140,6 @@ export const strings = {
     'advice.ok': 'सामान्य दायरे में है। लिखने के लिए शाबाश।',
     missedFall: 'छूटा गिरना',
     missedQuiet: 'छूटी शांति',
-    demoData: 'डेमो डेटा',
     'sp.title': 'साझा फ़ोन',
     'sp.note':
       'इस फ़ोन को कई लोग चला सकते हैं। सबका अपना डेटा और 4 अंकों का पिन होता है। पिन सिर्फ़ यूँ ही झाँकने से रोकता है; यह मज़बूत सुरक्षा नहीं है।',
@@ -1205,7 +1166,17 @@ export const strings = {
     'acc.phone': 'आपका मोबाइल नंबर',
     'join.link': 'मेरे पास न्योते का कोड है',
     'inv.card': 'लोग जो आपकी मदद करते हैं',
-    'pt.title': 'जिनकी मैं देखभाल करता हूँ',
+    'pt.title': 'जिनकी मैं देखभाल करता हूँ',
+
+
+
+
+
+
+
+
+
+
     'rc.doctor': 'मैं डॉक्टर हूँ',
     'rc.doctorNote': 'सिर्फ़ आपके मरीज़। आप उन्हें जोड़ते हैं, उनकी देखभाल की योजना बनाते हैं और उनका हाल देखते हैं।',
     'mo.nameTitleDoctor': 'आपके बारे में, डॉक्टर साहब',
@@ -1357,7 +1328,6 @@ export const strings = {
     'plan.notes': 'व्यक्ति के लिए एक नोट',
     'plan.publish': 'योजना भेजें',
     'plan.empty': 'कम से कम एक दवा, काम, जाँच की संख्या या नोट जोड़ें।',
-    'plan.demoApplied': 'डेमो: इस फ़ोन पर वैसे ही लागू हुआ जैसे उनके फ़ोन पर होता। देखने के लिए व्यक्ति का दृश्य खोलें।',
     'plan.needSignIn': 'पहले मैं टैब में साइन इन करें।',
     'plan.sending': 'भेज रहे हैं...',
     'plan.sent': 'भेज दी गई। उनका फ़ोन अगली बार ऑनलाइन और खुला होने पर अपने आप अपडेट होगा।',

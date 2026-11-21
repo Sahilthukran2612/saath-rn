@@ -8,7 +8,6 @@ import { useNow } from '../useNow';
 import { heartStatus } from '../../heart';
 import { askBluetoothPermission, bleAvailable, connectBand, disconnectBand, scanForBands } from '../../services/ble';
 import { colors } from '../../theme';
-import { nowMs } from '../../services/clock';
 
 // Connects a Bluetooth heart-rate band and shows the live rate. The rate stays on this phone. Saath only
 // says "stayed high/low while you were still" and points to the clinician's plan: it never diagnoses.
@@ -56,8 +55,6 @@ export default function HeartCard() {
     else setMsg(t('hr.none'));
   };
 
-  const simulate = (bpm) => dispatch({ type: 'HEART_SIM', bpm, at: nowMs() });
-
   const leave = async () => {
     await disconnectBand();
     dispatch({ type: 'HEART_DEVICE', device: null });
@@ -83,22 +80,6 @@ export default function HeartCard() {
           </View>
           {!contact ? <Body bold>{t('hr.nocontact')}</Body> : null}
           <Body bold={status.level === 'high' || status.level === 'low'}>{line}</Body>
-          {device.id === 'sim' ? (
-            <View style={{ gap: 8 }}>
-              <Caption>{t('hr.simNote')}</Caption>
-              <View style={{ flexDirection: 'row', gap: 8 }}>
-                {[
-                  ['hr.simRest', 72],
-                  ['hr.simHigh', 135],
-                  ['hr.simLow', 36],
-                ].map(([key, bpm]) => (
-                  <View key={key} style={{ flex: 1 }}>
-                    <BigButton kind="quiet" label={t(key)} onPress={() => simulate(bpm)} />
-                  </View>
-                ))}
-              </View>
-            </View>
-          ) : null}
           <BigButton kind="quiet" label={t('hr.disconnect')} onPress={leave} />
         </View>
       ) : (
@@ -114,7 +95,6 @@ export default function HeartCard() {
           ) : null}
           {msg ? <Body bold>{msg}</Body> : null}
           <BigButton kind="primary" label={t('hr.connect')} onPress={find} />
-          {state.demo ? <BigButton kind="quiet" label={t('hr.simulate')} onPress={() => simulate(72)} /> : null}
         </View>
       )}
     </Card>

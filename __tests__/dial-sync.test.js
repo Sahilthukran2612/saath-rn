@@ -2,7 +2,8 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import { StoreProvider } from '../src/state/store';
 import AppShell from '../src/AppShell';
-import { initialState, reducer } from '../src/state/reducer';
+import { reducer } from '../src/state/reducer';
+import { seededState as initialState } from '../testSupport/fixtures';
 import { listMembers, setMemberDial, setMyTimeOff } from '../src/services/cloud';
 
 const cfg = { url: 'https://api.example.test', key: 'anon-key' };
@@ -124,20 +125,6 @@ describe('on the Circle screen', () => {
     joined: [{ id: 'm9', name: 'Asha (joined)', role: 'family', dial: 0, time_off: false, share_contact: false }],
   };
 
-  test('demo: nobody has joined yet, then a demo member joins and the dial moves what they see', async () => {
-    delete process.env.EXPO_PUBLIC_SAATH_API_URL;
-    await mount({ demo: true });
-    await openCircle();
-    expect(screen.getByText('Joined on their own phones')).toBeTruthy();
-    expect(screen.getByText(/No one has joined yet/)).toBeTruthy();
-    await fireEvent.press(screen.getByLabelText('Demo: someone joins with my invite'));
-    expect(screen.getByText('Asha (demo) sees: Safety only')).toBeTruthy();
-    await fireEvent.press(screen.getAllByLabelText('Routine').at(-1));
-    expect(screen.getByText('Asha (demo) sees: Routine')).toBeTruthy();
-    await fireEvent.press(screen.getAllByLabelText('Full').at(-1));
-    expect(screen.getByText('Asha (demo) sees: Full')).toBeTruthy();
-  });
-
   test('signed in: the dial change is sent to the server for that member', async () => {
     global.fetch = jest.fn(async () => reply(204, null));
     await mount({ demo: false, ...live });
@@ -201,14 +188,4 @@ describe('on the Circle screen', () => {
     await waitFor(() => expect(screen.getByLabelText('Pause routine updates from them: off')).toBeTruthy());
   });
 
-  test('the demo person can be paused locally without any server', async () => {
-    delete process.env.EXPO_PUBLIC_SAATH_API_URL;
-    global.fetch = jest.fn();
-    await mount({ demo: true, usage: 'member' });
-    await fireEvent.press(screen.getByLabelText('Demo: add a person I look after'));
-    await fireEvent.press(screen.getByLabelText('Amma (demo)'));
-    await fireEvent.press(screen.getByLabelText('Pause routine updates from them: off'));
-    expect(screen.getByLabelText('Pause routine updates from them: on')).toBeTruthy();
-    expect(global.fetch).not.toHaveBeenCalled();
-  });
 });

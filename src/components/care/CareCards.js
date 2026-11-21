@@ -93,7 +93,6 @@ export function GlucoseCard() {
       <CardHead
         icon={Droplet}
         title={t('sugarLog')}
-        right={last?.demo ? <Badge label={t('demoData')} tone="haldi" /> : null}
       />
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8 }}>
         <Text
@@ -310,7 +309,6 @@ export function BudgetCard() {
       <CardHead
         icon={Wallet}
         title={t('budgetTitle')}
-        right={state.budget.some((b) => b.demo) ? <Badge label={t('demoData')} tone="haldi" /> : null}
       />
       <View style={{ flexDirection: 'row', gap: 12 }}>
         <Stat value={`₹${s.thisMonth}`} label={t('thisMonth')} />

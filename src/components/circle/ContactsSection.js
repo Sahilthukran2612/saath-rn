@@ -8,12 +8,12 @@ import ContactsForm from './ContactsForm';
 // form to add someone. Removing a contact is on each person's row in the list above.
 export default function ContactsSection() {
   const { state, t } = useStore();
-  const real = state.members.filter((m) => !m.demo);
+  const real = state.members;
   return (
     <Card style={{ gap: 12 }}>
       <Body bold>{t('ct.title')}</Body>
       <Caption>{t('ct.note')}</Caption>
-      {real.length === 0 && !state.demo ? <Body bold>{t('ct.empty')}</Body> : null}
+      {real.length === 0 ? <Body bold>{t('ct.empty')}</Body> : null}
       <View>
         <ContactsForm />
       </View>

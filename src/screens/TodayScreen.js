@@ -258,7 +258,7 @@ function AdultHome() {
   const { state, t } = useStore();
   const go = useNav();
   const now = useNow();
-  const real = state.readings.filter((r) => !r.demo);
+  const real = state.readings;
   const shown = real.length ? real : state.readings;
   const last = shown[shown.length - 1];
   const advice = glucoseAdvice(last?.mgdl);
@@ -271,7 +271,6 @@ function AdultHome() {
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <Glyph icon={Droplet} size={22} color={colors.indigo} />
             <Body bold>{t('sugarPlan')}</Body>
-            {last?.demo ? <Badge label={t('demoData')} tone="haldi" /> : null}
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8 }}>
             <Text
@@ -394,61 +393,6 @@ function FamilyHome() {
   );
 }
 
-const HOUSEHOLDS = [
-  { id: 'A', need: 'ph.needA', hot: true },
-  { id: 'B', need: 'ph.needB', hot: true },
-  { id: 'C', need: 'ph.needC', hot: false },
-];
-
-function ProHome() {
-  const { state, t } = useStore();
-  return (
-    <>
-      <Reveal index={1}>
-        <Body bold>{t('householdsRanked')}</Body>
-        <View style={{ height: 8 }} />
-        <ListGroup>
-          {HOUSEHOLDS.map((h, i) => (
-            <ListRow
-              key={h.id}
-              lead={
-                <View style={[styles.rank, { backgroundColor: h.hot ? colors.haldiTint : colors.leafTint }]}>
-                  <Text
-                    style={{
-                      fontFamily: fonts.bold,
-                      fontSize: 18,
-                      color: h.hot ? colors.haldiDeep : colors.leafDeep,
-                    }}
-                  >
-                    {i + 1}
-                  </Text>
-                </View>
-              }
-              title={`${fmt(t('ph.household'), { x: h.id })} (${t('demoData')})`}
-              subtitle={t(h.need)}
-              trailing={<Badge label={h.hot ? t('rankNeed') : t('rankOk')} tone={h.hot ? 'haldi' : 'leaf'} />}
-            />
-          ))}
-        </ListGroup>
-      </Reveal>
-      <Reveal index={2}>
-        <Card tone="tint">
-          <Title style={{ fontSize: 22 }}>{t('onePage')}</Title>
-          <Body>
-            {can(state.role, 'viewSummary')
-              ? fmt(t('doneOf'), {
-                  done: state.tasks.filter((x) => x.done).length,
-                  total: state.tasks.length,
-                })
-              : t('noAccess')}
-          </Body>
-          <Caption>{t('pro.note')}</Caption>
-        </Card>
-      </Reveal>
-    </>
-  );
-}
-
 // The neighbour's home: what they get, what they are asked to do, and what they never see.
 function NeighbourHome() {
   const { state, t } = useStore();
@@ -468,12 +412,12 @@ function NeighbourHome() {
           <ListRow icon={Pill} title={t('nb.never')} subtitle={t('nb.neverSub')} last />
         </ListGroup>
       </View>
-      {state.demo ? null : <CirclesSection />}
+      <CirclesSection />
     </View>
   );
 }
 
-// ASHA or clinician outside demo mode: only the households that really added them. No made-up households.
+// ASHA or clinician: only the households that really added them. No made-up households.
 function RealProHome() {
   const { state, t } = useStore();
   return (
@@ -515,7 +459,7 @@ export default function TodayScreen() {
     body = (
       <NeighbourHome />
     );
-  else body = state.demo ? <ProHome /> : <RealProHome />;
+  else body = <RealProHome />;
   return (
     <ScrollView
       keyboardShouldPersistTaps="handled"

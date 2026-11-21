@@ -90,7 +90,7 @@ export default function InviteSection() {
           <Title style={{ fontSize: 22 }}>{t('inv.card')}</Title>
         </View>
       </View>
-      {state.members.filter((m) => !m.demo).length === 0 && !state.demo ? <Body bold>{t('ct.empty')}</Body> : null}
+      {state.members.length === 0 ? <Body bold>{t('ct.empty')}</Body> : null}
       <BigButton icon={UserPlus} label={t('inviteTitle')} onPress={() => setOpen(true)} />
       <Sheet visible={open} onClose={() => setOpen(false)} title={t('inviteTitle')}>
         <Field label={t('inviteName')} value={name} onChangeText={setName} />
@@ -124,8 +124,8 @@ export default function InviteSection() {
               title={i.name}
               subtitle={`${t(`role.${i.role}`)}. ${fmt(t('inv.code'), { code: i.code })}`}
               trailing={<Badge label={i.cloud ? t('inv.sentBadge') : t('invitePending')} tone={i.cloud ? 'leaf' : 'haldi'} />}
-              onPress={state.demo ? () => dispatch({ type: 'INVITE_ACCEPT', id: i.id }) : () => setQr({ name: i.name, code: i.code })}
-              label={state.demo ? t('inviteAcceptSim') : t('inv.showQr')}
+              onPress={() => setQr({ name: i.name, code: i.code })}
+              label={t('inv.showQr')}
               chevron={false}
             />
           ))}
@@ -140,7 +140,6 @@ export default function InviteSection() {
           {signedIn ? <BigButton kind="quiet" icon={Send} label={t('inv.sendNow')} onPress={requestSync} /> : null}
         </View>
       ) : null}
-      {pending.length > 0 && state.demo ? <Caption>{t('inv.demoNote')}</Caption> : null}
     </Card>
   );
 }

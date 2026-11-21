@@ -1,6 +1,7 @@
 import { allSlips, buildPad, markSlip, dayKey, PAD_SIZE } from '../src/suggestions';
 import { strings } from '../src/i18n/strings';
-import { reducer, initialState } from '../src/state/reducer';
+import { reducer } from '../src/state/reducer';
+import { seededState as initialState } from '../testSupport/fixtures';
 
 const at = (h, m = 0, d = 10) => new Date(2026, 10, d, h, m).getTime();
 const base = (over = {}) => ({

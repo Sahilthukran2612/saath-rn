@@ -23,10 +23,20 @@ test('teen home shows the transition ladder', async () => {
   expect(screen.getByText('Transition ladder')).toBeTruthy();
 });
 
-test("simulate fall opens the alert, I'm OK closes it", async () => {
-  await mount({ mode: 'elder' });
-  await fireEvent.press(screen.getByLabelText('Safety'));
-  await fireEvent.press(screen.getByLabelText('Simulate a fall'));
+test("a detected fall opens the alert, I'm OK closes it", async () => {
+  await mount({
+    mode: 'elder',
+    alert: {
+      id: 'a',
+      kind: 'fall',
+      confidence: 0.9,
+      reason: 'impact then still',
+      phase: 'countdown',
+      remaining: 20,
+      stepIndex: 0,
+      chain: [{ id: 'm1', name: 'Asha (daughter)', role: 'family', phone: '9000000001' }],
+    },
+  });
   expect(screen.getByText('Are you OK?')).toBeTruthy();
   await fireEvent.press(screen.getAllByLabelText("I'm OK")[0]);
   expect(screen.queryByText('Are you OK?')).toBeNull();

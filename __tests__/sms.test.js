@@ -110,29 +110,6 @@ describe('automatic SMS when nobody answers', () => {
   });
 });
 
-describe('demo: the automatic SMS is shown, not sent, when the SMS module is absent (Expo Go)', () => {
-  test('the message that would be sent is shown on the alert screen and nothing is sent', async () => {
-    mockAvailable = false;
-    await mount({ autoSms: true, demo: true, profile: { name: 'Amma' }, alert: alert() });
-    await waitFor(() => expect(screen.getByText(/Demo: would send to Asha \(daughter\): Saath: Amma may have had a fall/)).toBeTruthy());
-    expect(sms.sendSms).not.toHaveBeenCalled();
-  });
-  test('the switch can be turned on in demo mode without the permission, and says it is a demo', async () => {
-    mockAvailable = false;
-    await mount({ demo: true });
-    await fireEvent.press(screen.getByLabelText('Me'));
-    expect(screen.getByText('Demo: the message is shown on screen, not sent.')).toBeTruthy();
-    await fireEvent.press(screen.getByLabelText('Send the alert SMS by itself: off'));
-    await waitFor(() => expect(screen.getByLabelText('Send the alert SMS by itself: on')).toBeTruthy());
-    expect(sms.askSmsPermission).not.toHaveBeenCalled();
-  });
-  test('outside demo mode, without the module, nothing is simulated', async () => {
-    mockAvailable = false;
-    await mount({ demo: false, autoSms: true, alert: alert() });
-    expect(screen.queryByText(/Demo: would send/)).toBeNull();
-    expect(sms.sendSms).not.toHaveBeenCalled();
-  });
-});
 describe('the setting on the Me tab', () => {
   const openMe = async () => fireEvent.press(screen.getByLabelText('Me'));
 

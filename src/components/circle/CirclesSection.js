@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
-import { BigButton, Body, Caption, Card } from '../ui';
+import { BigButton, Body, Caption } from '../ui';
 import { Avatar, Badge, ListGroup, ListRow, ScreenHeader, Toggle } from '../kit';
 import JoinCard from './JoinCard';
 import CarePlanBuilder from './CarePlanBuilder';
 import { useStore } from '../../state/store';
 import { useNow } from '../useNow';
-import { colors } from '../../theme';
-import { nowMs } from '../../services/clock';
+
 import { cloudConfig, isConfigured, setMyTimeOff } from '../../services/cloud';
 import { ago, describeEvent, fmt, isAlert, newest, pendingAlert } from '../../circleFeed';
 
@@ -26,7 +25,7 @@ export default function CirclesSection() {
   const now = useNow();
   const [open, setOpen] = useState(null); // household id
   const cfg = cloudConfig();
-  if (!isConfigured(cfg) && !state.demo) return null;
+  if (!isConfigured(cfg)) return null;
 
   const signedIn = Boolean(state.cloud.access);
   const nameOf = (c) => c.person_name || t('cf.someone');
@@ -34,7 +33,7 @@ export default function CirclesSection() {
   // Time Off: stop routine updates from one person. The server still lets safety alerts through.
   const pause = async (c, on) => {
     dispatch({ type: 'CIRCLE_TIMEOFF', id: c.household_id, on });
-    if (!signedIn || c.household_id.startsWith('demo-')) return;
+    if (!signedIn) return;
     const r = await setMyTimeOff(cfg, state.cloud, c.household_id, on);
     if (r.session) dispatch({ type: 'CLOUD_SET', patch: r.session });
     if (!r.ok) dispatch({ type: 'CIRCLE_TIMEOFF', id: c.household_id, on: !on });
@@ -105,30 +104,6 @@ export default function CirclesSection() {
           })}
         </ListGroup>
       )}
-      {state.demo ? (
-        <Card tone="haldi" style={{ gap: 10 }}>
-          <Caption style={{ color: colors.ink }}>{t('demo.circleNote')}</Caption>
-          <BigButton
-            kind="quiet"
-            label={t('demo.circleAdd')}
-            onPress={() => dispatch({ type: 'DEMO_CIRCLE_ADD', at: nowMs() })}
-          />
-          {state.circles.some((c) => c.household_id === 'demo-amma') ? (
-            <>
-              <BigButton
-                kind="quiet"
-                label={t('demo.circleFall')}
-                onPress={() => dispatch({ type: 'DEMO_CIRCLE_EVENT', kind: 'fall', at: nowMs() })}
-              />
-              <BigButton
-                kind="quiet"
-                label={t('demo.circleOk')}
-                onPress={() => dispatch({ type: 'DEMO_CIRCLE_EVENT', kind: 'im_ok', at: nowMs() })}
-              />
-            </>
-          ) : null}
-        </Card>
-      ) : null}
       <JoinLink />
     </View>
   );

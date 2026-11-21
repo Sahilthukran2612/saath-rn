@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { Minus, Plus, Send, X } from '../icons';
-import { BigButton, Body, Caption, Card, Chip, Title } from '../ui';
+import { BigButton, Body, Caption, Card, Chip } from '../ui';
 import { Field, ListGroup, ListRow, SectionTitle } from '../kit';
 import { useStore } from '../../state/store';
 import { WHEN } from '../../medicines';
@@ -23,11 +23,10 @@ export default function CarePlanBuilder({ circle }) {
   const [task, setTask] = useState('');
   const [hour, setHour] = useState(8);
   const [status, setStatus] = useState('');
-  const demo = state.demo || String(circle.household_id).startsWith('demo-');
   const cfg = cloudConfig();
 
   useEffect(() => {
-    if (demo || !isConfigured(cfg) || !state.cloud.access) return undefined;
+    if (!isConfigured(cfg) || !state.cloud.access) return undefined;
     let live = true;
     fetchLatestPlan(cfg, state.cloud, circle.household_id).then((r) => {
       const clean = r.ok && r.row ? sanitizePlan(r.row.plan) : null;
@@ -55,11 +54,6 @@ export default function CarePlanBuilder({ circle }) {
   const publish = async () => {
     const plan = planFromDraft(draft);
     if (!plan) return setStatus(t('plan.empty'));
-    if (demo) {
-      // Demo mode has no server: apply it to this phone as the person's phone would, and say so.
-      dispatch({ type: 'PLAN_APPLY', plan, version: new Date().toISOString(), author: state.profile.name || t('role.clinician'), at: Date.now() });
-      return setStatus(t('plan.demoApplied'));
-    }
     if (!state.cloud.access) return setStatus(t('plan.needSignIn'));
     setStatus(t('plan.sending'));
     const r = await publishPlan(cfg, state.cloud, circle.household_id, state.profile.name, plan);

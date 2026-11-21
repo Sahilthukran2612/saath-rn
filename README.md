@@ -15,7 +15,7 @@ Backend setup (free Supabase project, Firebase push) is in `docs/supabase/SETUP.
 ## Three kinds of phone
 - **"I need care"**: the person. Sets up emergency contacts, gets the fall/quiet watching, reminders, alerts.
 - **"I am a doctor"**: a separate kind of phone. A doctor is only ever a doctor: no guardian, neighbour or ASHA role, and invitations that name another role are not shown on a doctor phone. Their one screen is "My patients"; they add patients (**Add my patient**) and publish care plans.
-- **"I look after someone"**: a guardian, neighbour or ASHA worker. They say which at sign-up, create their own account, and join with an invite code (typed, or scanned as a QR) that is bound to their phone number. They see only what each person's Privacy Dial allows. The role belongs to each person they look after, so one phone can be a guardian for one person and a neighbour for another. They get one screen, "People I look after", most urgent first.
+- **"I look after someone"**: a guardian, neighbour or ASHA worker. They never choose a role: the person they look after decides it, in the invite. They create their own account and join with an invite code (typed, or scanned as a QR) that is bound to their phone number. They see only what each person's Privacy Dial allows. The role belongs to each person they look after, so one phone can be a guardian for one person and a neighbour for another. They get one screen, "People I look after", most urgent first.
 
 How people are added: the person taps **Add a person** once (name, number, role). That makes them an emergency contact and an invite at the same time, with a QR to scan. A doctor shows **their own card** (**Add my patient**); the person scans it, confirms once, and shows a code back. No details are typed twice.
 
@@ -35,8 +35,7 @@ Details: `docs/ROLES.md` (how each person gets in) and `docs/RBAC.md` (who can s
 | Circle: number-bound invite codes (single use, lockout after wrong tries), join, role, dial, feed, Time Off | **Run against the live server**. Database rules checked by 45 live policy tests |
 | Push notifications (Firebase) | Server chain run up to Google. **No notification delivered to a real phone yet** (needs two phones) |
 | Two-phone flows (invite then join, helper receiving the alert) | **Not run**: only one phone available |
-| Bluetooth heart-rate band | Built with the native layer mocked; not run with a real band. A labelled simulated band exists for the demo |
-| Demo mode (simulated band, on-screen SMS and calls, stand-in family phone, sample people) | Built and tested. Always labelled as a demo; never places a real call or message |
+| Bluetooth heart-rate band | Built with the native layer mocked; not run with a real band. There is no simulated band |
 | Shared-phone mode (profiles, PIN) | Unit-tested. Not run on a phone. The PIN deters, it does not encrypt |
 | Guardian consent for under-18s | Records a name and number. **Does not verify identity. Needs legal review. Not a compliance claim** |
 | Food guide content, IDRS cut-offs | Starter content by this project. **Needs clinician or dietitian review before real use** |
@@ -62,7 +61,7 @@ Not built: SMS gateway or missed-call alerts, glucometer photo, voice input, for
 - Data on the phone is not encrypted. A forgotten account password cannot be reset.
 - The server project is in Tokyo; a legal review (data location, guardian consent under India's DPDP Act) has not been done.
 - Free-tier servers can pause when unused.
-- Demo data is labelled as such. Scheme and pharmacy information will be marked "verify locally".
+- There is no demo mode: a fresh install holds no sample people, numbers, readings or costs, and nothing is simulated. Scheme and pharmacy information will be marked "verify locally".
 
 ## More
 `docs/SPEC.md`, `SCREENS.md`, `DATA_MODEL.md`, `ARCHITECTURE.md`, `TEST_REPORT.md`, `PAPER_MAP.md`, `DEMO_SCRIPT.md`, `VOICEOVER.md`.

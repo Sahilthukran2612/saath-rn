@@ -1,18 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  Moon,
-  Languages,
-  Eye,
-  MessageCircle,
-  Phone,
-  RotateCcw,
-  ShieldCheck,
-  Siren,
-  Type,
-} from '../components/icons';
-import { BigButton, Body, Caption, Chip, Title } from '../components/ui';
+import { Moon, Languages, MessageCircle, Phone, RotateCcw, ShieldCheck, Siren, Type } from '../components/icons';
+import { BigButton, Body, Caption, Title } from '../components/ui';
 import { Avatar, Badge, ListGroup, ListRow, SectionTitle, Segmented, Toggle } from '../components/kit';
 import { Reveal } from '../components/motion';
 import SharedPhone from '../components/me/SharedPhone';
@@ -22,7 +12,7 @@ import { foregroundAvailable } from '../services/foreground';
 import { askSmsPermission, smsAvailable } from '../services/sms';
 import { callsAvailable } from '../services/calls';
 import useChoices from '../state/useChoices';
-import { CARE_ROLES } from '../components/patients/roles';
+
 import { isDoctor, looksAfterOthers } from '../who';
 import { colors } from '../theme';
 
@@ -118,7 +108,7 @@ export default function MeScreen() {
         <View style={{ flex: 1, gap: 4 }}>
           <Title style={{ fontSize: 28 }}>{state.profile.name || t('tabMe')}</Title>
           <Badge
-            label={doctor ? t('role.clinician') : member ? t(`role.${state.profile.myRole || 'family'}`) : t(`mode.${state.mode}`)}
+            label={doctor ? t('role.clinician') : member ? t('use.member') : t(`mode.${state.mode}`)}
             tone="indigo"
           />
         </View>
@@ -161,7 +151,6 @@ export default function MeScreen() {
                   onValueChange={async (on) => {
                     set('autoSmsDenied', false);
                     if (!on) return set('autoSms', false);
-                    if (!smsAvailable && state.demo) return set('autoSms', true); // demo: shown on screen, not sent
                     if (await askSmsPermission()) set('autoSms', true);
                     else {
                       set('autoSms', false);
@@ -187,11 +176,11 @@ export default function MeScreen() {
           {!foregroundAvailable ? <Caption style={styles.warn}>{t('bg.unavailable')}</Caption> : null}
           {state.backgroundDenied ? <Caption style={styles.warn}>{t('bg.denied')}</Caption> : null}
           {!callsAvailable ? (
-            <Caption style={styles.warn}>{t(state.demo ? 'call.demoNote' : 'call.unavailable')}</Caption>
+            <Caption style={styles.warn}>{t('call.unavailable')}</Caption>
           ) : null}
           {state.autoCallDenied ? <Caption style={styles.warn}>{t('call.denied')}</Caption> : null}
           {!smsAvailable ? (
-            <Caption style={styles.warn}>{t(state.demo ? 'sms.demoNote' : 'sms.unavailable')}</Caption>
+            <Caption style={styles.warn}>{t('sms.unavailable')}</Caption>
           ) : null}
           {state.autoSmsDenied ? <Caption style={styles.warn}>{t('sms.denied')}</Caption> : null}
         </Reveal>
@@ -207,21 +196,6 @@ export default function MeScreen() {
             options={['person', 'member', 'both'].map((v) => ({ value: v, label: t(`use.${v}`) }))}
           />
         )}
-        {state.usage === 'member' || state.usage === 'both' ? (
-          <View style={{ gap: 8, marginTop: 14 }}>
-            <SectionTitle>{t('mo.who')}</SectionTitle>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              {CARE_ROLES.map((r) => (
-                <Chip
-                  key={r}
-                  label={t(`role.${r}`)}
-                  active={(state.profile.myRole || 'family') === r}
-                  onPress={() => dispatch({ type: 'PROFILE_SET', patch: { myRole: r } })}
-                />
-              ))}
-            </View>
-          </View>
-        ) : null}
         <View style={{ height: 18 }} />
         <Account />
         {member ? null : (
@@ -262,17 +236,6 @@ export default function MeScreen() {
                 value={state.largeText}
                 label={t('largeText')}
                 onValueChange={(v) => set('largeText', v)}
-              />
-            }
-          />
-          <ListRow
-            icon={Eye}
-            title={t('demoMode')}
-            trailing={
-              <Toggle
-                value={state.demo}
-                label={t('demoMode')}
-                onValueChange={(v) => dispatch({ type: v ? 'DEMO_ON' : 'DEMO_OFF', at: Date.now() })}
               />
             }
           />

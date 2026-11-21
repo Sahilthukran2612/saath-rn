@@ -1,14 +1,6 @@
 import React from 'react';
 import { ScrollView, Share, StyleSheet, View } from 'react-native';
-import {
-  Activity,
-  Download,
-  FlaskConical,
-  Moon,
-  RotateCcw,
-  ShieldCheck,
-  TriangleAlert,
-} from '../components/icons';
+import { Activity, Download, FlaskConical, Moon, RotateCcw, ShieldCheck } from '../components/icons';
 import { BigButton, Body, Caption, Card, Glyph, Title } from '../components/ui';
 import { ListGroup, ListRow, SectionTitle, Stat } from '../components/kit';
 import { Reveal } from '../components/motion';
@@ -86,39 +78,11 @@ export default function SafetyScreen() {
             </View>
             <View style={{ flex: 1 }}>
               <Title style={{ fontSize: 22 }}>{t('trialTitle')}</Title>
-              {(state.autoCall || state.autoSms) && !state.demo ? (
+              {(state.autoCall || state.autoSms) ? (
                 <Caption style={{ color: colors.madder }}>{t('trial.realWarn')}</Caption>
               ) : null}
             </View>
           </View>
-          <BigButton
-            label={t('simulateFall')}
-            icon={TriangleAlert}
-            onPress={() =>
-              !idle &&
-              dispatch({
-                type: 'TRIGGER_ALERT',
-                kind: 'fall',
-                confidence: 0.85,
-                reason: 'simulated: impact then still',
-                id: String(Date.now()),
-              })
-            }
-          />
-          <BigButton
-            kind="quiet"
-            label={t('simulateQuiet')}
-            icon={Moon}
-            onPress={() =>
-              !idle &&
-              dispatch({
-                type: 'QUIET_CHECK',
-                ...quietTrace(state.baseline.inactiveHours),
-                simulated: true,
-                id: String(Date.now()),
-              })
-            }
-          />
           <View style={{ flexDirection: 'row', gap: 10 }}>
             <View style={{ flex: 1 }}>
               <BigButton

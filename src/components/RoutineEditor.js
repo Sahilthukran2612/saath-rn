@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
-import { Bell, BellRing, Minus, Pencil, Plus, RefreshCw, X } from './icons';
-import { BigButton, Caption, Card, Chip, Title } from './ui';
+import { Bell, BellRing, Minus, Pencil, Plus, X } from './icons';
+import { BigButton, Caption, Chip } from './ui';
 import { formatHour, reminderPlan, stepHour, validHour } from '../reminders';
 import { askReminderPermission } from '../services/reminders';
 import { Field, ListGroup, ListRow, SectionTitle, Toggle } from './kit';
@@ -111,20 +111,6 @@ export default function RoutineEditor() {
             />
           }
         />
-        {state.demo ? (
-        <ListRow
-          icon={RefreshCw}
-          title={t(state.online ? 'goOffline' : 'goOnline')}
-          subtitle={waiting > 0 ? `${t('waiting')}: ${waiting}` : undefined}
-          trailing={
-            <Toggle
-              value={state.online}
-              label={t('syncDemo')}
-              onValueChange={(on) => dispatch({ type: 'SET_ONLINE', online: on })}
-            />
-          }
-        />
-        ) : null}
         <ListRow icon={Pencil} title={t('editRoutine')} onPress={() => setOpen(true)} chevron />
       </ListGroup>
       <Sheet visible={open} onClose={() => setOpen(false)} title={t('editRoutine')}>

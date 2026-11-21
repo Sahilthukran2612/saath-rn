@@ -194,9 +194,9 @@ export default function SuggestionPad() {
       slipStats: state.slipStats,
       foodPrefs: state.foodPrefs,
       labels: { breakfast: t('slot.breakfast'), lunch: t('slot.lunch'), snack: t('slot.snack'), dinner: t('slot.dinner') },
-      engaged: state.demo || (state.tally?.imOk || 0) > 0 || state.tasks.some((x) => x.done),
+      engaged: (state.tally?.imOk || 0) > 0 || state.tasks.some((x) => x.done),
     }),
-    [now, state.mode, state.phase, state.meds, state.testPlan, state.careEvents, state.meals, state.footChecks, state.checkins, state.readings, state.visitQuestions, state.ladder, state.profile?.condition, state.tasks, state.demo, state.tally, state.medicines, state.medTaken, state.lang, state.slipStats, state.foodPrefs, t],
+    [now, state.mode, state.phase, state.meds, state.testPlan, state.careEvents, state.meals, state.footChecks, state.checkins, state.readings, state.visitQuestions, state.ladder, state.profile?.condition, state.tasks, state.tally, state.medicines, state.medTaken, state.lang, state.slipStats, state.foodPrefs, t],
   );
   const pad = useMemo(() => buildPad(ctx, state.slips), [ctx, state.slips]);
   const stampedCount = stampedToday(ctx, state.slips).length;

@@ -136,7 +136,7 @@ const RULES = [
     tab: 'care',
     make: (c) => {
       if (c.mode !== 'adult' && c.mode !== 'teen') return null;
-      const last = lastAt((c.readings || []).filter((r) => !r.demo));
+      const last = lastAt((c.readings || []));
       if (last == null || c.nowMs - last < 24 * HOUR) return null;
       return { priority: 46, params: {} };
     },

@@ -1,5 +1,6 @@
 import { sanitizePlan, planPatch, planFromDraft, draftFromPlan } from '../src/carePlan';
-import { reducer, initialState } from '../src/state/reducer';
+import { reducer } from '../src/state/reducer';
+import { seededState as initialState } from '../testSupport/fixtures';
 import { strings } from '../src/i18n/strings';
 
 const plan = sanitizePlan({

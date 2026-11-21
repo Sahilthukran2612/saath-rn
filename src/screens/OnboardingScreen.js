@@ -24,7 +24,7 @@ export default function OnboardingScreen() {
   const [name, setName] = useState(state.profile.name || '');
   const [condition, setCondition] = useState(state.profile.condition || '');
   const set = (key, value) => dispatch({ type: 'SET', key, value });
-  const real = state.members.filter((m) => !m.demo);
+  const real = state.members;
 
   const next = () => {
     if (step === 1)
@@ -112,7 +112,7 @@ export default function OnboardingScreen() {
             <ListRow
               title={t('call.title')}
               subtitle={
-                !callsAvailable && !state.demo
+                !callsAvailable
                   ? t('call.unavailable')
                   : state.autoCallDenied
                     ? t('call.denied')
@@ -125,7 +125,7 @@ export default function OnboardingScreen() {
             <ListRow
               title={t('sms.title')}
               subtitle={
-                !smsAvailable && !state.demo
+                !smsAvailable
                   ? t('sms.unavailable')
                   : state.autoSmsDenied
                     ? t('sms.denied')
@@ -138,7 +138,6 @@ export default function OnboardingScreen() {
                   onValueChange={async (on) => {
                     set('autoSmsDenied', false);
                     if (!on) return set('autoSms', false);
-                    if (!smsAvailable && state.demo) return set('autoSms', true);
                     if (await askSmsPermission()) return set('autoSms', true);
                     set('autoSms', false);
                     set('autoSmsDenied', true);

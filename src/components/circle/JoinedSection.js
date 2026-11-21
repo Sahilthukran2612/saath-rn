@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { BigButton, Body, Caption, Card } from '../ui';
+import { Body, Caption } from '../ui';
 import { Avatar, Badge, ListGroup, Segmented } from '../kit';
 import { useStore } from '../../state/store';
 import useJoinedDial, { sameSomeone } from '../../state/useJoinedDial';
@@ -8,11 +8,11 @@ import { colors } from '../../theme';
 
 // People who joined this circle from their own phones, and what each of them sees. Changing the dial
 // here is what the server checks before it shows that person anything (row-level security): it is the
-// real control, not a label. In demo mode there is no server, so the change stays on this phone.
+// real control, not a label.
 export default function JoinedSection() {
   const { state, dispatch, t } = useStore();
   const { setDial, msg, live } = useJoinedDial();
-  if (!live && !state.demo) return null;
+  if (!live) return null;
   // People already in the list above (same name and role as a contact I added) are not repeated here.
   const joinedOnly = state.joined.filter((j) => !state.members.some((c) => sameSomeone(c, j)));
 
@@ -52,16 +52,6 @@ export default function JoinedSection() {
         </ListGroup>
       )}
       {msg ? <Body bold>{msg}</Body> : null}
-      {state.demo && !live ? (
-        <Card tone="haldi" style={{ gap: 8 }}>
-          <Caption style={{ color: colors.ink }}>{t('demo.circleNote')}</Caption>
-          <BigButton
-            kind="quiet"
-            label={t('demo.joinedAdd')}
-            onPress={() => dispatch({ type: 'DEMO_JOINED_ADD' })}
-          />
-        </Card>
-      ) : null}
     </View>
   );
 }

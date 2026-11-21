@@ -2,7 +2,8 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native';
 import { StoreProvider, useStore } from '../src/state/store';
 import AppShell from '../src/AppShell';
-import { initialState, productionState, reducer } from '../src/state/reducer';
+import { productionState, reducer } from '../src/state/reducer';
+import { seededState as initialState } from '../testSupport/fixtures';
 import { CFG } from '../src/logic';
 import { callSeconds } from '../src/services/calls';
 import * as callsService from '../src/services/calls';
@@ -32,7 +33,6 @@ beforeEach(() => {
 
 describe('a real install starts empty', () => {
   test('no demo people, no fake numbers, no invented readings or costs, setup not done', () => {
-    expect(productionState.demo).toBe(false);
     expect(productionState.onboarded).toBe(false);
     expect(productionState.members).toEqual([]);
     expect(productionState.readings).toEqual([]);
@@ -40,11 +40,6 @@ describe('a real install starts empty', () => {
     expect(productionState.meds.name).toBe('');
     expect(JSON.stringify(productionState)).not.toMatch(/9000000/);
     expect(JSON.stringify(productionState)).not.toMatch(/\(demo\)/);
-  });
-  test('the development build and the tests keep the demo data', () => {
-    expect(initialState.demo).toBe(true);
-    expect(initialState.members.length).toBeGreaterThan(0);
-    expect(initialState.onboarded).toBe(true);
   });
   test('the automatic call, SMS and siren all start off', () => {
     expect([productionState.autoCall, productionState.autoSms, productionState.siren]).toEqual([false, false, false]);
@@ -93,37 +88,6 @@ describe('emergency contacts', () => {
     const s = add(reducer({ ...productionState, hydrated: true }, { type: 'DEMO_ON' }));
     expect(s.members.filter((m) => m.demo)).toEqual([]);
     expect(s.members.map((m) => m.name)).toEqual(['Asha']);
-  });
-});
-
-describe('demo mode on a real install', () => {
-  const real = { ...productionState, hydrated: true };
-  test('turning it on loads flagged demo data; turning it off removes exactly that', () => {
-    const on = reducer(real, { type: 'DEMO_ON' });
-    expect(on.demo).toBe(true);
-    expect(on.members.length).toBeGreaterThan(0);
-    expect(on.members.every((m) => m.demo)).toBe(true);
-    const off = reducer(on, { type: 'DEMO_OFF' });
-    expect(off.demo).toBe(false);
-    expect(off.members).toEqual([]);
-    expect(off.readings).toEqual([]);
-    expect(off.budget).toEqual([]);
-    expect(off.meds.name).toBe('');
-  });
-  test('real contacts, readings and costs survive demo on and off', () => {
-    let s = reducer(real, { type: 'CONTACT_ADD', id: 'c1', name: 'Asha', phone: '9876543210', role: 'family' });
-    s = reducer(s, { type: 'ADD_READING', mgdl: 140, at: 5, id: 'r1' });
-    s = reducer(s, { type: 'DEMO_ON' });
-    expect(s.members.map((m) => m.name)).toEqual(['Asha']); // demo people are not added next to real ones
-    s = reducer(s, { type: 'DEMO_OFF' });
-    expect(s.members.map((m) => m.name)).toEqual(['Asha']);
-    expect(s.readings.some((r) => r.id === 'r1')).toBe(true);
-  });
-  test('turning demo off also removes the demo person I look after', () => {
-    let s = reducer(real, { type: 'DEMO_ON' });
-    s = reducer(s, { type: 'DEMO_CIRCLE_ADD', at: 1_000_000 });
-    expect(s.circles.length).toBe(3); // a guardian, a neighbour and a doctor demo patient
-    expect(reducer(s, { type: 'DEMO_OFF' }).circles).toEqual([]);
   });
 });
 
@@ -323,13 +287,6 @@ describe('automatic calls: on the alert screen', () => {
     expect(callsService.placeCall).not.toHaveBeenCalled();
   });
 
-  test('demo mode never places a real call, even if the module is there; it shows what it would do', async () => {
-    mockCallsAvailable = true;
-    await mount({ demo: true, autoCall: true, alert: alert() });
-    expect(callsService.placeCall).not.toHaveBeenCalled();
-    expect(screen.getByText('Demo: would call Asha now')).toBeTruthy();
-  });
-
   test('a contact with no number is skipped, and "I’m OK" ends everything', async () => {
     mockCallsAvailable = true;
     await mountWith({ demo: false, autoCall: true, alert: alert({ chain: [{ ...asha, phone: '' }] }) });
@@ -365,15 +322,6 @@ describe('the automatic-call switch', () => {
     expect(screen.getAllByText('This needs the installed Saath app, not Expo Go.').length).toBeGreaterThan(0);
     await fireEvent.press(screen.getByLabelText('Call my contacts automatically: off'));
     await waitFor(() => expect(screen.getByLabelText('Call my contacts automatically: off')).toBeTruthy());
-  });
-  test('in demo mode it turns on without the module and says it is a demo', async () => {
-    mockCallsAvailable = false;
-    await mount({ demo: true });
-    await openMe();
-    expect(screen.getByText('Demo: calls are shown on screen, not placed.')).toBeTruthy();
-    await fireEvent.press(screen.getByLabelText('Call my contacts automatically: off'));
-    await waitFor(() => expect(screen.getByLabelText('Call my contacts automatically: on')).toBeTruthy());
-    expect(callsService.askCallPermissions).not.toHaveBeenCalled();
   });
   test('the Safety trial card warns that a real run reaches real contacts', async () => {
     await mount({ demo: false, autoCall: true });

@@ -17,12 +17,10 @@ afterEach(() => jest.restoreAllMocks());
 const signedIn = { phone: '9876543210', userId: 'u', access: 'A', refresh: 'R', householdId: 'h' };
 
 describe('sign-up asks who you are', () => {
-  test('the care-giver setup offers guardian, neighbour and ASHA, and never doctor', async () => {
+  test('a care-giver never picks a role: the person they look after gives it in the invite', async () => {
     await mount({ ...productionState, usage: 'member' });
-    ['Guardian', 'Neighbour', 'ASHA'].forEach((l) => expect(screen.getByLabelText(l)).toBeTruthy());
-    expect(screen.queryByLabelText('Doctor')).toBeNull();
-    await fireEvent.press(screen.getByLabelText('ASHA'));
-    expect(screen.getByLabelText('ASHA').props.accessibilityState.selected).toBe(true);
+    expect(await screen.findByText('About you')).toBeTruthy();
+    ['Guardian', 'Neighbour', 'ASHA', 'Doctor'].forEach((l) => expect(screen.queryByLabelText(l)).toBeNull());
   });
 
   test('the first screen has a separate door for doctors, and a doctor setup has no role choice', async () => {

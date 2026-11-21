@@ -80,7 +80,7 @@ function MemberRow({ m, last }) {
             <Toggle value={m.shareContact} label={t('shareMyNumber')} onValueChange={(on) => dispatch({ type: 'SET_SHARE_CONTACT', id: m.id, on })} />
           </View>
         ) : null}
-        {isPerson && !m.demo ? (
+        {isPerson ? (
           <BigButton
             kind="outlined"
             icon={X}
