@@ -1,6 +1,6 @@
 # Generated suggestion cards and the Saath helper
 
-Two features use a language model (Grok, from xAI): five to seven generated **suggestion cards** on Today, and a
+Two features use a language model (Llama-family and open models served by Groq, which has a free tier): five to seven generated **suggestion cards** on Today, and a
 floating **helper** chat. Both are on by default and can be switched off in Me ("Smart cards and helper").
 Both work without it: with no internet, no server or the switch off, Today shows the rule-based cards
 (`src/suggestions.js`) and the helper button is hidden or says it needs internet.
@@ -11,12 +11,12 @@ Both work without it: with no internet, no server or the switch off, Today shows
 |---|---|
 | Safety guard on every reply, emergency detection, anonymous summary, card handling, pad merge, chat window | Built, 30 tests (`__tests__/ai.test.js`), English and Hindi |
 | Relay function (`docs/supabase/functions/ai/index.ts`) and cap (`docs/supabase/ai.sql`) | Written. **Not deployed, never run against xAI.** |
-| Real replies from Grok, and how well the model follows the rules | **Not seen.** Needs the deploy below |
+| Real replies, and how well the model follows the rules | Tried by hand against Groq with one card request, one Hindi question and one dose question (refused). Not yet seen inside the app |
 
 ## How it is wired
 
 ```
-phone  -- anonymous summary / chat turns -->  Supabase Edge Function "ai"  -->  api.x.ai (key lives here only)
+phone  -- anonymous summary / chat turns -->  Supabase Edge Function "ai"  -->  api.groq.com (key lives here only)
 phone  <-- cards / reply  --                  (limits per address and per day)
 phone: checks every card and reply again (src/ai/guard.js) before showing it
 ```
@@ -36,9 +36,9 @@ name, phone number, medicine name or dose, sugar number, contact, location or se
 
 ## To switch it on (needs you)
 
-1. Get an xAI API key. **This is paid, so it is outside Saath's free-only rule.** Set a spending limit in the xAI console.
+1. Get a Groq API key at console.groq.com (starts `gsk_`). The free tier has rate limits; a heavy day can hit them, and then the app falls back to the rule-based cards.
 2. Run `docs/supabase/ai.sql` in the Supabase SQL editor (or `npx supabase db query --remote --yes -f docs/supabase/ai.sql`).
-3. `npx supabase secrets set XAI_API_KEY=...` (optionally `XAI_MODEL`, `AI_DAILY_CAP`, `AI_HOURLY_PER_IP`).
+3. `npx supabase secrets set GROQ_API_KEY=...` (optionally `GROQ_MODEL`, `AI_DAILY_CAP`, `AI_HOURLY_PER_IP`).
 4. `npx supabase functions deploy ai --no-verify-jwt` (the app calls it with the project's public key, like the rest of the API).
 5. Open the app, Today, and check the cards and the helper. Then have a clinician and a Hindi speaker read a few dozen
    generated cards and replies. Model output is not covered by `docs/REVIEW_SHEET.md`.

@@ -1,4 +1,5 @@
-// Saath AI relay: a Supabase Edge Function. The app never talks to xAI directly, so the API key is never in the APK.
+// Saath AI relay: a Supabase Edge Function. The app never talks to the model provider directly, so the API key is
+// never in the APK. The provider is Groq (OpenAI-compatible, has a free tier).
 //
 //   POST /functions/v1/ai   { kind: 'cards' | 'chat', ctx: {...}, messages?: [{ role, content }] }
 //   -> cards: { cards: [{ title, body, icon, tab }] }     chat: { reply: string }
@@ -7,12 +8,12 @@
 //   - only the anonymous summary fields listed in `pick` are used; anything else the caller sends is dropped
 //   - a system prompt that forbids doses, diagnoses and reading interpretation, and sends emergencies to the alert
 //   - small token limits, a per-address hourly limit, and a global daily cap (table ai_usage, see ai.sql)
-// Secrets (supabase secrets set): XAI_API_KEY. Optional: XAI_MODEL, AI_DAILY_CAP, AI_HOURLY_PER_IP.
+// Secrets (supabase secrets set): GROQ_API_KEY. Optional: GROQ_MODEL, AI_DAILY_CAP, AI_HOURLY_PER_IP.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
-const XAI_KEY = Deno.env.get('XAI_API_KEY') ?? '';
-const MODEL = Deno.env.get('XAI_MODEL') ?? 'grok-3-mini';
+const API_KEY = Deno.env.get('GROQ_API_KEY') ?? '';
+const MODEL = Deno.env.get('GROQ_MODEL') ?? 'openai/gpt-oss-120b';
 const DAILY_CAP = Number(Deno.env.get('AI_DAILY_CAP') ?? '2000');
 const HOURLY_PER_IP = Number(Deno.env.get('AI_HOURLY_PER_IP') ?? '40');
 
@@ -69,25 +70,27 @@ async function underDailyCap(): Promise<boolean> {
 }
 
 async function grok(messages: { role: string; content: string }[], asJson: boolean, maxTokens: number) {
-  const res = await fetch('https://api.x.ai/v1/chat/completions', {
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${XAI_KEY}` },
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${API_KEY}` },
     body: JSON.stringify({
       model: MODEL,
       messages,
       temperature: 0.7,
+      // the model thinks a little before it answers; a low effort keeps replies fast and cheap
+      reasoning_effort: 'low',
       max_tokens: maxTokens,
       ...(asJson ? { response_format: { type: 'json_object' } } : {}),
     }),
   });
-  if (!res.ok) throw new Error(`xai ${res.status}`);
+  if (!res.ok) throw new Error(`llm ${res.status}`);
   const data = await res.json();
   return String(data?.choices?.[0]?.message?.content ?? '');
 }
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return json({ error: 'method' }, 405);
-  if (!XAI_KEY) return json({ error: 'not_configured' }, 503);
+  if (!API_KEY) return json({ error: 'not_configured' }, 503);
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
   if (limited(ip)) return json({ error: 'busy' }, 429);
 
@@ -110,8 +113,9 @@ Deno.serve(async (req) => {
 Write between 5 and 7 small suggestion cards for today for this person. Context (anonymous): ${JSON.stringify(ctx)}.
 Fit the time of day. If phase is "crisis" or "new", keep every card gentle and about rest, company or food only.
 They like: ${JSON.stringify(slugs((body.ctx as Record<string, unknown>).likes))}. They tend to skip: ${JSON.stringify(slugs((body.ctx as Record<string, unknown>).avoids))}. Lean toward what they like, avoid repeating what they skip.
-Reply with JSON only: {"cards":[{"title": "max 5 words","body":"one or two short sentences","icon":"one of ${ICONS.join(', ')}","tab":"one of ${TABS.join(', ')} or null"}]}`;
-      const text = await grok([{ role: 'system', content: prompt }, { role: 'user', content: 'Make the cards.' }], true, 700);
+Reply with JSON only: {"cards":[{"title": "max 5 words","body":"one or two short sentences","icon":"one of ${ICONS.join(', ')}","tab":"one of ${TABS.join(', ')} or null"}]}
+Use a tab only when the card is directly about it, otherwise null: care = medicine list, sugar log, stock and charts; plan = food guide, foot check, handover, passport; circle = the people who help them; safety = the alert and fall watching. A card about water, walking, stretching, sleep or a call is null.`;
+      const text = await grok([{ role: 'system', content: prompt }, { role: 'user', content: 'Make the cards.' }], true, 1200);
       const parsed = JSON.parse(text);
       const cards = (Array.isArray(parsed?.cards) ? parsed.cards : []).slice(0, 7).map((c: Record<string, unknown>) => ({
         title: String(c.title ?? '').slice(0, 48),
@@ -129,7 +133,7 @@ Reply with JSON only: {"cards":[{"title": "max 5 words","body":"one or two short
     }));
     if (history.length === 0 || history[history.length - 1].role !== 'user') return json({ error: 'bad_request' }, 400);
     const system = `${RULES}\nContext (anonymous): ${JSON.stringify(ctx)}.\nIf asked how to use the app: the tabs are Today, Circle (people who help you, with a privacy dial), Safety (the alert and fall watching), Care (medicine list, sugar log, charts) and Plan (food, handover, passport). Me is behind the round avatar at the top.`;
-    const reply = await grok([{ role: 'system', content: system }, ...history], false, 260);
+    const reply = await grok([{ role: 'system', content: system }, ...history], false, 500);
     return json({ reply });
   } catch {
     return json({ error: 'unavailable' }, 502);
