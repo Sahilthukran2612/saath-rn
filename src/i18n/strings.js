@@ -486,7 +486,13 @@ export const strings = {
     'acc.phone': 'Your mobile number',
     'join.link': 'I have an invite code',
     'inv.card': 'People who help you',
-    'pt.title': 'People I look after',
+    'pt.title': 'People I look after',
+    'rc.doctor': 'I am a doctor',
+    'rc.doctorNote': 'Your patients only. You add them, plan their care, and see how they are doing.',
+    'mo.nameTitleDoctor': 'About you, doctor',
+    'ob.nameDoctor': 'Your name, as patients will see it',
+    'pt.hiddenMember': '{n} invitation(s) were sent to you as a doctor. Use a doctor account for those.',
+    'pt.hiddenDoctor': '{n} invitation(s) were not sent to you as a doctor, so they are not shown here. Doctors only see their patients.',
     'sheet.close': 'Close',
     'plate.alt': 'Plate model',
     'acc.open': 'Sign in or create account',
@@ -1199,7 +1205,13 @@ export const strings = {
     'acc.phone': 'आपका मोबाइल नंबर',
     'join.link': 'मेरे पास न्योते का कोड है',
     'inv.card': 'लोग जो आपकी मदद करते हैं',
-    'pt.title': 'जिनकी मैं देखभाल करता हूँ',
+    'pt.title': 'जिनकी मैं देखभाल करता हूँ',
+    'rc.doctor': 'मैं डॉक्टर हूँ',
+    'rc.doctorNote': 'सिर्फ़ आपके मरीज़। आप उन्हें जोड़ते हैं, उनकी देखभाल की योजना बनाते हैं और उनका हाल देखते हैं।',
+    'mo.nameTitleDoctor': 'आपके बारे में, डॉक्टर साहब',
+    'ob.nameDoctor': 'आपका नाम, जैसा मरीज़ों को दिखेगा',
+    'pt.hiddenMember': '{n} न्योता आपको डॉक्टर के रूप में भेजा गया था। उसके लिए डॉक्टर खाता इस्तेमाल करें।',
+    'pt.hiddenDoctor': '{n} न्योता आपको डॉक्टर के रूप में नहीं भेजा गया था, इसलिए यहाँ नहीं दिखता। डॉक्टर सिर्फ़ अपने मरीज़ देखते हैं।',
     'sheet.close': 'बंद करें',
     'plate.alt': 'थाली का नमूना',
     'acc.open': 'साइन इन या खाता बनाएँ',

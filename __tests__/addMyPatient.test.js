@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Linking, Share } from 'react-native';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import { StoreProvider } from '../src/state/store';
@@ -17,16 +17,24 @@ afterEach(() => jest.restoreAllMocks());
 const signedIn = { phone: '9876543210', userId: 'u', access: 'A', refresh: 'R', householdId: 'h' };
 
 describe('sign-up asks who you are', () => {
-  test('the care-giver setup offers guardian, neighbour, ASHA and doctor, and remembers the choice', async () => {
+  test('the care-giver setup offers guardian, neighbour and ASHA, and never doctor', async () => {
     await mount({ ...productionState, usage: 'member' });
-    ['Guardian', 'Neighbour', 'ASHA', 'Doctor'].forEach((l) => expect(screen.getByLabelText(l)).toBeTruthy());
-    await fireEvent.press(screen.getByLabelText('Doctor'));
-    expect(screen.getByLabelText('Doctor').props.accessibilityState.selected).toBe(true);
+    ['Guardian', 'Neighbour', 'ASHA'].forEach((l) => expect(screen.getByLabelText(l)).toBeTruthy());
+    expect(screen.queryByLabelText('Doctor')).toBeNull();
+    await fireEvent.press(screen.getByLabelText('ASHA'));
+    expect(screen.getByLabelText('ASHA').props.accessibilityState.selected).toBe(true);
+  });
+
+  test('the first screen has a separate door for doctors, and a doctor setup has no role choice', async () => {
+    await mount(productionState);
+    await fireEvent.press(await screen.findByLabelText('I am a doctor'));
+    expect(await screen.findByText('About you, doctor')).toBeTruthy();
+    ['Guardian', 'Neighbour', 'ASHA'].forEach((l) => expect(screen.queryByLabelText(l)).toBeNull());
   });
 });
 
 describe('a doctor adds a patient by showing a card', () => {
-  const doctor = { ...productionState, usage: 'member', onboarded: true, cloud: signedIn, profile: { ...productionState.profile, name: 'Dr Rao', myRole: 'clinician' } };
+  const doctor = { ...productionState, usage: 'doctor', onboarded: true, cloud: signedIn, profile: { ...productionState.profile, name: 'Dr Rao' } };
 
   test('a doctor sees My patients and an Add my patient button that shows a card to scan', async () => {
     await mount(doctor);
@@ -42,7 +50,7 @@ describe('a doctor adds a patient by showing a card', () => {
   });
 
   test('a guardian sees the plain wording, not the doctor wording', async () => {
-    await mount({ ...doctor, profile: { ...doctor.profile, myRole: 'family' } });
+    await mount({ ...doctor, usage: 'member', profile: { ...doctor.profile, myRole: 'family' } });
     expect(screen.getByText('People I look after')).toBeTruthy();
     expect(screen.getByLabelText('Show my card to add someone')).toBeTruthy();
   });

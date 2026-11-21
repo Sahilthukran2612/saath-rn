@@ -12,11 +12,12 @@ npx expo start      # Expo Go: demo only, native features are missing
 For the real app (calls, SMS, lock-screen alert, background watching, push) build the standalone APK on Windows with `scripts/build-apk.ps1 -Release`. It produces `dist\saath.apk`. See `docs/ARCHITECTURE.md` for why the script exists.
 Backend setup (free Supabase project, Firebase push) is in `docs/supabase/SETUP.md` and `docs/PUSH.md`. Without a `.env` the app runs fully offline.
 
-## Two kinds of phone
+## Three kinds of phone
 - **"I need care"**: the person. Sets up emergency contacts, gets the fall/quiet watching, reminders, alerts.
-- **"I look after someone"**: a guardian, neighbour, ASHA worker or doctor. They say which at sign-up, create their own account, and join with an invite code (typed, or scanned as a QR) that is bound to their phone number. They see only what each person's Privacy Dial allows. The role belongs to each person they look after, so one phone can be a guardian for one person, a neighbour for another and a doctor for a third. They get one screen, "People I look after" (a doctor's says "My patients"), most urgent first.
+- **"I am a doctor"**: a separate kind of phone. A doctor is only ever a doctor: no guardian, neighbour or ASHA role, and invitations that name another role are not shown on a doctor phone. Their one screen is "My patients"; they add patients (**Add my patient**) and publish care plans.
+- **"I look after someone"**: a guardian, neighbour or ASHA worker. They say which at sign-up, create their own account, and join with an invite code (typed, or scanned as a QR) that is bound to their phone number. They see only what each person's Privacy Dial allows. The role belongs to each person they look after, so one phone can be a guardian for one person and a neighbour for another. They get one screen, "People I look after", most urgent first.
 
-How people are added: the person taps **Add a person** once (name, number, role). That makes them an emergency contact and an invite at the same time, with a QR to scan. A doctor can instead show **their own card** (**Add my patient**); the person scans it, confirms once, and shows a code back. No details are typed twice.
+How people are added: the person taps **Add a person** once (name, number, role). That makes them an emergency contact and an invite at the same time, with a QR to scan. A doctor shows **their own card** (**Add my patient**); the person scans it, confirms once, and shows a code back. No details are typed twice.
 
 Details: `docs/ROLES.md` (how each person gets in) and `docs/RBAC.md` (who can see what, enforced by the database).
 

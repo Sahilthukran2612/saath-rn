@@ -502,9 +502,11 @@ function baseReducer(state, a) {
         { household_id: 'demo-chacha', role: 'neighbour', dial: 0, time_off: false, person_name: 'Chacha (demo)' },
         { household_id: 'demo-sita', role: 'clinician', dial: 2, time_off: false, person_name: 'Sita (demo)' },
       ];
+      // A doctor's phone gets only a patient; a guardian's, neighbour's or ASHA's gets only the people they look after.
+      const shown = state.usage === 'doctor' ? demo.filter((c) => c.role === 'clinician') : state.usage === 'member' ? demo.filter((c) => c.role !== 'clinician') : demo;
       return {
         ...state,
-        circles: [...state.circles, ...demo],
+        circles: [...state.circles, ...shown],
         feeds: {
           ...state.feeds,
           'demo-amma': [
@@ -519,7 +521,8 @@ function baseReducer(state, a) {
         },
       };
     }    case 'DEMO_CIRCLE_EVENT': {
-      const feed = state.feeds['demo-amma'];
+      const id = a.id || 'demo-amma';
+      const feed = state.feeds[id];
       if (!feed) return state;
       const safety = a.kind === 'fall' || a.kind === 'quiet' || a.kind === 'false_alarm';
       const e = {
@@ -529,7 +532,7 @@ function baseReducer(state, a) {
         detail: null,
         created_at: new Date(a.at).toISOString(),
       };
-      return { ...state, feeds: { ...state.feeds, 'demo-amma': [e, ...feed].slice(0, 30) } };
+      return { ...state, feeds: { ...state.feeds, [id]: [e, ...feed].slice(0, 30) } };
     }
     case 'HEART_DEVICE':
       return { ...state, heart: { device: a.device, readings: [], contact: true } };

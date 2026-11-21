@@ -13,14 +13,14 @@ const mount = (preload) =>
 const circle = { household_id: 'demo-amma', role: 'clinician', dial: 1, time_off: false, person_name: 'Amma (demo)' };
 
 describe('a clinician publishes a care plan and the person sees it', () => {
-  test('the builder is only for a clinician in that circle', async () => {
+  test('a guardian never sees the builder, and a doctor phone never lists a circle where it is not the doctor', async () => {
     await mount({ usage: 'member', demo: true, circles: [{ ...circle, role: 'family' }] });
     await fireEvent.press(await screen.findByLabelText('Amma (demo)'));
     expect(screen.queryByText('Publish plan')).toBeNull();
   });
 
   test('a doctor publishes a plan from the patient panel (demo mode applies it locally and says so)', async () => {
-    await mount({ usage: 'member', demo: true, circles: [circle] });
+    await mount({ usage: 'doctor', demo: true, circles: [circle] });
     await fireEvent.press(await screen.findByLabelText('Amma (demo)'));
     await fireEvent.press(await screen.findByLabelText('Edit care plan')); // the builder opens in a drawer
     await fireEvent.changeText(await screen.findByLabelText('Medicine name'), 'Metformin');

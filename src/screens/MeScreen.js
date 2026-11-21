@@ -22,6 +22,8 @@ import { foregroundAvailable } from '../services/foreground';
 import { askSmsPermission, smsAvailable } from '../services/sms';
 import { callsAvailable } from '../services/calls';
 import useChoices from '../state/useChoices';
+import { CARE_ROLES } from '../components/patients/roles';
+import { isDoctor, looksAfterOthers } from '../who';
 import { colors } from '../theme';
 
 // The label gets the full width and the selector sits underneath, so neither is squeezed at large text.
@@ -104,7 +106,8 @@ export default function MeScreen() {
   const { state, dispatch, t } = useStore();
   const set = (key, value) => dispatch({ type: 'SET', key, value });
   const choices = useChoices();
-  const member = state.usage === 'member'; // looks after someone, has no sensors or emergency contacts of their own
+  const member = looksAfterOthers(state);
+  const doctor = isDoctor(state); // looks after someone, has no sensors or emergency contacts of their own
   return (
     <ScrollView
       keyboardShouldPersistTaps="handled"
@@ -115,7 +118,7 @@ export default function MeScreen() {
         <View style={{ flex: 1, gap: 4 }}>
           <Title style={{ fontSize: 28 }}>{state.profile.name || t('tabMe')}</Title>
           <Badge
-            label={member ? t(`role.${state.profile.myRole || 'family'}`) : t(`mode.${state.mode}`)}
+            label={doctor ? t('role.clinician') : member ? t(`role.${state.profile.myRole || 'family'}`) : t(`mode.${state.mode}`)}
             tone="indigo"
           />
         </View>
@@ -197,16 +200,18 @@ export default function MeScreen() {
       <Reveal index={1}>
         <SectionTitle>{t('use.title')}</SectionTitle>
         <View style={{ height: 8 }} />
-        <Segmented
-          value={state.usage || 'person'}
-          onChange={(v) => set('usage', v)}
-          options={['person', 'member', 'both'].map((v) => ({ value: v, label: t(`use.${v}`) }))}
-        />
-        {state.usage && state.usage !== 'person' ? (
+        {doctor ? null : (
+          <Segmented
+            value={state.usage || 'person'}
+            onChange={(v) => set('usage', v)}
+            options={['person', 'member', 'both'].map((v) => ({ value: v, label: t(`use.${v}`) }))}
+          />
+        )}
+        {state.usage === 'member' || state.usage === 'both' ? (
           <View style={{ gap: 8, marginTop: 14 }}>
             <SectionTitle>{t('mo.who')}</SectionTitle>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              {['family', 'neighbour', 'asha', 'clinician'].map((r) => (
+              {CARE_ROLES.map((r) => (
                 <Chip
                   key={r}
                   label={t(`role.${r}`)}

@@ -50,6 +50,7 @@ export default function RoleChoiceScreen() {
       />
       <Choice doodle="walker" title={t('rc.person')} note={t('rc.personNote')} onPress={() => pick('person')} />
       <Choice doodle="phone" title={t('rc.member')} note={t('rc.memberNote')} onPress={() => pick('member')} />
+      <Choice doodle="strip" title={t('rc.doctor')} note={t('rc.doctorNote')} onPress={() => pick('doctor')} />
       <Caption>{t('rc.change')}</Caption>
     </ScrollView>
   );

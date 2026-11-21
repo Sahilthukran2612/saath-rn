@@ -8,6 +8,8 @@ import SetupProgress from '../components/SetupProgress';
 import Account from '../components/me/Account';
 import JoinCard from '../components/circle/JoinCard';
 import { useStore } from '../state/store';
+import { CARE_ROLES } from '../components/patients/roles';
+import { isDoctor } from '../who';
 import { colors } from '../theme';
 
 const STEPS = 3;
@@ -18,6 +20,7 @@ const STEPS = 3;
 // those belong to the person.
 export default function MemberOnboardingScreen() {
   const { state, dispatch, t } = useStore();
+  const doctor = isDoctor(state);
   const [step, setStep] = useState(0);
   const [name, setName] = useState(state.profile.name || '');
   const signedIn = Boolean(state.cloud.access);
@@ -36,19 +39,23 @@ export default function MemberOnboardingScreen() {
 
       {step === 0 ? (
         <View style={{ gap: 14 }}>
-          <Title style={{ fontSize: 28 }}>{t('mo.nameTitle')}</Title>
-          <Field label={t('ob.name')} value={name} onChangeText={setName} />
-          <SectionTitle>{t('mo.who')}</SectionTitle>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-            {['family', 'neighbour', 'asha', 'clinician'].map((r) => (
-              <Chip
-                key={r}
-                label={t(`role.${r}`)}
-                active={(state.profile.myRole || 'family') === r}
-                onPress={() => dispatch({ type: 'PROFILE_SET', patch: { myRole: r } })}
-              />
-            ))}
-          </View>
+          <Title style={{ fontSize: 28 }}>{t(doctor ? 'mo.nameTitleDoctor' : 'mo.nameTitle')}</Title>
+          <Field label={t(doctor ? 'ob.nameDoctor' : 'ob.name')} value={name} onChangeText={setName} />
+          {doctor ? null : (
+            <>
+              <SectionTitle>{t('mo.who')}</SectionTitle>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                {CARE_ROLES.map((r) => (
+                  <Chip
+                    key={r}
+                    label={t(`role.${r}`)}
+                    active={(state.profile.myRole || 'family') === r}
+                    onPress={() => dispatch({ type: 'PROFILE_SET', patch: { myRole: r } })}
+                  />
+                ))}
+              </View>
+            </>
+          )}
         </View>
       ) : null}
 

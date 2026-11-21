@@ -11,9 +11,10 @@ import JoinCard from '../circle/JoinCard';
 import PatientPanel from './PatientPanel';
 import AddMyPatient from './AddMyPatient';
 import { visitStatus } from '../../visits';
+import { circlesFor, hiddenCount, isDoctor } from '../../who';
 import { colors, fonts, radii } from '../../theme';
 
-const ROLE_ORDER = ['family', 'clinician', 'asha', 'neighbour'];
+const ROLE_ORDER = ['family', 'asha', 'neighbour'];
 
 // Joining is the less common path, so it sits behind one plain link.
 function JoinLink() {
@@ -34,12 +35,15 @@ export default function PatientsHome() {
   const nameOf = (c) => c.person_name || t('cf.someone');
   const alertOf = (c) => pendingAlert(state.feeds[c.household_id] || [], state.seen[c.household_id], now);
 
-  const circle = state.circles.find((c) => c.household_id === open);
+  const circle = circlesFor(state).find((c) => c.household_id === open);
   if (circle) return <PatientPanel circle={circle} onBack={() => setOpen(null)} />;
 
-  const all = state.circles;
+  const all = circlesFor(state);
+  const hidden = hiddenCount(state);
+  const doctor = isDoctor(state);
+  const demoTarget = all.find((c) => String(c.household_id).startsWith('demo-'));
   const needing = all.filter(alertOf).length;
-  const roles = ROLE_ORDER.filter((r) => all.some((c) => c.role === r));
+  const roles = doctor ? [] : ROLE_ORDER.filter((r) => all.some((c) => c.role === r));
   const grouped = roles.length > 1;
 
   const row = (c, i, list) => {
@@ -81,7 +85,7 @@ export default function PatientsHome() {
         accessibilityRole="header"
       >
         <Text style={{ fontFamily: fonts.semi, fontSize: 16, lineHeight: 22, color: '#EEF3FF' }}>
-          {t(state.profile.myRole === 'clinician' ? 'pt.titleDoctor' : 'pt.title')}
+          {t(doctor ? 'pt.titleDoctor' : 'pt.title')}
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 10 }}>
           <Text style={{ fontFamily: fonts.bold, fontSize: 56, lineHeight: 64, color: colors.white }}>{all.length}</Text>
@@ -117,12 +121,17 @@ export default function PatientsHome() {
         <Card tone="haldi" style={{ gap: 10 }}>
           <Caption style={{ color: colors.ink }}>{t('demo.circleNote')}</Caption>
           <BigButton kind="quiet" label={t('demo.circleAdd')} onPress={() => dispatch({ type: 'DEMO_CIRCLE_ADD', at: nowMs() })} />
-          {state.circles.some((c) => c.household_id === 'demo-amma') ? (
+          {demoTarget ? (
             <>
-              <BigButton kind="quiet" label={t('demo.circleFall')} onPress={() => dispatch({ type: 'DEMO_CIRCLE_EVENT', kind: 'fall', at: nowMs() })} />
-              <BigButton kind="quiet" label={t('demo.circleOk')} onPress={() => dispatch({ type: 'DEMO_CIRCLE_EVENT', kind: 'im_ok', at: nowMs() })} />
+              <BigButton kind="quiet" label={t('demo.circleFall')} onPress={() => dispatch({ type: 'DEMO_CIRCLE_EVENT', id: demoTarget.household_id, kind: 'fall', at: nowMs() })} />
+              <BigButton kind="quiet" label={t('demo.circleOk')} onPress={() => dispatch({ type: 'DEMO_CIRCLE_EVENT', id: demoTarget.household_id, kind: 'im_ok', at: nowMs() })} />
             </>
           ) : null}
+        </Card>
+      ) : null}
+      {hidden > 0 ? (
+        <Card tone="haldi">
+          <Caption style={{ color: colors.ink }}>{t(doctor ? 'pt.hiddenDoctor' : 'pt.hiddenMember').replace('{n}', String(hidden))}</Caption>
         </Card>
       ) : null}
       <AddMyPatient />

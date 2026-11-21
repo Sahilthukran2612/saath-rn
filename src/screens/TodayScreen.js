@@ -29,6 +29,7 @@ import Stamp, { StampMark } from '../components/Stamp';
 import Perf from '../components/Perf';
 import Doodle from '../components/doodles';
 import { useStore } from '../state/store';
+import { looksAfterOthers } from '../who';
 import { adviceText } from '../i18n/strings';
 import { can, glucoseAdvice } from '../logic';
 import { budgetSummary, refillStatus } from '../care';
@@ -51,7 +52,7 @@ function Greeting() {
     day: 'numeric',
     month: 'long',
   });
-  const person = state.role === 'person' && state.usage !== 'member';
+  const person = state.role === 'person' && !looksAfterOthers(state);
   const total = state.tasks.length;
   const done = state.tasks.filter((x) => x.done).length;
   return (
@@ -490,7 +491,7 @@ function RealProHome() {
 
 export default function TodayScreen() {
   const { state, t } = useStore();
-  if (state.usage === 'member')
+  if (looksAfterOthers(state))
     return (
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 20, paddingTop: 8, gap: 18 }}>
         <PatientsHome />

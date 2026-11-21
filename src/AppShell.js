@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AppState, BackHandler, KeyboardAvoidingView, Linking, StyleSheet, View } from 'react-native';
 import { parseAddUrl, parseJoinUrl } from './joinLink';
+import { looksAfterOthers } from './who';
 import Text from './components/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -93,7 +94,7 @@ export default function AppShell({ sensing = true }) {
 
   useEffect(() => {
     // a phone used only to look after someone else has no one to watch: no motion sensing
-    if (!sensing || !state.hydrated || state.usage === 'member') return undefined;
+    if (!sensing || !state.hydrated || looksAfterOthers(state)) return undefined;
     return startFallListener({
       cfg: cfgFrom({ impactG, inactiveHours }),
       onFall: (r) =>
@@ -113,7 +114,7 @@ export default function AppShell({ sensing = true }) {
   const { background, lang } = state;
   useEffect(() => {
     if (!state.hydrated) return undefined;
-    if (!background || state.usage === 'member') {
+    if (!background || looksAfterOthers(state)) {
       stopWatching();
       return undefined;
     }
@@ -177,7 +178,7 @@ export default function AppShell({ sensing = true }) {
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.mist }}>
         <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
         <AlertBanner />
-        {state.usage == null ? <RoleChoiceScreen /> : state.usage === 'member' ? <MemberOnboardingScreen /> : <OnboardingScreen />}
+        {state.usage == null ? <RoleChoiceScreen /> : looksAfterOthers(state) ? <MemberOnboardingScreen /> : <OnboardingScreen />}
       </SafeAreaView>
     );
   }
@@ -198,7 +199,7 @@ export default function AppShell({ sensing = true }) {
   // is not that person, so they get only what they act on: the people they look after, and the circle.
   // Someone who only looks after people has one screen: all of their people. The role (guardian, neighbour, doctor)
   // belongs to each person they look after, so it shows inside that person's panel, not as a tab.
-  const tabs = state.usage === 'member' ? NAV_TABS.filter(([id]) => id === 'today') : NAV_TABS;
+  const tabs = looksAfterOthers(state) ? NAV_TABS.filter(([id]) => id === 'today') : NAV_TABS;
   const current = tab === 'me' || tabs.some(([id]) => id === tab) ? tab : 'today';
   const Screen = SCREENS[current];
   const onMe = current === 'me';
