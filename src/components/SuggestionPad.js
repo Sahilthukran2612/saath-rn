@@ -244,7 +244,7 @@ export default function SuggestionPad() {
           <TopSlip key={pad[0].id} slip={pad[0]} index={0} total={pad.length} onDone={onDone} lang={state.lang} nowMs={now} />
         </View>
       )}
-      <Caption>{t('sg.note')}</Caption>
+      <Caption>{t(pad.some((s) => s.ai) ? 'sg.noteAi' : 'sg.note')}</Caption>
     </View>
   );
 }
