@@ -61,7 +61,7 @@ export default function InviteSection() {
     if (state.addPrefill) dispatch({ type: 'ADD_PREFILL', value: null });
     setQr({ name: name.trim(), code });
     try {
-      await Share.share({ message: fmt(t('inv.message'), { code }) });
+      await Share.share({ message: fmt(t(role === 'clinician' ? 'inv.messageDoctor' : 'inv.message'), { code }) });
     } catch {
       // the invite is saved even if the share sheet is dismissed
     }
