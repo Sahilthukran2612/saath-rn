@@ -1,5 +1,7 @@
 # How each person gets in: accounts, roles and the invite
 
+> **Update, 21 Nov 2026.** The role flow below was simplified. The demo role switcher is gone. Someone who looks after people says at sign-up whether they are a guardian, neighbour, ASHA or doctor, and has **one screen with all their people** (the role is per person). The person adds someone once with **Add a person** (contact and invite together, with a QR to scan); a doctor can show their own card with **Add my patient**. A person who joins from their own phone is matched to the contact by name and role, so they appear once in the circle, with one in/out privacy switch. ASHA has household visits; a doctor builds a care plan that the person's phone applies by itself. Family is now called **Guardian** and Clinician **Doctor** in the app. The step-by-step text below is the older, typed-code version and is still how the code path works underneath.
+
 Everyone has **their own account on their own phone**. An account is a phone number and a password (no text message,
 so no cost). The account says *who* you are. Your **role** is not something you pick: the person you look after gives
 it to you in an invite, and it applies to that person's circle only.

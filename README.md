@@ -14,7 +14,9 @@ Backend setup (free Supabase project, Firebase push) is in `docs/supabase/SETUP.
 
 ## Two kinds of phone
 - **"I need care"**: the person. Sets up emergency contacts, gets the fall/quiet watching, reminders, alerts.
-- **"I look after someone"**: a family member, neighbour, ASHA worker or clinician. Creates their own account, joins with an invite code that is bound to their phone number, and sees only what the person's Privacy Dial allows.
+- **"I look after someone"**: a guardian, neighbour, ASHA worker or doctor. They say which at sign-up, create their own account, and join with an invite code (typed, or scanned as a QR) that is bound to their phone number. They see only what each person's Privacy Dial allows. The role belongs to each person they look after, so one phone can be a guardian for one person, a neighbour for another and a doctor for a third. They get one screen, "People I look after" (a doctor's says "My patients"), most urgent first.
+
+How people are added: the person taps **Add a person** once (name, number, role). That makes them an emergency contact and an invite at the same time, with a QR to scan. A doctor can instead show **their own card** (**Add my patient**); the person scans it, confirms once, and shows a code back. No details are typed twice.
 
 Details: `docs/ROLES.md` (how each person gets in) and `docs/RBAC.md` (who can see what, enforced by the database).
 
@@ -41,10 +43,17 @@ Details: `docs/ROLES.md` (how each person gets in) and `docs/RBAC.md` (who can s
 | Hindi and English | Complete and parity-checked by test. **No native-speaker review yet** |
 | Accessibility | Automated audit (every control named, 56 px targets, computed contrast ratios). **TalkBack not run** |
 | Suggestion slips on Today (16 fixed rules, made on the phone from what the person entered; no doses, no diagnosis; hard weeks only get company and rest; animated stamp and tear-off) | Built, 14 rule tests and 5 screen tests, see docs/SUGGESTIONS.md. **Not seen on a phone; wording not clinician-reviewed; Hindi not native-reviewed** |
-| Counter Stamp visual world on every screen (slips, perforated lists, tally marks, stamped I'm OK, doodles) | Built; colours audited by computed contrast tests. **Never viewed as a rendered screen** |
-| Release APK | Builds (`dist\saath.apk`, about 39 MB, both phone CPU types, unneeded permissions removed). The owner installed an earlier build on a phone; the newest build (Material 3 look) has not been reported on yet |
+| Counter Stamp touches (slips, stamped I'm OK, doodles) inside the newer look | Built; colours audited by computed contrast tests, light and dark |
+| Release APK | Builds (`dist\saath.apk`, about 46 MB, both phone CPU types). The owner installed an earlier build on a phone; **the newest build has not been tried on a phone yet** |
 
-Not built: SMS gateway or missed-call alerts, glucometer photo, voice input, dark mode, forgotten-password recovery, encrypted local storage, CAPTCHA and extra abuse limits for a public launch.
+| Role dashboards: guardian, neighbour, ASHA (household visits, "Visit due"), doctor (patients, care plan builder) | Built and covered by tests; the doctor view was looked at on an emulator. **Not run with two phones** |
+| Doctor care plans: a doctor in the circle publishes medicines, tasks and a note; the person's phone applies the newest by itself and says who set it | Server table and rules **run against the live server** (anonymous read and write refused). End-to-end flow tested in code. **Not run with two phones** |
+| Join by QR (saath://join/CODE, doctor card saath://add/...) | Link handling run on an emulator; **no real camera scan yet** |
+| Care analytics: sugar over 7/14/30 days, medicines taken, heart rate (this session only) | Built; sugar and medicine charts seen on an emulator. Numbers are reported, never labelled good or bad |
+| Generated meal ideas and adaptive suggestion cards (region, diet, hour, what was given, what was turned down; habits the person skips fall away) | Built and tested. **Food names and Hindi wording need a dietitian and native-speaker review** (docs/REVIEW_SHEET.md) |
+| Look: electric blue, pastel tiles, dark mode (Phone / Light / Dark), bottom drawers for forms, NativeWind + React Native Reusables for shared parts | Seen on an emulator in English and Hindi, light and dark. **Not seen on a phone**; only the shared components are on NativeWind so far |
+
+Not built: SMS gateway or missed-call alerts, glucometer photo, voice input, forgotten-password recovery, encrypted local storage, CAPTCHA and extra abuse limits for a public launch. iOS is configured (docs/IOS.md) but has never run.
 
 ## Known limits
 - Saath helps notice when someone may need help. It cannot promise to catch every fall and it does not sense blood sugar. It never calculates doses and never diagnoses.
