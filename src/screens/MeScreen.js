@@ -13,7 +13,7 @@ import { askSmsPermission, smsAvailable } from '../services/sms';
 import { callsAvailable } from '../services/calls';
 import useChoices from '../state/useChoices';
 
-import { isDoctor, looksAfterOthers } from '../who';
+import { isDoctor, looksAfterOthers, usesAi } from '../who';
 import { colors } from '../theme';
 
 // The label gets the full width and the selector sits underneath, so neither is squeezed at large text.
@@ -228,12 +228,14 @@ export default function MeScreen() {
         <ListGroup>
           <LanguageRow lang={state.lang} onChange={(v) => set('lang', v)} label={t('language')} />
           <ThemeRow />
-          <ListRow
-            icon={Sparkles}
-            title={t('ai.setting')}
-            subtitle={t('ai.settingNote')}
-            trailing={<Toggle value={state.aiOn !== false} label={t('ai.setting')} onValueChange={(v) => set('aiOn', v)} />}
-          />
+          {usesAi(state) ? (
+            <ListRow
+              icon={Sparkles}
+              title={t('ai.setting')}
+              subtitle={t('ai.settingNote')}
+              trailing={<Toggle value={state.aiOn !== false} label={t('ai.setting')} onValueChange={(v) => set('aiOn', v)} />}
+            />
+          ) : null}
           <ListRow
             icon={Type}
             title={t('largeText')}

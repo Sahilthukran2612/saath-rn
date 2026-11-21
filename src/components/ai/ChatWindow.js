@@ -10,6 +10,7 @@ import useKeyboardVisible from '../useKeyboard';
 import { buildAiContext } from '../../ai/context';
 import { fetchAiReply } from '../../ai/client';
 import { nowMs } from '../../services/clock';
+import { usesAi } from '../../who';
 import { isEmergency } from '../../ai/guard';
 import { colors, fonts, radii, shadow } from '../../theme';
 
@@ -70,7 +71,7 @@ export default function ChatWindow({ bottom = 96 }) {
     if (open) setTimeout(() => scroll.current?.scrollToEnd?.({ animated: false }), 30);
   }, [open, msgs.length, busy]);
 
-  if (!state.aiOn || state.alert) return null;
+  if (!state.aiOn || state.alert || !usesAi(state)) return null;
 
   const send = async (raw) => {
     const q = String(raw ?? text).trim();

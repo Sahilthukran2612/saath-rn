@@ -13,6 +13,7 @@ import { useStore } from '../state/store';
 import { taskLabel } from '../taskLabel';
 import { buildPad, dayKey, stampedToday } from '../suggestions';
 import { buildAiContext } from '../ai/context';
+import { usesAi } from '../who';
 import { fetchAiCards } from '../ai/client';
 import { fmt } from '../circleFeed';
 import { colors, fonts, radii, shadow } from '../theme';
@@ -203,14 +204,14 @@ export default function SuggestionPad() {
   );
   const slipState = state.slips;
   const fresh = state.aiCards && state.aiCards.lang === state.lang ? state.aiCards.cards : null;
-  const pad = useMemo(() => buildPad(ctx, slipState, state.aiOn ? fresh : null), [ctx, slipState, state.aiOn, fresh]);
+  const pad = useMemo(() => buildPad(ctx, slipState, state.aiOn && usesAi(state) ? fresh : null), [ctx, slipState, state.aiOn, state.role, state.usage, fresh]);
 
   // Ask for new generated cards when there are none, they are from another day or language, or they are 3 hours old.
   // One try at a time, and after a failure not again for ten minutes. Offline, the rule-based pad simply stays.
   const busy = useRef(0);
   const stale = !state.aiCards || state.aiCards.lang !== state.lang || dayKey(state.aiCards.at) !== dayKey(now) || now - state.aiCards.at > 3 * 3600000;
   useEffect(() => {
-    if (!state.aiOn || !state.hydrated || state.alert || !stale) return undefined;
+    if (!state.aiOn || !usesAi(state) || !state.hydrated || state.alert || !stale) return undefined;
     if (Date.now() - busy.current < 10 * 60000) return undefined;
     busy.current = Date.now();
     let live = true;

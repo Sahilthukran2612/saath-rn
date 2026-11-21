@@ -29,6 +29,8 @@ name, phone number, medicine name or dose, sugar number, contact, location or se
 
 - No doses, no amounts of medicine, no "skip or stop", no diagnosis, no meaning of a reading. Enforced twice: in the
   system prompt, and on the phone by `violates()`. A reply that breaks them is replaced by a fixed safe line.
+- The helper answers only about the person's own health (symptoms, how they feel, food, water, walking, sleep, mood, foot care, their routine without doses) and how to use Saath. The relay first asks a separate, strict classifier whether the last message is on topic; anything else, or any doubt, gets one fixed refusal line and no answer is written. Live-tested with 8 off-topic and trick messages (gold, cricket, maths, a poem, "ignore your rules", a bitcoin question dressed as a health one) and 7 real health or app questions, in English and Hindi.
+- Only the person who needs care gets the helper, the generated cards and the setting for them. Guardians, neighbours, ASHA workers and doctors get none of it (`usesAi` in `src/who.js`).
 - Anything the person types that sounds like an emergency (fall, chest pain, very low sugar, self-harm, in English or
   Hindi) is **not sent anywhere**. The phone answers locally and offers "Open Safety".
 - In a hard phase or a hard week, generated cards are left out; only the calm rule-based ones show.

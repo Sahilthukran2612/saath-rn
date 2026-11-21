@@ -8,6 +8,10 @@ export const isMember = (state) => state.usage === 'member';
 // Phones that look after others and so have no sensors of their own.
 export const looksAfterOthers = (state) => isDoctor(state) || isMember(state);
 
+// The helper chat and the generated suggestion cards are for the person who needs care, nobody else: not a guardian,
+// neighbour, ASHA or doctor. (`both` is someone who needs care and also looks after someone, so they are a patient.)
+export const usesAi = (state) => state.role === 'person' && !looksAfterOthers(state);
+
 // A doctor's patients are the circles where they are the doctor. A guardian, neighbour or ASHA sees every circle
 // except the ones where they are a doctor. Anything else is hidden, not deleted.
 export function circlesFor(state) {

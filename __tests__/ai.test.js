@@ -233,6 +233,32 @@ describe('the floating helper', () => {
     expect(screen.queryByLabelText('Ask Saath for help')).toBeNull();
   });
 
+  test('a guardian, neighbour or ASHA phone has no helper button and no AI setting', async () => {
+    await mount({ ...productionState, usage: 'member', onboarded: true, circles: [{ household_id: 'h1', role: 'family', dial: 1, time_off: false, person_name: 'Amma' }] });
+    await waitFor(() => expect(screen.getByLabelText('Amma')).toBeTruthy());
+    expect(screen.queryByLabelText('Ask Saath for help')).toBeNull();
+    await fireEvent.press(screen.getByLabelText('Me'));
+    expect(await screen.findByText('I look after someone')).toBeTruthy();
+    expect(screen.queryByText('Smart cards and helper')).toBeNull();
+  });
+
+  test('someone who needs care and also looks after someone is a patient, so they have the helper', async () => {
+    await mount({ usage: 'both' });
+    expect(await screen.findByLabelText('Ask Saath for help')).toBeTruthy();
+  });
+
+  test('the patient sees the AI setting in Me', async () => {
+    await mount({});
+    await fireEvent.press(await screen.findByLabelText('Me'));
+    expect(await screen.findByText('Smart cards and helper')).toBeTruthy();
+  });
+
+  test('no generated cards are asked for on a phone that is not a patient\'s', async () => {
+    await mount({ ...productionState, usage: 'member', onboarded: true, circles: [] });
+    await waitFor(() => expect(screen.getByText(/You have not joined/)).toBeTruthy());
+    expect(cards).not.toHaveBeenCalled();
+  });
+
   test('generated cards appear on Today next to the care reminders, marked as ideas', async () => {
     const list = [
       { id: 'ai-a', kind: 'ai', ai: true, title: 'Walk after lunch', body: 'Ten easy minutes in the sun, then sit and rest.', doodle: 'walker', tab: null, priority: 40 },
