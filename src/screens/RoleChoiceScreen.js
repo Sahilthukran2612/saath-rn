@@ -1,6 +1,7 @@
 import React from 'react';
 import { ScrollView, View } from 'react-native';
-import { Body, Caption, PressRow, Title } from '../components/ui';
+import { Body, Caption, Glyph, PressRow, Title } from '../components/ui';
+import { Stethoscope } from '../components/icons';
 import Doodle from '../components/doodles';
 import { Segmented } from '../components/kit';
 import { SaathMark } from '../components/art';
@@ -10,7 +11,7 @@ import { colors, radii, shadow } from '../theme';
 // The first question, because it decides everything after it: do I need care, or do I look after someone?
 // A person gets the setup for their own safety. Someone invited as family, neighbour, ASHA or clinician gets
 // their own setup: an account, then the code the person sent. They are different people with different phones.
-function Choice({ doodle, title, note, onPress }) {
+function Choice({ doodle, icon, title, note, onPress }) {
   return (
     <PressRow
       accessibilityRole="button"
@@ -25,7 +26,13 @@ function Choice({ doodle, title, note, onPress }) {
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-        <Doodle name={doodle} size={64} />
+        {icon ? (
+          <View style={{ width: 64, height: 64, alignItems: 'center', justifyContent: 'center' }}>
+            <Glyph icon={icon} size={52} color={colors.indigo} strokeWidth={2.2} />
+          </View>
+        ) : (
+          <Doodle name={doodle} size={64} />
+        )}
         <Title style={{ fontSize: 22, flex: 1 }}>{title}</Title>
       </View>
       <Body>{note}</Body>
@@ -50,7 +57,7 @@ export default function RoleChoiceScreen() {
       />
       <Choice doodle="walker" title={t('rc.person')} note={t('rc.personNote')} onPress={() => pick('person')} />
       <Choice doodle="phone" title={t('rc.member')} note={t('rc.memberNote')} onPress={() => pick('member')} />
-      <Choice doodle="strip" title={t('rc.doctor')} note={t('rc.doctorNote')} onPress={() => pick('doctor')} />
+      <Choice icon={Stethoscope} title={t('rc.doctor')} note={t('rc.doctorNote')} onPress={() => pick('doctor')} />
       <Caption>{t('rc.change')}</Caption>
     </ScrollView>
   );
