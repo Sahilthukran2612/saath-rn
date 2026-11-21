@@ -42,6 +42,7 @@ const PERSIST = [
   'medLog',
   'slipStats',
  'aiOn',
+ 'readingsSyncedAt',
  'aiCards',
  'aiChat',
   'foodPrefs',

@@ -268,6 +268,51 @@ export async function publishPlan(cfg, cloud, householdId, authorName, plan, fet
   return { ok: res.ok, status: res.status, session };
 }
 
+// ---- Sugar readings shared with a doctor (docs/supabase/readings.sql) ----
+
+// The person's phone uploads readings it has not sent yet. Safe to repeat: a reading is keyed by household and its id.
+export async function pushReadings(cfg, cloud, rows, fetchImpl) {
+  if (!rows.length) return { ok: true, session: null };
+  const { res, session } = await withAuth(
+    cfg,
+    cloud,
+    (token) =>
+      call(
+        cfg,
+        '/rest/v1/readings?on_conflict=household_id,client_id',
+        { method: 'POST', token, prefer: 'resolution=merge-duplicates,return=minimal', body: rows },
+        fetchImpl
+      ),
+    fetchImpl
+  );
+  return { ok: res.ok, status: res.status, session };
+}
+
+// A doctor reads their patient's readings, newest first. The database only answers when the person has them at Full.
+export async function fetchReadings(cfg, cloud, householdId, fetchImpl) {
+  const { res, session } = await withAuth(
+    cfg,
+    cloud,
+    (token) =>
+      call(
+        cfg,
+        `/rest/v1/readings?household_id=eq.${encodeURIComponent(householdId)}&select=client_id,mgdl,at&order=at.desc&limit=1000`,
+        { token },
+        fetchImpl
+      ),
+    fetchImpl
+  );
+  const rows = Array.isArray(res.data) ? res.data : [];
+  return {
+    ok: res.ok && Array.isArray(res.data),
+    readings: rows
+      .map((r) => ({ id: r.client_id, mgdl: r.mgdl, at: Date.parse(r.at) }))
+      .filter((r) => Number.isFinite(r.at) && Number.isFinite(r.mgdl))
+      .sort((a, b) => a.at - b.at),
+    session,
+  };
+}
+
 // ---- The dial on the server: who joined, and what each may see ----
 
 // People who joined this household from their own phones (rows with a user). The person's phone reads

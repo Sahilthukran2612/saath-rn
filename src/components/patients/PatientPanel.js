@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { Check, ClipboardList } from '../icons';
 import { BigButton, Body, Caption, Card } from '../ui';
@@ -7,7 +7,8 @@ import { Badge, ListGroup, ListRow, ScreenHeader, Toggle } from '../kit';
 import CarePlanBuilder from '../circle/CarePlanBuilder';
 import { useStore } from '../../state/store';
 import { useNow } from '../useNow';
-import { cloudConfig, isConfigured, setMyTimeOff } from '../../services/cloud';
+import { cloudConfig, fetchReadings, isConfigured, setMyTimeOff } from '../../services/cloud';
+import { PatientSugar } from '../care/CareCharts';
 import { visitStatus } from '../../visits';
 import { ago, describeEvent, fmt, isAlert, pendingAlert } from '../../circleFeed';
 
@@ -25,6 +26,25 @@ export default function PatientPanel({ circle, onBack }) {
   const doctor = circle.role === 'clinician';
   const [planOpen, setPlanOpen] = useState(false);
   const visit = visitStatus(state.visits[circle.household_id], now);
+
+  // A doctor reads the patient's sugar readings from the server. The database answers only while the patient has
+  // this doctor at Full, so an empty list means none were shared, not that none exist.
+  const [readings, setReadings] = useState([]);
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    if (!doctor || !signedIn || !isConfigured(cfg)) return undefined;
+    let live = true;
+    fetchReadings(cfg, state.cloud, circle.household_id).then((r) => {
+      if (!live) return;
+      if (r.session) dispatch({ type: 'CLOUD_SET', patch: r.session });
+      if (r.ok) setReadings(r.readings);
+      setLoaded(true);
+    });
+    return () => {
+      live = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [circle.household_id, doctor, signedIn]);
 
   // Time Off: stop routine updates from this person. The server still lets safety alerts through.
   const pause = async (on) => {
@@ -87,6 +107,7 @@ export default function PatientPanel({ circle, onBack }) {
           <BigButton icon={Check} label={t('vis.mark')} onPress={() => dispatch({ type: 'VISIT_MARK', id: circle.household_id, at: Date.now() })} />
         </Card>
       ) : null}
+      {doctor ? <PatientSugar readings={readings} loaded={loaded} /> : null}
       {doctor ? (
         <Card style={{ gap: 12 }}>
           <Body bold>{t('plan.build')}</Body>

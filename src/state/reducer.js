@@ -54,6 +54,7 @@ export const initialState = {
   medTaken: { day: null, ids: [] },
   // { 'YYYY-M-D': [medicine ids taken] }: the last 30 days, for the adherence chart.
   medLog: {},
+  readingsSyncedAt: 0, // time of the newest reading already sent to a doctor (see src/readingsSync.js)
   aiOn: true, // generated suggestion cards and the chat helper (needs internet; an anonymous summary is sent, see src/ai/context.js)
   aiCards: null, // { at, lang, cards: [...] } the newest generated cards, kept for offline use
   aiChat: [], // the last messages with the helper: [{ id, role: 'user' | 'assistant', text }]. Stays on this phone
@@ -479,6 +480,8 @@ function baseReducer(state, a) {
         slipStats: { ...state.slipStats, [a.id]: { ...prev, [key]: prev[key] + 1 } },
       };
     }
+    case 'READINGS_SYNCED':
+      return { ...state, readingsSyncedAt: Math.max(state.readingsSyncedAt || 0, Number(a.at) || 0) };
     case 'AI_CARDS':
       return { ...state, aiCards: { at: a.at, lang: a.lang, cards: (a.cards || []).slice(0, 7) } };
     case 'AI_CHAT_ADD':

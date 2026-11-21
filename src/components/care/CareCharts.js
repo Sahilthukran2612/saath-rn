@@ -135,6 +135,47 @@ export function SugarAnalytics() {
 }
 
 // Medicines marked taken over the last 7 days, against how many medicines the person has.
+// A doctor's view of a patient's readings: the same figures and charts, read-only. It reports numbers and never says
+// what they mean; reading them is the doctor's job.
+export function PatientSugar({ readings, loaded = true }) {
+  const { state, t } = useStore();
+  const now = useNow(60000);
+  const [days, setDays] = useState(14);
+  const [w, setW] = useState(280);
+  const sum = sugarSummary(readings, days, now);
+  const daily = dailyReadings(readings, days, now);
+  const window = readings.filter((r) => r.at >= daily[0].ms - 12 * 3600000 && Number.isFinite(r.mgdl));
+  const last = readings[readings.length - 1];
+  return (
+    <Card style={{ gap: 14 }}>
+      <View className="flex-row items-center gap-3">
+        <Glyph icon={Droplet} size={26} color={colors.indigo} />
+        <Title style={{ fontSize: 22, flex: 1 }}>{t('pt.readings')}</Title>
+        {last ? <Text style={{ fontFamily: fonts.bold, fontSize: 30, lineHeight: 34, color: colors.indigo }}>{last.mgdl}</Text> : null}
+      </View>
+      <Segmented value={days} onChange={setDays} options={RANGES.map((d) => ({ value: d, label: t('an.days').replace('{n}', String(d)) }))} />
+      {sum.n === 0 ? (
+        loaded ? <Body>{t('pt.noReadings')}</Body> : <Caption>{t('ai.thinking')}</Caption>
+      ) : (
+        <>
+          <View className="flex-row gap-2">
+            <StatTile value={sum.avg} label={t('average')} unit="mg/dL" />
+            <StatTile value={sum.min} label={t('an.lowest')} />
+            <StatTile value={sum.max} label={t('an.highest')} />
+            <StatTile value={sum.n} label={t('an.readings')} />
+          </View>
+          <View onLayout={(e) => setW(Math.floor(e.nativeEvent.layout.width))}>
+            <LineChart values={window.slice(-60).map((r) => r.mgdl)} width={w} height={120} label={t('pt.readings')} />
+          </View>
+          <Caption>{t('an.dailyAvg')}</Caption>
+          <BarChart width={w} height={110} label={t('an.dailyAvg')} data={daily.map((d) => ({ key: d.day, value: d.avg, label: weekdayLabel(d.ms, state.lang) }))} />
+        </>
+      )}
+      <Caption>{t('pt.readingsNote')}</Caption>
+    </Card>
+  );
+}
+
 export function AdherenceChart() {
   const { state, t } = useStore();
   const now = useNow(60000);

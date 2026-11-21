@@ -3,11 +3,13 @@ import { AppState } from 'react-native';
 import { useStore } from './store';
 import { setupPush } from '../services/push';
 import { sanitizePlan } from '../carePlan';
+import { readingsToPush } from '../readingsSync';
 import {
   cloudConfig,
   createInvite,
   fetchFeed,
   fetchLatestPlan,
+  pushReadings,
   flush,
   isConfigured,
   listCircles,
@@ -95,6 +97,16 @@ export default function useCloudSync() {
         const m = await listMembers(cfg, cloud);
         keep(m.session);
         if (m.ok) dispatch({ type: 'JOINED_SET', members: m.members });
+      }
+
+      // Sugar readings for a doctor: sent only while a doctor who joined my circle is at Full (src/readingsSync.js).
+      {
+        const rows = readingsToPush(latest.current);
+        if (rows.length) {
+          const r = await pushReadings(cfg, cloud, rows);
+          keep(r.session);
+          if (r.ok) dispatch({ type: 'READINGS_SYNCED', at: Date.parse(rows[rows.length - 1].at) });
+        }
       }
 
       // The newest care plan a clinician in my circle published for me. It is applied by itself and shown with who set it.

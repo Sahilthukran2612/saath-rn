@@ -101,6 +101,7 @@ export default function InviteSection() {
             <Chip key={r} label={t(`role.${r}`)} active={role === r} onPress={() => setRole(r)} />
           ))}
         </View>
+        {role === 'clinician' ? <Caption>{t('inv.doctorSees')}</Caption> : null}
         {error ? <Body style={{ color: colors.brick }}>{t('invalidPhone')}</Body> : null}
         <BigButton icon={Send} label={t('inviteShare')} onPress={send} />
       </Sheet>
