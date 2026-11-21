@@ -68,10 +68,10 @@ function Mirror() {
     <Svg width="100%" height="100%" style={StyleSheet.absoluteFill} pointerEvents="none">
       <Defs>
         <LinearGradient id="body" x1="0" y1="0" x2="0" y2="1">
-          <Stop offset="0" stopColor={top} stopOpacity={dark ? 0.3 : 0.99} />
-          <Stop offset="0.48" stopColor={dark ? '#7C8CF0' : '#DCE6FF'} stopOpacity={dark ? 0.2 : 0.94} />
-          <Stop offset="0.52" stopColor={dark ? '#0F1226' : '#C7D6FA'} stopOpacity={dark ? 0.7 : 0.93} />
-          <Stop offset="1" stopColor={dark ? '#20264F' : '#EEF3FF'} stopOpacity={dark ? 0.88 : 0.98} />
+          <Stop offset="0" stopColor={top} stopOpacity={dark ? 0.5 : 0.99} />
+          <Stop offset="0.48" stopColor={dark ? '#7C8CF0' : '#DCE6FF'} stopOpacity={dark ? 0.45 : 0.94} />
+          <Stop offset="0.52" stopColor={dark ? '#0F1226' : '#C7D6FA'} stopOpacity={dark ? 0.93 : 0.93} />
+          <Stop offset="1" stopColor={dark ? '#20264F' : '#EEF3FF'} stopOpacity={dark ? 0.97 : 0.98} />
         </LinearGradient>
         <LinearGradient id="sheen" x1="0" y1="0" x2="1" y2="0.35">
           <Stop offset="0" stopColor="#FFFFFF" stopOpacity="0" />
