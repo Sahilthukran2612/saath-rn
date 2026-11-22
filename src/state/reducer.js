@@ -503,6 +503,16 @@ function baseReducer(state, a) {
         slipStats: { ...state.slipStats, [a.id]: { ...prev, [key]: prev[key] + 1 } },
       };
     }
+    case 'READINGS_RESTORE': {
+      // This account's readings that are on the server but not on this phone (a new phone, or cleared data). Each is
+      // added once, by its id, so polling again never duplicates anything; readings typed here are kept as they are.
+      const have = new Set(state.readings.map((r) => r.id));
+      const add = (a.readings || []).filter(
+        (r) => r && r.id && !have.has(r.id) && Number.isFinite(r.at) && Number.isFinite(r.mgdl)
+      );
+      if (!add.length) return state;
+      return { ...state, readings: [...state.readings, ...add].sort((x, y) => x.at - y.at) };
+    }
     case 'READINGS_SYNCED':
       return { ...state, readingsSyncedAt: Math.max(state.readingsSyncedAt || 0, Number(a.at) || 0) };
     case 'AI_CARDS':

@@ -4,11 +4,13 @@ import { useStore } from './store';
 import { setupPush } from '../services/push';
 import { sanitizePlan } from '../carePlan';
 import { readingsToPush } from '../readingsSync';
+import { looksAfterOthers } from '../who';
 import {
   cloudConfig,
   createInvite,
   fetchFeed,
   fetchLatestPlan,
+  fetchReadings,
   pushReadings,
   flush,
   isConfigured,
@@ -35,6 +37,7 @@ export default function useCloudSync() {
   const name = state.profile.name;
   const busy = useRef(false);
   const pushTried = useRef('');
+  const restored = useRef('');
   const latest = useRef(state);
   const [tick, setTick] = useState(0);
 
@@ -122,6 +125,17 @@ export default function useCloudSync() {
             author: p.row.author_name,
             at: Date.now(),
           });
+      }
+
+      // My own sugar readings, once per run: on a new phone, or after the data was cleared, they come back from the
+      // server. Only for the person's own household, never for someone who only looks after others.
+      if (householdId && restored.current !== householdId && !looksAfterOthers(latest.current)) {
+        const r = await fetchReadings(cfg, cloud, householdId);
+        keep(r.session);
+        if (r.ok) {
+          restored.current = householdId;
+          dispatch({ type: 'READINGS_RESTORE', readings: r.readings });
+        }
       }
 
       // This phone's push address, once per app run and language: so alerts arrive with Saath closed.
