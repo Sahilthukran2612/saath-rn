@@ -11,6 +11,7 @@ import { colors, fonts, themeName } from './theme';
 import AlertBanner from './components/AlertBanner';
 import CircleAlertBanner from './components/CircleAlertBanner';
 import HeartNotice from './components/HeartNotice';
+import { SHOW_HEART } from './features';
 import TabBar, { NAV_TABS } from './components/TabBar';
 import { ArrowLeft, UserRound } from './components/icons';
 import { Glyph, PressRow, useScale } from './components/ui';
@@ -269,7 +270,7 @@ export default function AppShell({ sensing = true }) {
           </View>
           <AlertBanner />
           <CircleAlertBanner />
-          <HeartNotice />
+          {SHOW_HEART ? <HeartNotice /> : null}
           <View style={{ flex: 1 }}>
             {state.hydrated ? (
               <Reveal key={current} style={{ flex: 1 }}>

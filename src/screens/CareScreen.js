@@ -5,7 +5,7 @@ import { Body, Caption, Card, Glyph, Title } from '../components/ui';
 import { Reveal } from '../components/motion';
 import Medicines from '../components/care/Medicines';
 import { BudgetCard, StockCard, SugarPromptCard } from '../components/care/CareCards';
-import { SHOW_BUDGET } from '../features';
+import { SHOW_BUDGET, SHOW_HEART } from '../features';
 import { AdherenceChart, HeartAnalytics, SugarAnalytics } from '../components/care/CareCharts';
 import { useStore } from '../state/store';
 import { can } from '../logic';
@@ -53,9 +53,11 @@ export default function CareScreen() {
       <Reveal index={1}>
         <AdherenceChart />
       </Reveal>
-      <Reveal index={1}>
-        <HeartAnalytics />
-      </Reveal>
+      {SHOW_HEART ? (
+        <Reveal index={1}>
+          <HeartAnalytics />
+        </Reveal>
+      ) : null}
       <Reveal index={2}>
         <StockCard />
       </Reveal>

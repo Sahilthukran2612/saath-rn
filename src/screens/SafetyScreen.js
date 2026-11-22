@@ -6,6 +6,7 @@ import { ListGroup, ListRow, SectionTitle, Stat } from '../components/kit';
 import { Reveal } from '../components/motion';
 import Doodle from '../components/doodles';
 import HeartCard from '../components/safety/HeartCard';
+import { SHOW_HEART } from '../features';
 import { useNav } from '../components/nav';
 import { useStore } from '../state/store';
 import { tallyToCsv } from '../services/export';
@@ -69,8 +70,12 @@ export default function SafetyScreen() {
       </Reveal>
 
       <Reveal index={2}>
-        <HeartCard />
-        <View style={{ height: 14 }} />
+        {SHOW_HEART ? (
+          <>
+            <HeartCard />
+            <View style={{ height: 14 }} />
+          </>
+        ) : null}
         <Card style={{ gap: 14 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <View style={styles.trialIcon}>

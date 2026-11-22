@@ -5,6 +5,9 @@ import AppShell from '../src/AppShell';
 import * as ble from '../src/services/ble';
 import { strings } from '../src/i18n/strings';
 
+// The heart-rate band is hidden in the shipped app (features.js); these tests bring it back to keep it covered.
+jest.mock('../src/features', () => ({ ...jest.requireActual('../src/features'), SHOW_HEART: true }));
+
 jest.mock('../src/services/ble', () => ({
   bleAvailable: jest.fn(() => true),
   askBluetoothPermission: jest.fn(async () => true),

@@ -7,6 +7,12 @@
       "skillPath": "skills/apple-design/SKILL.md",
       "computedHash": "f3f1d2cbc8f3e79ccddff05f4e42d34d995f057fb30ff670e4edf8c87d568b69"
     },
+    "pptx": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/pptx/SKILL.md",
+      "computedHash": "dd3338f0a32a3d7d269b501d74ab044f696d93e12e076d48b6b380877b5c8e56"
+    },
     "stageshow": {
       "source": "benjitaylor/skills",
       "sourceType": "github",
