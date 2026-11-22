@@ -169,14 +169,11 @@ describe('Today and the tab bar', () => {
     expect(screen.getByLabelText('Care').props.accessibilityState.selected).toBe(true);
     expect(screen.getByLabelText('Today').props.accessibilityState.selected).toBe(false);
   });
-  test('the elder home shows the ring caption and ticking a task updates it', async () => {
+  test('the elder home shows the day\'s count under the ring and ticking a task updates it', async () => {
     await mountApp({ mode: 'elder' });
-    // the hero shows the count as a big number, the total and the words "done today"
-    expect(screen.getByText('0')).toBeTruthy();
-    expect(screen.getByText('/ 4')).toBeTruthy();
-    expect(screen.getByText('done today')).toBeTruthy();
+    expect(screen.getByText('0 / 4 done today')).toBeTruthy();
     await fireEvent.press(screen.getByLabelText('Lunch'));
-    expect(screen.getByText('1')).toBeTruthy();
+    expect(screen.getByText('1 / 4 done today')).toBeTruthy();
     expect(screen.getByLabelText('Lunch, done').props.accessibilityState.checked).toBe(true);
   });
   test("tapping I'm OK confirms in words", async () => {

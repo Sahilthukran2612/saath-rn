@@ -43,6 +43,7 @@ const PERSIST = [
   'slipStats',
  'aiOn',
  'readingsSyncedAt',
+ 'lastOkAt',
  'aiCards',
  'aiChat',
   'foodPrefs',

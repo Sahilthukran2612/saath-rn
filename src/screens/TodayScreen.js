@@ -1,8 +1,8 @@
 import CirclesSection from '../components/circle/CirclesSection';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import Text from '../components/AppText';
-import { Check, ChevronRight, Droplet, ShieldCheck, Wallet, Pill, Siren } from '../components/icons';
+import { ChevronRight, Droplet, ShieldCheck, Wallet, Pill, Siren } from '../components/icons';
 import { Body, Caption, Card, Glyph, PressRow, Title, useScale } from '../components/ui';
 import {
   Avatar,
@@ -25,8 +25,9 @@ import SuggestionPad from '../components/SuggestionPad';
 import { MedicinesNow } from '../components/care/Medicines';
 import PlanNotice from '../components/care/PlanNotice';
 import PatientsHome from '../components/patients/PatientsHome';
-import Stamp, { StampMark } from '../components/Stamp';
+import { StampMark } from '../components/Stamp';
 import Perf from '../components/Perf';
+import OkRing from '../components/OkRing';
 import Doodle from '../components/doodles';
 import { useStore } from '../state/store';
 import { looksAfterOthers } from '../who';
@@ -52,9 +53,6 @@ function Greeting() {
     day: 'numeric',
     month: 'long',
   });
-  const person = state.role === 'person' && !looksAfterOthers(state);
-  const total = state.tasks.length;
-  const done = state.tasks.filter((x) => x.done).length;
   return (
     <View accessibilityRole="header" style={styles.heroBlue}>
       {/* two soft circles, as in the reference: depth without an image */}
@@ -62,18 +60,6 @@ function Greeting() {
       <View pointerEvents="none" style={[styles.blob, { width: 120, height: 120, right: 70, bottom: -60 }]} />
       <Text style={{ fontFamily: fonts.semi, fontSize: 16, lineHeight: 22, color: '#EEF3FF' }}>{date}</Text>
       <Text style={{ fontFamily: fonts.bold, fontSize: 30, lineHeight: 38, color: colors.white }}>{t(`greet.${key}`)}</Text>
-      {person && total > 0 ? (
-        <View style={{ gap: 10, marginTop: 6 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8 }}>
-            <Text style={{ fontFamily: fonts.bold, fontSize: 64, lineHeight: 72, color: colors.white }}>{done}</Text>
-            <Text style={{ fontFamily: fonts.bold, fontSize: 24, lineHeight: 32, color: '#EEF3FF' }}>{`/ ${total}`}</Text>
-            <Text style={{ fontFamily: fonts.semi, fontSize: 18, lineHeight: 26, color: '#EEF3FF', flex: 1 }}>{t('hero.done')}</Text>
-          </View>
-          <View style={{ height: 8, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.28)', overflow: 'hidden' }}>
-            <View style={{ height: 8, borderRadius: 4, backgroundColor: colors.white, width: `${(done / total) * 100}%` }} />
-          </View>
-        </View>
-      ) : null}
     </View>
   );
 }
@@ -144,53 +130,6 @@ function TaskRow({ task, big, k, dispatch, state, t, last, index = 0 }) {
   );
 }
 
-// The first thing on the elder's day: one big slip. "I'm OK" is a leaf-green button the full width; pressing
-// it lands the violet stamp with the time, and the day's tasks are counted in tally marks below.
-function ImOkHero() {
-  const { state, dispatch, t } = useStore();
-  const [sentAt, setSentAt] = useState(null);
-  const sent = sentAt != null;
-  useEffect(() => {
-    if (!sent) return undefined;
-    const h = setTimeout(() => setSentAt(null), 6000);
-    return () => clearTimeout(h);
-  }, [sent]);
-  const time = sent
-    ? new Date(sentAt).toLocaleTimeString(state.lang === 'hi' ? 'hi-IN' : 'en-IN', { hour: 'numeric', minute: '2-digit' })
-    : '';
-  return (
-    <View style={styles.slip}>
-      <PressRow
-        accessibilityRole="button"
-        accessibilityLabel={t('imOk')}
-        accessibilityHint={t('imOkHint')}
-        haptic={false}
-        rippleColor="rgba(255,255,255,0.24)"
-        onPress={() => {
-          const at = Date.now();
-          dispatch({ type: 'CHECK_IN', at });
-          speak(t('imOk'), state.lang);
-          setSentAt(at);
-        }}
-        style={styles.imOkButton}
-      >
-        <Glyph icon={Check} size={44} color={colors.white} strokeWidth={2.8} />
-        <Text style={{ fontFamily: fonts.bold, fontSize: 32, lineHeight: 40, color: colors.white }}>{t('imOk')}</Text>
-      </PressRow>
-      <View style={{ minHeight: sent ? 72 : 0, justifyContent: 'center' }}>
-        <Stamp show={sent} word={t('imOk')} sub={time} rotate={-5} />
-      </View>
-      {sent ? (
-        <>
-          <Perf />
-          <Body bold style={{ color: colors.leafDeep }}>
-            {t('sent.ok')}
-          </Body>
-        </>
-      ) : null}
-    </View>
-  );
-}
 // What needs attention now, as one stack with an even gap: a plan the doctor changed, medicines due, today's slips.
 function TodayNudges() {
   return (
@@ -327,15 +266,31 @@ function AdultHome() {
   );
 }
 
+// Every patient mode starts with the same card: the I'm OK button inside the day's progress ring.
 function PersonHome() {
   const { state } = useStore();
-  if (state.mode === 'teen') return <TeenHome />;
-  if (state.mode === 'adult') return <AdultHome />;
+  const ok = (
+    <Reveal index={1}>
+      <OkRing />
+    </Reveal>
+  );
+  if (state.mode === 'teen')
+    return (
+      <>
+        {ok}
+        <TeenHome />
+      </>
+    );
+  if (state.mode === 'adult')
+    return (
+      <>
+        {ok}
+        <AdultHome />
+      </>
+    );
   return (
     <>
-      <Reveal index={1}>
-        <ImOkHero />
-      </Reveal>
+      {ok}
       <Reveal index={2}>
         <TodayNudges />
       </Reveal>

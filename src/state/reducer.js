@@ -54,6 +54,7 @@ export const initialState = {
   medTaken: { day: null, ids: [] },
   // { 'YYYY-M-D': [medicine ids taken] }: the last 30 days, for the adherence chart.
   medLog: {},
+  lastOkAt: null, // when the person last tapped "I'm OK" on Today (shown as "Last confirmed")
   readingsSyncedAt: 0, // time of the newest reading already sent to a doctor (see src/readingsSync.js)
   aiOn: true, // generated suggestion cards and the chat helper (needs internet; an anonymous summary is sent, see src/ai/context.js)
   aiCards: null, // { at, lang, cards: [...] } the newest generated cards, kept for offline use
@@ -154,7 +155,7 @@ function baseReducer(state, a) {
       return { ...state, lastActiveMs: a.at };
     // The person tapped "I'm OK" on Today (not the alert). Counts as activity and tells the circle.
     case 'CHECK_IN':
-      return { ...state, lastActiveMs: a.at };
+      return { ...state, lastActiveMs: a.at, lastOkAt: a.at };
     case 'TRIGGER_ALERT':
       return openAlert(state, a);
     case 'QUIET_CHECK': {
