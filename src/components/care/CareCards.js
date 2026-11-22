@@ -236,7 +236,8 @@ export function StockCard() {
         </View>
         <Bar value={refill.daysLeft ?? 0} max={30} color={LEVEL_COLOR[refill.level]} />
         <Caption>
-          {state.meds.name}: {state.meds.pillsLeft} {t('pillsLeft')}
+          {state.meds.name ? `${state.meds.name}: ` : ''}
+          {state.meds.pillsLeft} {t('pillsLeft')}
         </Caption>
         {canEdit ? (
           <View style={{ flexDirection: 'row', gap: 8 }}>

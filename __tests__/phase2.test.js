@@ -90,6 +90,12 @@ describe('Care and alert screens', () => {
     expect(screen.queryByText('Care budget')).toBeNull();
     expect(screen.queryByLabelText('Add cost')).toBeNull();
   });
+  test('with no medicine named yet the stock line has no stray colon', async () => {
+    await mount({ meds: { name: '', pillsLeft: 0, perDay: 0 } });
+    await fireEvent.press(screen.getByLabelText('Care'));
+    expect(screen.queryByText(/^: /)).toBeNull();
+    expect(screen.getByText(/0 tablets left/)).toBeTruthy();
+  });
   test('insulin logged 3 hours ago with no meal shows a prompt with the safe steps', async () => {
     await mount({ careEvents: { lastInsulinAt: Date.now() - 3 * 3600000, lastMealAt: null } });
     await fireEvent.press(screen.getByLabelText('Care'));
