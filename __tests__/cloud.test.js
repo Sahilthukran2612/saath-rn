@@ -302,44 +302,68 @@ describe('account card', () => {
     expect(screen.getByText('Account and sync')).toBeTruthy();
     expect(screen.getByText(/Sync is not set up in this build/)).toBeTruthy();
   });
+  const signInSheet = async () => fireEvent.press(screen.getByLabelText('Sign in or create account'));
   test('asks for a number and a password, and refuses a bad number or a short password', async () => {
     configure();
     await open({});
-    await fireEvent.press(screen.getByLabelText('Sign in or create account'));
+    await signInSheet();
     await fireEvent.changeText(screen.getByLabelText('Your mobile number'), '123');
-    await fireEvent.press(screen.getByLabelText('Continue'));
+    await fireEvent.press(screen.getByLabelText('Sign in'));
     expect(screen.getByText('Enter a 10-digit mobile number.')).toBeTruthy();
     await fireEvent.changeText(screen.getByLabelText('Your mobile number'), '9876543210');
     await fireEvent.changeText(screen.getByLabelText('Password (8 or more characters)'), 'abc');
-    await fireEvent.press(screen.getByLabelText('Continue'));
+    await fireEvent.press(screen.getByLabelText('Sign in'));
     expect(screen.getByText('Use a password of at least 8 characters.')).toBeTruthy();
   });
-  test('there is one Continue button, no repeat-password box and no create/sign-in switch', async () => {
+  test('sign-in and create are separate: a failed sign-in never makes an account', async () => {
     configure();
+    const urls = [];
+    global.fetch = jest.fn(async (url) => {
+      urls.push(url);
+      if (url.includes('grant_type=password')) return reply(400, { error_code: 'invalid_credentials' });
+      return reply(200, []);
+    });
     await open({});
-    await fireEvent.press(screen.getByLabelText('Sign in or create account'));
-    expect(screen.getByLabelText('Continue')).toBeTruthy();
-    expect(screen.queryByLabelText('Repeat the password')).toBeNull();
-    expect(screen.queryByLabelText('Create account')).toBeNull();
+    await signInSheet();
+    await fireEvent.changeText(screen.getByLabelText('Your mobile number'), '9876543210');
+    await fireEvent.changeText(screen.getByLabelText('Password (8 or more characters)'), 'wrongpass1');
+    await fireEvent.press(screen.getByLabelText('Sign in'));
+    await waitFor(() => expect(screen.getByText('The number or the password is wrong.')).toBeTruthy());
+    expect(urls.some((u) => u.includes('/auth/v1/signup'))).toBe(false);
   });
-  test('a new number: Continue makes the account and signs in; a forgotten password is warned about', async () => {
+  test('a new number: Create account makes the account and signs in; a forgotten password is warned about', async () => {
     configure();
     global.fetch = jest.fn(async (url) => {
-      if (url.includes('grant_type=password')) return reply(400, { error_code: 'invalid_credentials' });
       if (url.includes('/auth/v1/signup')) return reply(200, { access_token: 'A', refresh_token: 'R', user: { id: 'u1' } });
       if (url.includes('select=id,person_name')) return reply(200, []);
       return reply(201, [{ id: 'h1', person_name: '' }]);
     });
     await open({});
-    await fireEvent.press(screen.getByLabelText('Sign in or create account'));
+    await signInSheet();
+    await fireEvent.press(screen.getByLabelText('Create a new account'));
     expect(screen.getByText(/A forgotten password cannot be reset, so keep it safe/)).toBeTruthy();
     await fireEvent.changeText(screen.getByLabelText('Your mobile number'), '98765 43210');
     await fireEvent.changeText(screen.getByLabelText('Password (8 or more characters)'), 'abcdefgh1');
-    await fireEvent.press(screen.getByLabelText('Continue'));
+    await fireEvent.press(screen.getByLabelText('Create account'));
     await waitFor(() => expect(screen.getByText('Signed in as +91 9876543210')).toBeTruthy());
     expect(screen.getByText(/Sign in with the same number and password on another phone/)).toBeTruthy();
   });
-  test('an existing number: Continue signs in without creating anything', async () => {
+  test('creating an account for a number that has one sends you to sign in', async () => {
+    configure();
+    global.fetch = jest.fn(async (url) => {
+      if (url.includes('/auth/v1/signup')) return reply(422, { msg: 'User already registered' });
+      return reply(200, []);
+    });
+    await open({});
+    await signInSheet();
+    await fireEvent.press(screen.getByLabelText('Create a new account'));
+    await fireEvent.changeText(screen.getByLabelText('Your mobile number'), '9876543210');
+    await fireEvent.changeText(screen.getByLabelText('Password (8 or more characters)'), 'abcdefgh1');
+    await fireEvent.press(screen.getByLabelText('Create account'));
+    await waitFor(() => expect(screen.getByText('This number already has an account. Sign in instead.')).toBeTruthy());
+    expect(screen.getByLabelText('Sign in')).toBeTruthy();
+  });
+  test('an existing number: Sign in signs in without creating anything', async () => {
     configure();
     const urls = [];
     global.fetch = jest.fn(async (url) => {
@@ -349,40 +373,25 @@ describe('account card', () => {
       return reply(201, [{ id: 'h1', person_name: '' }]);
     });
     await open({});
-    await fireEvent.press(screen.getByLabelText('Sign in or create account'));
+    await signInSheet();
     await fireEvent.changeText(screen.getByLabelText('Your mobile number'), '9876543210');
     await fireEvent.changeText(screen.getByLabelText('Password (8 or more characters)'), 'abcdefgh1');
-    await fireEvent.press(screen.getByLabelText('Continue'));
+    await fireEvent.press(screen.getByLabelText('Sign in'));
     await waitFor(() => expect(screen.getByText('Signed in as +91 9876543210')).toBeTruthy());
     expect(urls.some((u) => u.includes('/auth/v1/signup'))).toBe(false);
-  });
-  test('an existing number with the wrong password says the password is wrong, not that the number exists', async () => {
-    configure();
-    global.fetch = jest.fn(async (url) => {
-      if (url.includes('grant_type=password')) return reply(400, { error_code: 'invalid_credentials' });
-      if (url.includes('/auth/v1/signup')) return reply(422, { msg: 'User already registered' });
-      return reply(200, []);
-    });
-    await open({});
-    await fireEvent.press(screen.getByLabelText('Sign in or create account'));
-    await fireEvent.changeText(screen.getByLabelText('Your mobile number'), '9876543210');
-    await fireEvent.changeText(screen.getByLabelText('Password (8 or more characters)'), 'wrongpass1');
-    await fireEvent.press(screen.getByLabelText('Continue'));
-    await waitFor(() => expect(screen.getByText('That is not the right password for this number.')).toBeTruthy());
   });
   test('the password can be shown and hidden', async () => {
     configure();
     await open({});
-    await fireEvent.press(screen.getByLabelText('Sign in or create account'));
+    await signInSheet();
     expect(screen.getByLabelText('Password (8 or more characters)').props.secureTextEntry).toBe(true);
     await fireEvent.press(screen.getByLabelText('Show'));
     expect(screen.getByLabelText('Password (8 or more characters)').props.secureTextEntry).toBe(false);
   });
-  test('"use without an account" still works and warns what is lost', async () => {
+  test('there is no way to skip the account any more', async () => {
     configure();
     await open({});
-    expect(screen.getByLabelText('Skip for now')).toBeTruthy();
-    expect(screen.getByText(/This phone only/)).toBeTruthy();
+    expect(screen.queryByLabelText('Skip for now')).toBeNull();
   });
   test('shows who is signed in, how many updates wait, and signs out', async () => {
     configure();
@@ -393,7 +402,7 @@ describe('account card', () => {
     expect(screen.getByText('Signed in as +91 9876543210')).toBeTruthy();
     expect(screen.getByText('1 updates waiting to send')).toBeTruthy();
     await fireEvent.press(screen.getByLabelText('Sign out'));
-    await waitFor(() => expect(screen.getByLabelText('Skip for now')).toBeTruthy());
+    await waitFor(() => expect(screen.getByLabelText('Sign in or create account')).toBeTruthy());
   });
   test('an account without a phone number says what is lost if the data is cleared', async () => {
     configure();

@@ -12,8 +12,6 @@ import { useStore } from '../state/store';
 import { isDoctor } from '../who';
 import { colors } from '../theme';
 
-const STEPS = 3;
-
 // The setup for someone who looks after a person (family, neighbour, ASHA, clinician). Their own account comes
 // first, because it is how Saath knows who they are on their own phone and which circle they belong to. Then the
 // code the person sent them. Their role comes from that invite. Nothing about sensors or emergency contacts:
@@ -21,15 +19,18 @@ const STEPS = 3;
 export default function MemberOnboardingScreen() {
   const { state, dispatch, t } = useStore();
   const doctor = isDoctor(state);
-  const [step, setStep] = useState(0);
+  // Signed in already (the usual way now, from the welcome screen): no account step.
+  const [order] = useState(() => (state.cloud.access ? ['name', 'join'] : ['name', 'account', 'join']));
+  const [index, setIndex] = useState(0);
+  const step = order[index];
   const [name, setName] = useState(state.profile.name || '');
   const signedIn = Boolean(state.cloud.access);
   const joined = state.circles.length > 0;
-  const back = step > 0 ? () => setStep((s) => s - 1) : null;
+  const back = index > 0 ? () => setIndex((n) => n - 1) : null;
 
   const next = () => {
-    if (step === 0) dispatch({ type: 'PROFILE_SET', patch: { name: name.trim() } });
-    setStep((s) => s + 1);
+    if (step === 'name') dispatch({ type: 'PROFILE_SET', patch: { name: name.trim() } });
+    setIndex((n) => n + 1);
   };
 
   return (
@@ -37,16 +38,16 @@ export default function MemberOnboardingScreen() {
       <View style={{ alignItems: 'center', paddingTop: 8 }}>
         <Doodle name="people" size={104} />
       </View>
-      <SetupProgress step={step} total={STEPS} />
+      <SetupProgress step={index} total={order.length} />
 
-      {step === 0 ? (
+      {step === 'name' ? (
         <View style={{ gap: 14 }}>
           <Title style={{ fontSize: 28 }}>{t(doctor ? 'mo.nameTitleDoctor' : 'mo.nameTitle')}</Title>
           <Field label={t(doctor ? 'ob.nameDoctor' : 'ob.name')} value={name} onChangeText={setName} />
         </View>
       ) : null}
 
-      {step === 1 ? (
+      {step === 'account' ? (
         <View style={{ gap: 14 }}>
           <Title style={{ fontSize: 28 }}>{t('mo.accountTitle')}</Title>
           <Body>{t('mo.accountNote')}</Body>
@@ -55,7 +56,7 @@ export default function MemberOnboardingScreen() {
         </View>
       ) : null}
 
-      {step === 2 ? (
+      {step === 'join' ? (
         <View style={{ gap: 14 }}>
           <Title style={{ fontSize: 28 }}>{t('mo.joinTitle')}</Title>
           <Body>{t('mo.joinNote')}</Body>
@@ -69,11 +70,11 @@ export default function MemberOnboardingScreen() {
       ) : null}
 
       <View style={{ gap: 10 }}>
-        {step < STEPS - 1 ? (
+        {index < order.length - 1 ? (
           <BigButton
             icon={ArrowRight}
             label={t('ob.next')}
-            onPress={() => (step === 1 && !signedIn ? null : next())}
+            onPress={() => (step === 'account' && !signedIn ? null : next())}
           />
         ) : (
           <BigButton
@@ -83,7 +84,7 @@ export default function MemberOnboardingScreen() {
             onPress={() => dispatch({ type: 'SET', key: 'onboarded', value: true })}
           />
         )}
-        {back ? <BigButton kind="quiet" label={t('back')} onPress={back} /> : null}
+        {back ? <BigButton kind="text" label={t('back')} onPress={back} /> : null}
       </View>
     </Screen>
   );

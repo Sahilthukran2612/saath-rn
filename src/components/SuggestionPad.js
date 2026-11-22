@@ -16,7 +16,7 @@ import { buildAiContext } from '../ai/context';
 import { usesAi } from '../who';
 import { fetchAiCards } from '../ai/client';
 import { fmt } from '../circleFeed';
-import { colors, fonts, radii, shadow } from '../theme';
+import { colors, fonts, radii } from '../theme';
 
 // A pad of bill-book slips. The top slip is today's most useful small thing; behind it sit the pink and
 // yellow carbon copies of the next ones. "Stamp it" presses the violet stamp, then the slip tears off along
@@ -68,7 +68,7 @@ function TopSlip({ slip, index, total, onDone, lang, nowMs }) {
       style={{
         transform: [
           { translateX: x.interpolate({ inputRange: [0, 1], outputRange: [0, 460] }) },
-          { rotate: x.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '7deg'] }) },
+          { rotate: x.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '3deg'] }) },
         ],
         opacity: x.interpolate({ inputRange: [0, 0.8, 1], outputRange: [1, 1, 0] }),
       }}
@@ -79,7 +79,6 @@ function TopSlip({ slip, index, total, onDone, lang, nowMs }) {
           borderRadius: radii.lg,
           padding: 16,
           gap: 10,
-          ...shadow.raised,
         }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -109,7 +108,7 @@ function TopSlip({ slip, index, total, onDone, lang, nowMs }) {
             <Doodle name={slip.doodle} size={72} />
           </View>
           <View style={{ flex: 1, gap: 4 }}>
-            <Title style={{ fontSize: 22 * k, color: colors.indigoDeep }}>{title}</Title>
+            <Title style={{ fontSize: 22 }}>{title}</Title>
             <Body>{body}</Body>
           </View>
         </View>
@@ -325,7 +324,6 @@ export default function SuggestionPad() {
             borderRadius: radii.lg,
             padding: 16,
             gap: 10,
-            ...shadow.raised,
           }}
         >
           <Stamp show word={t('sg.stamped')} silent />

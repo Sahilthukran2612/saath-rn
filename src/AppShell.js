@@ -24,6 +24,8 @@ import ConsentScreen from './screens/ConsentScreen';
 import LockScreen from './screens/LockScreen';
 import OnboardingScreen from './screens/OnboardingScreen';
 import RoleChoiceScreen from './screens/RoleChoiceScreen';
+import WelcomeScreen from './screens/WelcomeScreen';
+import { cloudConfig, isConfigured } from './services/cloud';
 import MemberOnboardingScreen from './screens/MemberOnboardingScreen';
 import useCloudSync from './state/useCloudSync';
 import useReminders from './state/useReminders';
@@ -151,13 +153,17 @@ export default function AppShell({ sensing = true }) {
     );
   }
 
-  // A fresh install runs the setup once: who uses the phone, a name, the people to reach, the alert choices.
+  // A fresh install starts with an account (create one, or sign in to an existing one), then runs the setup once: who
+  // uses the phone, a name, the people to reach, the alert choices. A build with no server configured skips the account.
+  const needsAccount = isConfigured(cloudConfig()) && !state.cloud.access;
   if (state.hydrated && !state.onboarded) {
     return (
       <SafeAreaView edges={['top', 'left', 'right']} style={{ flex: 1, backgroundColor: colors.mist }}>
         <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
         <AlertBanner />
-        {state.usage == null ? (
+        {needsAccount ? (
+          <WelcomeScreen />
+        ) : state.usage == null ? (
           <RoleChoiceScreen />
         ) : looksAfterOthers(state) ? (
           <MemberOnboardingScreen />

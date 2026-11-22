@@ -34,25 +34,28 @@ afterEach(() => {
 });
 
 describe('the first question', () => {
-  test('a fresh install asks how Saath will be used, before anything else', async () => {
+  test('a fresh install asks for an account first, then how Saath will be used', async () => {
     await mount({ ...productionState });
+    expect(screen.getByLabelText('Create account')).toBeTruthy();
+    expect(screen.queryByText('How will you use Saath?')).toBeNull();
+    await mount({ ...productionState, cloud: signedIn });
     expect(screen.getByText('How will you use Saath?')).toBeTruthy();
     expect(screen.getByLabelText('I need care')).toBeTruthy();
     expect(screen.getByLabelText('I look after someone')).toBeTruthy();
     expect(screen.queryByLabelText('Circle')).toBeNull();
   });
   test('the question can be read in Hindi', async () => {
-    await mount({ ...productionState });
+    await mount({ ...productionState, cloud: signedIn });
     await fireEvent.press(screen.getByLabelText('हिन्दी'));
     expect(screen.getByText('आप साथ का कैसे इस्तेमाल करेंगे?')).toBeTruthy();
   });
   test('"I need care" leads to the person\u2019s setup, with contacts and alert choices', async () => {
-    await mount({ ...productionState });
+    await mount({ ...productionState, cloud: signedIn });
     await fireEvent.press(screen.getByLabelText('I need care'));
     expect(screen.getByText('Welcome to Saath')).toBeTruthy();
   });
   test('"I look after someone" leads to a different setup, with no contacts or sensors in it', async () => {
-    await mount({ ...productionState });
+    await mount({ ...productionState, cloud: signedIn });
     await fireEvent.press(screen.getByLabelText('I look after someone'));
     expect(screen.getByText('About you')).toBeTruthy();
     expect(screen.queryByText('Welcome to Saath')).toBeNull();
@@ -65,21 +68,14 @@ describe('the first question', () => {
 });
 
 describe('the care-giver setup (family, neighbour, ASHA, clinician)', () => {
-  test('name, then an account, then the invite code: and the account is required before the code', async () => {
+  test('a care-giver with no account starts at the two doors, not at the code', async () => {
     await mount({ ...productionState, usage: 'member' });
-    await fireEvent.changeText(screen.getByLabelText('Your name'), 'Asha');
-    await fireEvent.press(screen.getByLabelText('Next'));
-    expect(screen.getByText('Your own account')).toBeTruthy();
-    expect(screen.getByText('Create your account first.')).toBeTruthy();
-    // not signed in: Next does not move on
-    await fireEvent.press(screen.getByLabelText('Next'));
-    expect(screen.getByText('Your own account')).toBeTruthy();
+    expect(screen.getByLabelText('I already have an account')).toBeTruthy();
     expect(screen.queryByText('Join the person you look after')).toBeNull();
   });
   test('once signed in, the join step explains where the code comes from and that the number must match', async () => {
     await mount({ ...productionState, usage: 'member', cloud: signedIn });
-    await fireEvent.press(screen.getByLabelText('Next')); // name
-    await fireEvent.press(screen.getByLabelText('Next')); // account (already signed in)
+    await fireEvent.press(screen.getByLabelText('Next')); // name; signed in already, so the code is next
     expect(screen.getByText('Join the person you look after')).toBeTruthy();
     expect(screen.getByText(/Your role comes from their invite/)).toBeTruthy();
     expect(screen.getByText(/only works for the phone number the person entered for you/)).toBeTruthy();
@@ -89,14 +85,12 @@ describe('the care-giver setup (family, neighbour, ASHA, clinician)', () => {
   test('a care-giver who has joined sees how many circles and can start', async () => {
     await mount({ ...productionState, usage: 'member', cloud: signedIn, circles: [neighbourOf] });
     await fireEvent.press(screen.getByLabelText('Next'));
-    await fireEvent.press(screen.getByLabelText('Next'));
     expect(screen.getByText('Circles you have joined: 1')).toBeTruthy();
     await fireEvent.press(screen.getByLabelText('Start'));
     await waitFor(() => expect(screen.getByText('People I look after')).toBeTruthy());
   });
   test('skipping the code still opens the app, with a clear message that nobody is joined yet', async () => {
     await mount({ ...productionState, usage: 'member', cloud: signedIn });
-    await fireEvent.press(screen.getByLabelText('Next'));
     await fireEvent.press(screen.getByLabelText('Next'));
     await fireEvent.press(screen.getByLabelText('I will join later'));
     await waitFor(() => expect(screen.getByText('You have not joined anyone\'s circle yet.')).toBeTruthy());

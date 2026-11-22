@@ -1,9 +1,9 @@
 ---
 name: saath-design-system
-description: Use for any Saath UI work. Tokens, Mukta type, Lucide icons by file, springs, lists over cards, the dye ring, role-aware homes, accessibility.
+description: Use for any Saath UI work. Tokens, Mukta type, the Screen large title, grouped lists, springs, spot illustrations, role-aware homes, accessibility.
 ---
 
-Full write-up in `docs/DESIGN.md`. The rules below are the ones that get broken most easily.
+Full write-up in `DESIGN.md` (the Apple-style look: grouped grey page, flat white panels, one blue accent). The rules below are the ones that get broken most easily.
 
 **Tokens and type**
 - Colours and sizes come from `src/theme.js` only. Brick red is for a real safety alert and nothing else.
@@ -11,21 +11,23 @@ Full write-up in `docs/DESIGN.md`. The rules below are the ones that get broken 
 - Body 18 or more, supporting text 16 or more, targets 56 or more. Everything must work at large-text 1.35x.
 
 **Structure**
-- A greeting header, one hero, then divided lists (`ListGroup`, `ListRow`). Do not put every item in its own card. Vary radii by role.
+- Every page is `Screen` with a `title` (large title, account button, slim bar on scroll); pushed pages pass `onBack` and sit in `Push`. Never build a header or scroll padding by hand.
+- Related rows go in one `ListGroup` panel under a `SectionTitle`. Do not put every item in its own card. Panels are flat on the grey page; only floating things get a shadow.
+- Notes are one short sentence. Safety, privacy and not-medical-advice lines are kept, never padded.
 - No ALL CAPS labels, no "A · B · C" meta strings, no numbered markers unless the content is a real sequence.
 - One primary action per screen. Buttons are `BigButton` (`primary`, `ok`, `quiet`; `alert` only on the safety takeover).
 - Choices that have state use `Toggle` or `Segmented`, and the state is in the accessibility label.
 
 **Icons**
 - Line icons come from `src/components/icons.js`, one import per icon. Never `import ... from 'lucide-react-native'` (it bundles about 2,000 icons). Add a line to `icons.js` to use a new one.
-- No emoji as icons. Faces, plate, mark, rings and charts are drawn in SVG (`components/art.js`, `components/kit.js`).
+- No emoji as icons. Illustrations are the filled spot art in `components/doodles.js` (one colour, its tint, white, one turmeric accent, on a halo); faces, plate, rings and charts are SVG in `art.js` and `kit.js`.
 
 **Motion**
 - Springs, critically damped, start on touch-down, interruptible. Motion is tap-triggered or tied to a real alert; no idle loops.
 - Use `useReducedMotion`; with it on, change instantly. Do not read refs during render (`useState(() => new Animated.Value(x))`, not `useRef(...).current`).
 - Do not call `Date.now()` in render; use `useNow()` or `nowMs()` from `services/clock`.
 
-**Role-aware homes**: Elder (dye ring and "I'm OK", big list, voice), Teen (handover track, dial), Adult (sugar, refill, strips, spend, real numbers), Family (status ring, read only), Neighbour (safety only), ASHA and clinician (ranked households, one-page summary).
+**Role-aware homes**: every patient mode shares one focused Today (the I'm OK ring, what is due, one row for the mode: the teen's ladder or the adult's last reading, then the routine with Edit). Family (status ring, read only), Neighbour (safety only), ASHA and clinician (their people, most urgent first). The study tally lives in Me > Study data, not on Safety.
 
 **Accessibility**: label every control, never use colour alone (print the number), hide decorative graphics, keep the Hindi and English string files in step (a test enforces it).
 

@@ -14,7 +14,6 @@ import { askReminderPermission } from '../services/reminders';
 import { callsAvailable } from '../services/calls';
 import { colors } from '../theme';
 
-const STEPS = 4;
 // One picture per step, so each page is recognisable at a glance.
 const HERO = ['heart', 'face', 'people', 'shield'];
 
@@ -23,7 +22,11 @@ const HERO = ['heart', 'face', 'people', 'shield'];
 export default function OnboardingScreen() {
   const { state, dispatch, t } = useStore();
   const choices = useChoices();
-  const [step, setStep] = useState(0);
+  // Someone who signed in to an existing account is asked only for what lives on this phone: the people to reach
+  // and how alerts work. Everyone else gets the whole setup.
+  const order = state.returning ? [2, 3] : [0, 1, 2, 3];
+  const [index, setIndex] = useState(0);
+  const step = order[index];
   const [name, setName] = useState(state.profile.name || '');
   const [condition, setCondition] = useState(state.profile.condition || '');
   const set = (key, value) => dispatch({ type: 'SET', key, value });
@@ -32,12 +35,12 @@ export default function OnboardingScreen() {
   const next = () => {
     if (step === 1)
       dispatch({ type: 'PROFILE_SET', patch: { name: name.trim(), condition: condition.trim() } });
-    setStep((s) => s + 1);
+    setIndex((n) => n + 1);
   };
 
   return (
     <Screen setup>
-      <SetupProgress step={step} total={STEPS} />
+      <SetupProgress step={index} total={order.length} />
       <View style={{ alignItems: 'center', paddingVertical: 4 }}>
         <Doodle name={HERO[step]} size={112} color={step === 0 ? colors.leaf : colors.indigo} />
       </View>
@@ -197,12 +200,22 @@ export default function OnboardingScreen() {
       </Push>
 
       <View style={{ gap: 10 }}>
-        {step < STEPS - 1 ? (
+        {index < order.length - 1 ? (
           <BigButton icon={ArrowRight} label={t('ob.next')} onPress={next} />
         ) : (
-          <BigButton kind="ok" icon={Check} label={t('ob.finish')} onPress={() => set('onboarded', true)} />
+          <BigButton
+            kind="ok"
+            icon={Check}
+            label={t('ob.finish')}
+            onPress={() => {
+              set('returning', false);
+              set('onboarded', true);
+            }}
+          />
         )}
-        {step > 0 ? <BigButton kind="text" label={t('back')} onPress={() => setStep((s) => s - 1)} /> : null}
+        {index > 0 ? (
+          <BigButton kind="text" label={t('back')} onPress={() => setIndex((n) => n - 1)} />
+        ) : null}
       </View>
     </Screen>
   );

@@ -26,9 +26,9 @@ describe('suggestion pad on Today', () => {
 
   test('shows the most important slip first, with Stamp it, Open and Not today', async () => {
     await mount({ mode: 'adult', ...lowMeds });
-    expect(await screen.findByText("Today's slips")).toBeTruthy();
+    expect(await screen.findByText("For today")).toBeTruthy();
     expect(screen.getByText('Medicine running low')).toBeTruthy();
-    expect(screen.getByLabelText('Stamp it')).toBeTruthy();
+    expect(screen.getByLabelText('Mark done')).toBeTruthy();
     expect(screen.getByLabelText('Open')).toBeTruthy();
     expect(screen.getByLabelText('Not today')).toBeTruthy();
     expect(screen.getByText(/about 2 days/)).toBeTruthy();
@@ -36,7 +36,7 @@ describe('suggestion pad on Today', () => {
 
   test('Stamp it stamps the slip and moves to the next one', async () => {
     await mount({ mode: 'adult', ...lowMeds });
-    await fireEvent.press(await screen.findByLabelText('Stamp it'));
+    await fireEvent.press(await screen.findByLabelText('Mark done'));
     await act(async () => {
       jest.advanceTimersByTime(1000);
     });
@@ -51,13 +51,13 @@ describe('suggestion pad on Today', () => {
 
   test('is in Hindi when the language is Hindi', async () => {
     await mount({ mode: 'adult', lang: 'hi', ...lowMeds });
-    expect(await screen.findByText('आज की पर्चियाँ')).toBeTruthy();
+    expect(await screen.findByText('आज के लिए')).toBeTruthy();
     expect(screen.getByText('दवा कम हो रही है')).toBeTruthy();
-    expect(screen.getByLabelText('मुहर लगाएँ')).toBeTruthy();
+    expect(screen.getByLabelText('पूरा हुआ')).toBeTruthy();
   });
 
   test('is not on the family home and does not appear over a real alert', async () => {
     await mount({ role: 'family' });
-    expect(screen.queryByText("Today's slips")).toBeNull();
+    expect(screen.queryByText("For today")).toBeNull();
   });
 });
