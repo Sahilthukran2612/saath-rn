@@ -26,9 +26,9 @@ export default function OkRing() {
 
   const total = state.tasks.length;
   const done = state.tasks.filter((x) => x.done).length;
-  const size = Math.max(200, Math.min(264, width - 40 - 48)); // screen padding 20, card padding 24
-  const stroke = 18;
-  const inner = size - stroke * 2 - 26;
+  const size = Math.max(188, Math.min(236, width - 40 - 48)); // screen padding 20, card padding 24
+  const stroke = 16;
+  const inner = size - stroke * 2 - 22;
 
   const [sentAt, setSentAt] = useState(null);
   useEffect(() => {
@@ -52,8 +52,8 @@ export default function OkRing() {
       style={{
         backgroundColor: colors.paper,
         borderRadius: radii.xl,
-        padding: 24,
-        gap: 18,
+        padding: 22,
+        gap: 16,
         alignItems: 'center',
         ...shadow.card,
       }}
@@ -61,9 +61,9 @@ export default function OkRing() {
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'stretch' }}>
         <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: today ? colors.leaf : colors.haldi }} />
         <Text
-          numberOfLines={2}
+          numberOfLines={1}
           accessibilityRole="header"
-          style={{ flex: 1, fontFamily: fonts.bold, fontSize: 13 * Math.min(k, 1.2), letterSpacing: hi ? 0 : 0.8, color: colors.inkSoft, textTransform: 'uppercase' }}
+          style={{ flex: 1, fontFamily: fonts.bold, fontSize: 18 * Math.min(k, 1.2), color: colors.ink }}
         >
           {t('ok.title')}
         </Text>
@@ -74,13 +74,13 @@ export default function OkRing() {
         </View>
       </View>
 
-      <ProgressRing size={size} stroke={stroke} progress={total ? done / total : 0} color={colors.leaf} track={colors.line}>
+      <ProgressRing size={size} stroke={stroke} progress={total ? done / total : 0} color={colors.indigo} track={colors.indigoTint}>
         <PressRow
           accessibilityRole="button"
           accessibilityLabel={t('imOk')}
           accessibilityHint={t('imOkHint')}
           haptic={false}
-          rippleColor="rgba(31,122,74,0.18)"
+          rippleColor="rgba(255,255,255,0.24)"
           onPress={() => {
             const at = Date.now();
             dispatch({ type: 'CHECK_IN', at });
@@ -92,34 +92,31 @@ export default function OkRing() {
             width: inner,
             height: inner,
             borderRadius: inner / 2,
-            backgroundColor: colors.leafTint,
-            borderWidth: 1.5,
-            borderColor: 'rgba(31,122,74,0.28)',
+            backgroundColor: colors.leaf,
             alignItems: 'center',
             justifyContent: 'center',
             gap: 2,
-            ...shadow.card,
           }}
         >
-          <Glyph icon={Check} size={30} color={colors.leaf} strokeWidth={2.8} />
-          <Text style={{ fontFamily: fonts.bold, fontSize: 26 * Math.min(k, 1.15), lineHeight: 34 * Math.min(k, 1.15), color: colors.ink }}>{t('imOk')}</Text>
-          <Text style={{ fontFamily: fonts.bold, fontSize: 14 * Math.min(k, 1.15), letterSpacing: hi ? 0.5 : 0, color: colors.indigo }}>
+          <Glyph icon={Check} size={32} color={colors.white} strokeWidth={2.8} />
+          <Text style={{ fontFamily: fonts.bold, fontSize: 26 * Math.min(k, 1.15), lineHeight: 34 * Math.min(k, 1.15), color: colors.white }}>{t('imOk')}</Text>
+          <Text style={{ fontFamily: fonts.bold, fontSize: 14 * Math.min(k, 1.15), letterSpacing: hi ? 0.5 : 0, color: 'rgba(255,255,255,0.88)' }}>
             {hi ? "I'M OK" : 'मैं ठीक हूँ'}
           </Text>
-          <Text style={{ fontFamily: fonts.regular, fontSize: 14 * Math.min(k, 1.15), color: colors.inkSoft }}>
+          <Text style={{ fontFamily: fonts.regular, fontSize: 14 * Math.min(k, 1.15), color: 'rgba(255,255,255,0.8)' }}>
             {sentAt != null ? t('ok.sent') : t('ok.tap')}
           </Text>
         </PressRow>
       </ProgressRing>
 
       {total > 0 ? (
-        <Text accessibilityLabel={fmt(t('doneOf'), { done, total })} style={{ fontFamily: fonts.bold, fontSize: 18 * Math.min(k, 1.2), color: colors.ink }}>
+        <Text accessibilityLabel={fmt(t('doneOf'), { done, total })} style={{ fontFamily: fonts.bold, fontSize: 18 * Math.min(k, 1.2), color: colors.indigo }}>
           {`${done} / ${total} ${t('hero.done')}`}
         </Text>
       ) : null}
 
-      <View style={{ backgroundColor: colors.mist, borderRadius: radii.pill, paddingHorizontal: 16, paddingVertical: 9, alignSelf: 'center' }}>
-        <Text style={{ fontFamily: fonts.semi, fontSize: 15 * Math.min(k, 1.2), color: colors.ink, textAlign: 'center' }}>{lastLine}</Text>
+      <View style={{ backgroundColor: colors.indigoTint, borderRadius: radii.pill, paddingHorizontal: 16, paddingVertical: 9, alignSelf: 'center' }}>
+        <Text style={{ fontFamily: fonts.semi, fontSize: 15 * Math.min(k, 1.2), color: colors.indigoDeep, textAlign: 'center' }}>{lastLine}</Text>
       </View>
 
       {sentAt != null ? (

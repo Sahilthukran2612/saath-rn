@@ -22,7 +22,7 @@ describe('the I\'m OK card on Today', () => {
   test('it has one round I\'m OK button, a status, the day\'s count and a last-confirmed line', async () => {
     await mount({ mode: 'elder' });
     expect(screen.getAllByLabelText("I'm OK")).toHaveLength(1);
-    expect(screen.getByText('Daily activity and status')).toBeTruthy();
+    expect(screen.getByText("Today's status")).toBeTruthy();
     expect(screen.getByText('Tap to confirm')).toBeTruthy();
     expect(screen.getByText('0 / 4 done today')).toBeTruthy();
     expect(screen.getByText('Not confirmed yet')).toBeTruthy();
@@ -75,7 +75,7 @@ describe('the last confirmed time', () => {
 describe('Hindi', () => {
   test('the words, the status and the last-confirmed line are Hindi', async () => {
     await mount({ mode: 'elder', lang: 'hi' });
-    expect(screen.getByText(/दैनिक/)).toBeTruthy();
+    expect(screen.getByText(/आज की स्थिति/)).toBeTruthy();
     expect(screen.getByText(/अभी पुष्टि नहीं/)).toBeTruthy();
     expect(screen.getByLabelText('मैं ठीक हूँ')).toBeTruthy();
   });
