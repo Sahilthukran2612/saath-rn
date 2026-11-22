@@ -7,7 +7,7 @@
 const AMOUNT = new RegExp(
   '\\b(?:\\d+(?:[.,]\\d+)?|one|two|three|four|five|half)\\s*(?:mg|mcg|µg|ml|iu|units?|u|tabs?|tablets?|pills?|capsules?|drops?|spoons?|teaspoons?)\\b' +
     '|(?:\\d+|आधा|एक|दो|तीन|चार|पाँच)\\s*(?:गोली|गोलियाँ|यूनिट|मिलीग्राम|बूँद|चम्मच)',
-  'i',
+  'i'
 );
 // Words that tell a person to change what they take.
 const DOSE_VERBS =
@@ -48,8 +48,14 @@ export function sanitizeReply(text, lang = 'en', max = 700) {
 // One suggestion card from the model: a short title and a short body, both safe, or nothing.
 export function sanitizeCard(card, lang = 'en') {
   if (!card || typeof card !== 'object') return null;
-  const title = String(card.title || '').replace(/[*_`#>]+/g, '').trim().slice(0, 48);
-  const body = String(card.body || '').replace(/[*_`#>]+/g, '').trim().slice(0, 160);
+  const title = String(card.title || '')
+    .replace(/[*_`#>]+/g, '')
+    .trim()
+    .slice(0, 48);
+  const body = String(card.body || '')
+    .replace(/[*_`#>]+/g, '')
+    .trim()
+    .slice(0, 160);
   if (title.length < 3 || body.length < 8) return null;
   if (violates(title) || violates(body)) return null;
   void lang;

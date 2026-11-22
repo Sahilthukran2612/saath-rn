@@ -1,14 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Animated, StyleSheet, View } from 'react-native';
-import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Text from './AppText';
 import { HeartPulse, House, LayoutGrid, ShieldCheck, UserRound, Users } from './icons';
-import { colors, fonts, roles, themeName } from '../theme';
+import { colors, motion, textStyles, themeName } from '../theme';
 import { PressRow, useScale, Glyph } from './ui';
 import { useSpringValue } from './motion';
 import useKeyboardVisible from './useKeyboard';
 
-// Five destinations. "Me" lives behind the account avatar in the top app bar. It stays in this list so the
+// Five destinations. "Me" opens from the account button beside each large title; it stays in this list so the
 // screen can still be routed to.
 export const TABS = [
   ['today', 'tabToday', House],
@@ -21,14 +21,10 @@ export const TABS = [
 
 export const NAV_TABS = TABS.filter(([id]) => id !== 'me');
 
-// Screens leave this much room under their last item, because the bar floats over them.
-export const NAV_CLEARANCE = 128;
-const BAR_H = 72;
+const BAR_H = 68;
+const PAD = 6;
 
-function Item({ id, label, Icon, on, onPress, k }) {
-  // The active pill grows out from its centre on a critically damped spring; with reduced motion it just appears.
-  const v = useSpringValue(on ? 1 : 0, { damping: 22, stiffness: 380, mass: 1 });
-  const scaleX = v.interpolate({ inputRange: [0, 1], outputRange: [0.5, 1] });
+function Item({ label, Icon, on, onPress, k }) {
   return (
     <PressRow
       accessibilityRole="tab"
@@ -37,20 +33,20 @@ function Item({ id, label, Icon, on, onPress, k }) {
       onPress={onPress}
       containerStyle={{ flex: 1 }}
       style={styles.item}
-      rippleColor="transparent"
     >
-      <View style={styles.iconSlot}>
-        <Animated.View style={[styles.indicator, { opacity: v, transform: [{ scaleX }] }]} />
-        <Glyph icon={Icon} size={24 * Math.min(k, 1.15)} color={on ? '#102A7A' : colors.inkSoft} strokeWidth={on ? 2.3 : 1.9} />
-      </View>
+      <Glyph
+        icon={Icon}
+        size={24 * Math.min(k, 1.15)}
+        color={on ? colors.indigo : colors.inkSoft}
+        strokeWidth={on ? 2.4 : 2}
+      />
       <Text
         numberOfLines={1}
         style={{
-          fontFamily: on ? fonts.bold : roles.labelNav.font,
-          fontSize: roles.labelNav.size * Math.min(k, 1.1),
-          lineHeight: roles.labelNav.line * Math.min(k, 1.1),
-          letterSpacing: roles.labelNav.track,
-          color: on ? colors.ink : colors.inkSoft,
+          fontFamily: textStyles.tab.font,
+          fontSize: textStyles.tab.size * Math.min(k, 1.1),
+          lineHeight: textStyles.tab.line * Math.min(k, 1.1),
+          color: on ? colors.indigo : colors.inkSoft,
         }}
       >
         {label}
@@ -59,76 +55,71 @@ function Item({ id, label, Icon, on, onPress, k }) {
   );
 }
 
-// A mirror finish without a blur (a blur is slow on low-end phones): a see-through body, a bright specular band
-// across the top, a soft darker reflection below it, and a lit rim. Drawn once with SVG gradients.
-function Mirror() {
-  const dark = themeName === 'dark';
-  const top = dark ? '#FFFFFF' : '#FFFFFF';
-  return (
-    <Svg width="100%" height="100%" style={StyleSheet.absoluteFill} pointerEvents="none">
-      <Defs>
-        <LinearGradient id="body" x1="0" y1="0" x2="0" y2="1">
-          <Stop offset="0" stopColor={top} stopOpacity={dark ? 0.5 : 0.99} />
-          <Stop offset="0.48" stopColor={dark ? '#7C8CF0' : '#DCE6FF'} stopOpacity={dark ? 0.45 : 0.94} />
-          <Stop offset="0.52" stopColor={dark ? '#0F1226' : '#C7D6FA'} stopOpacity={dark ? 0.93 : 0.93} />
-          <Stop offset="1" stopColor={dark ? '#20264F' : '#EEF3FF'} stopOpacity={dark ? 0.97 : 0.98} />
-        </LinearGradient>
-        <LinearGradient id="sheen" x1="0" y1="0" x2="1" y2="0.35">
-          <Stop offset="0" stopColor="#FFFFFF" stopOpacity="0" />
-          <Stop offset="0.4" stopColor="#FFFFFF" stopOpacity={dark ? 0.14 : 0.5} />
-          <Stop offset="0.6" stopColor="#FFFFFF" stopOpacity="0" />
-        </LinearGradient>
-      </Defs>
-      <Rect x="0" y="0" width="100%" height="100%" fill="url(#body)" />
-      <Rect x="0" y="0" width="100%" height="100%" fill="url(#sheen)" />
-    </Svg>
-  );
-}
-
-// A floating bar, inset from the edges and detached from the bottom, like Apple's tab bars.
+// A floating bar, inset from the edges and lifted above the phone's own gesture area. One soft highlight slides to
+// the chosen tab on a spring, so the eye follows the move instead of seeing two tabs blink.
 export default function TabBar({ tab, onChange, t, tabs = NAV_TABS }) {
   const k = useScale();
-  const dark = themeName === 'dark';
+  const insets = useSafeAreaInsets();
   const typing = useKeyboardVisible();
-  if (typing) return null; // while the keyboard is up the bar would float in the middle of the screen
+  const [w, setW] = useState(0);
+  const index = Math.max(
+    0,
+    tabs.findIndex(([id]) => id === tab)
+  );
+  const pos = useSpringValue(index, motion.snappy);
+  if (typing) return null; // with the keyboard up the bar would float in the middle of the screen
+  const seg = w > 0 ? (w - PAD * 2) / tabs.length : 0;
   return (
-    <View pointerEvents="box-none" style={styles.wrap}>
-      <View style={[styles.bar, { borderColor: dark ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.95)' }]}>
-        <Mirror />
-        <View style={styles.row}>
-          {tabs.map(([id, key, Icon]) => (
-            <Item key={id} id={id} label={t(key)} Icon={Icon} on={tab === id} onPress={() => onChange(id)} k={k} />
-          ))}
-        </View>
+    <View pointerEvents="box-none" style={[styles.wrap, { bottom: Math.max(insets.bottom, 8) + 6 }]}>
+      <View style={styles.bar} onLayout={(e) => setW(e.nativeEvent.layout.width)}>
+        {seg > 0 ? (
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              styles.highlight,
+              { width: seg, transform: [{ translateX: Animated.multiply(pos, seg) }] },
+            ]}
+          />
+        ) : null}
+        {tabs.map(([id, key, Icon]) => (
+          <Item key={id} label={t(key)} Icon={Icon} on={tab === id} onPress={() => onChange(id)} k={k} />
+        ))}
       </View>
     </View>
   );
 }
 
+const dark = themeName === 'dark';
 const styles = StyleSheet.create({
-  wrap: { position: 'absolute', left: 14, right: 14, bottom: 12 },
+  wrap: { position: 'absolute', left: 16, right: 16 },
   bar: {
     height: BAR_H,
     borderRadius: BAR_H / 2,
-    borderWidth: 1.5,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255,255,255,0.35)',
-    shadowColor: '#1B2A6B',
-    shadowOpacity: 0.22,
-    shadowRadius: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: PAD,
+    backgroundColor: dark ? 'rgba(44,44,46,0.97)' : 'rgba(255,255,255,0.97)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: dark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.08)',
+    shadowColor: '#000',
+    shadowOpacity: dark ? 0.5 : 0.12,
+    shadowRadius: 20,
     shadowOffset: { width: 0, height: 8 },
-    elevation: 12,
+    elevation: 10,
   },
-  row: { flex: 1, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8 },
-  item: { minHeight: 64, alignItems: 'center', justifyContent: 'center', gap: 2 },
-  iconSlot: { width: 60, height: 32, alignItems: 'center', justifyContent: 'center' },
-  indicator: {
+  highlight: {
     position: 'absolute',
-    width: 60,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(120,150,255,0.38)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.8)',
+    left: PAD,
+    top: PAD,
+    bottom: PAD,
+    borderRadius: (BAR_H - PAD * 2) / 2,
+    backgroundColor: colors.indigoTint,
+  },
+  item: {
+    height: BAR_H - PAD * 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+    borderRadius: (BAR_H - PAD * 2) / 2,
   },
 });

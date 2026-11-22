@@ -18,8 +18,14 @@ export function parseJoinUrl(url) {
 const ADD_ROLES = ['family', 'neighbour', 'asha', 'clinician'];
 
 export function addUrl({ name, phone, role }) {
-  const n = encodeURIComponent(String(name || '').trim().slice(0, 40));
-  const p = String(phone || '').replace(/\D/g, '').slice(-10);
+  const n = encodeURIComponent(
+    String(name || '')
+      .trim()
+      .slice(0, 40)
+  );
+  const p = String(phone || '')
+    .replace(/\D/g, '')
+    .slice(-10);
   return `${JOIN_SCHEME}://add/${ADD_ROLES.includes(role) ? role : 'family'}/${p}/${n}`;
 }
 
@@ -30,7 +36,10 @@ export function parseAddUrl(url) {
   if (!m || !ADD_ROLES.includes(m[1])) return null;
   let name = '';
   try {
-    name = decodeURIComponent(m[3]).replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 40);
+    name = decodeURIComponent(m[3])
+      .replace(/[\u0000-\u001f<>]/g, '')
+      .trim()
+      .slice(0, 40);
   } catch {
     return null;
   }

@@ -46,7 +46,11 @@ export default function JoinedSection() {
                 onChange={(v) => setDial(m, v)}
                 options={[0, 1, 2].map((d) => ({ value: d, label: t(`dial${d}`) }))}
               />
-              <Caption>{t('jm.sees').replace('{name}', m.name).replace('{level}', t(`dial${m.dial}`))}</Caption>
+              <Caption>
+                {t('jm.sees')
+                  .replace('{name}', m.name)
+                  .replace('{level}', t(`dial${m.dial}`))}
+              </Caption>
             </View>
           ))}
         </ListGroup>

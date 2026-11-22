@@ -52,19 +52,34 @@ const sessionOf = (d) => ({ access: d.access_token, refresh: d.refresh_token, us
 
 export async function requestOtp(cfg, phone, fetchImpl) {
   if (!isConfigured(cfg) || !validPhone(phone)) return { ok: false, reason: 'invalid' };
-  const r = await call(cfg, '/auth/v1/otp', { method: 'POST', body: { phone: toE164(phone), create_user: true } }, fetchImpl);
+  const r = await call(
+    cfg,
+    '/auth/v1/otp',
+    { method: 'POST', body: { phone: toE164(phone), create_user: true } },
+    fetchImpl
+  );
   return r.ok ? { ok: true } : { ok: false, reason: r.status === 0 ? 'network' : 'rejected' };
 }
 
 // Find this person's household, or make it. Shared by both ways of signing in.
 async function ensureHousehold(cfg, s, personName, fetchImpl) {
-  const found = await call(cfg, `/rest/v1/households?select=id,person_name&person_user_id=eq.${s.userId}`, { token: s.access }, fetchImpl);
+  const found = await call(
+    cfg,
+    `/rest/v1/households?select=id,person_name&person_user_id=eq.${s.userId}`,
+    { token: s.access },
+    fetchImpl
+  );
   let household = found.ok ? found.data?.[0] : null;
   if (!household?.id) {
     const made = await call(
       cfg,
       '/rest/v1/households',
-      { method: 'POST', token: s.access, prefer: 'return=representation', body: { person_user_id: s.userId, person_name: personName } },
+      {
+        method: 'POST',
+        token: s.access,
+        prefer: 'return=representation',
+        body: { person_user_id: s.userId, person_name: personName },
+      },
       fetchImpl
     );
     household = made.ok ? made.data?.[0] : null;
@@ -86,7 +101,11 @@ export async function signIn(cfg, phone, code, fetchImpl, personName = '') {
   const s = sessionOf(v.data);
   const h = await ensureHousehold(cfg, s, personName, fetchImpl);
   if (!h) return { ok: false, reason: 'household' };
-  return { ok: true, cloud: { phone: String(phone).replace(/\D/g, '').slice(-10), ...s, householdId: h.id }, personName: h.name };
+  return {
+    ok: true,
+    cloud: { phone: String(phone).replace(/\D/g, '').slice(-10), ...s, householdId: h.id },
+    personName: h.name,
+  };
 }
 
 // Free sign-in with no phone number and no SMS: the server makes an anonymous account for this
@@ -103,7 +122,12 @@ export async function signInAnonymous(cfg, fetchImpl, personName = '') {
   return { ok: true, cloud: { phone: '', ...s, householdId: h.id }, personName: h.name };
 }
 export async function refreshSession(cfg, refresh, fetchImpl) {
-  const r = await call(cfg, '/auth/v1/token?grant_type=refresh_token', { method: 'POST', body: { refresh_token: refresh } }, fetchImpl);
+  const r = await call(
+    cfg,
+    '/auth/v1/token?grant_type=refresh_token',
+    { method: 'POST', body: { refresh_token: refresh } },
+    fetchImpl
+  );
   return r.ok && r.data?.access_token ? { ok: true, session: sessionOf(r.data) } : { ok: false };
 }
 
@@ -122,7 +146,12 @@ export async function flush(cfg, cloud, outbox, fetchImpl) {
     return { sentIds: [], session: null };
   }
   const send = (token) =>
-    call(cfg, '/rest/v1/events', { method: 'POST', token, prefer: 'return=minimal', body: batch.map((e) => row(cloud.householdId, e)) }, fetchImpl);
+    call(
+      cfg,
+      '/rest/v1/events',
+      { method: 'POST', token, prefer: 'return=minimal', body: batch.map((e) => row(cloud.householdId, e)) },
+      fetchImpl
+    );
   let r = await send(cloud.access);
   let session = null;
   if (r.status === 401 && cloud.refresh) {
@@ -139,7 +168,8 @@ export async function flush(cfg, cloud, outbox, fetchImpl) {
 
 // Run an authorised call; on 401 refresh once and retry. Returns the result and any new tokens.
 async function withAuth(cfg, cloud, run, fetchImpl) {
-  if (!isConfigured(cfg) || !cloud?.access) return { res: { ok: false, status: 0, data: null }, session: null };
+  if (!isConfigured(cfg) || !cloud?.access)
+    return { res: { ok: false, status: 0, data: null }, session: null };
   let res = await run(cloud.access);
   let session = null;
   if (res.status === 401 && cloud.refresh) {
@@ -158,7 +188,12 @@ export async function setPersonName(cfg, cloud, name, fetchImpl) {
     cfg,
     cloud,
     (token) =>
-      call(cfg, `/rest/v1/households?id=eq.${cloud.householdId}`, { method: 'PATCH', token, body: { person_name: String(name || '') } }, fetchImpl),
+      call(
+        cfg,
+        `/rest/v1/households?id=eq.${cloud.householdId}`,
+        { method: 'PATCH', token, body: { person_name: String(name || '') } },
+        fetchImpl
+      ),
     fetchImpl
   );
   return { ok: res.ok, session };
@@ -173,7 +208,11 @@ export async function createInvite(cfg, cloud, inv, fetchImpl) {
       call(
         cfg,
         '/rest/v1/invites',
-        { method: 'POST', token, prefer: 'return=minimal', body: {
+        {
+          method: 'POST',
+          token,
+          prefer: 'return=minimal',
+          body: {
             household_id: cloud.householdId,
             name: inv.name,
             role: inv.role,
@@ -196,7 +235,13 @@ export async function acceptInvite(cfg, cloud, code, fetchImpl) {
   const { res, session } = await withAuth(
     cfg,
     cloud,
-    (token) => call(cfg, '/rest/v1/rpc/accept_invite', { method: 'POST', token, body: { invite_code: clean } }, fetchImpl),
+    (token) =>
+      call(
+        cfg,
+        '/rest/v1/rpc/accept_invite',
+        { method: 'POST', token, body: { invite_code: clean } },
+        fetchImpl
+      ),
     fetchImpl
   );
   // a wrong code comes back as null (the server keeps count of wrong tries), not as an error
@@ -211,7 +256,13 @@ export async function listCircles(cfg, cloud, fetchImpl) {
   const { res, session } = await withAuth(
     cfg,
     cloud,
-    (token) => call(cfg, '/rest/v1/my_circles?select=household_id,role,dial,time_off,person_name', { token }, fetchImpl),
+    (token) =>
+      call(
+        cfg,
+        '/rest/v1/my_circles?select=household_id,role,dial,time_off,person_name',
+        { token },
+        fetchImpl
+      ),
     fetchImpl
   );
   return { ok: res.ok && Array.isArray(res.data), circles: Array.isArray(res.data) ? res.data : [], session };
@@ -260,7 +311,16 @@ export async function publishPlan(cfg, cloud, householdId, authorName, plan, fet
       call(
         cfg,
         '/rest/v1/care_plans',
-        { method: 'POST', token, prefer: 'return=minimal', body: { household_id: householdId, author_name: String(authorName || '').slice(0, 60) || 'Clinician', plan } },
+        {
+          method: 'POST',
+          token,
+          prefer: 'return=minimal',
+          body: {
+            household_id: householdId,
+            author_name: String(authorName || '').slice(0, 60) || 'Clinician',
+            plan,
+          },
+        },
         fetchImpl
       ),
     fetchImpl
@@ -394,8 +454,14 @@ async function finishSignIn(cfg, data, phone, personName, fetchImpl) {
 // New account. reason: 'invalid' (bad number or short password), 'exists' (already registered),
 // 'confirm' (the server still wants a confirmation text: the provider switch is not set), 'network', 'household'.
 export async function signUpPassword(cfg, phone, password, fetchImpl, personName = '') {
-  if (!isConfigured(cfg) || !validPhone(phone) || !passwordOk(password)) return { ok: false, reason: 'invalid' };
-  const r = await call(cfg, '/auth/v1/signup', { method: 'POST', body: { phone: toE164(phone), password } }, fetchImpl);
+  if (!isConfigured(cfg) || !validPhone(phone) || !passwordOk(password))
+    return { ok: false, reason: 'invalid' };
+  const r = await call(
+    cfg,
+    '/auth/v1/signup',
+    { method: 'POST', body: { phone: toE164(phone), password } },
+    fetchImpl
+  );
   if (r.status === 0) return { ok: false, reason: 'network' };
   if (!r.ok) {
     const msg = String(r.data?.msg || r.data?.message || r.data?.error_description || '');
@@ -407,7 +473,8 @@ export async function signUpPassword(cfg, phone, password, fetchImpl, personName
 
 // Existing account, on this or another phone. reason: 'invalid', 'wrong' (number or password), 'network'.
 export async function signInPassword(cfg, phone, password, fetchImpl) {
-  if (!isConfigured(cfg) || !validPhone(phone) || !passwordOk(password)) return { ok: false, reason: 'invalid' };
+  if (!isConfigured(cfg) || !validPhone(phone) || !passwordOk(password))
+    return { ok: false, reason: 'invalid' };
   const r = await call(
     cfg,
     '/auth/v1/token?grant_type=password',
@@ -434,7 +501,12 @@ export async function saveDeviceToken(cfg, cloud, token, lang, fetchImpl) {
           method: 'POST',
           token: access,
           prefer: 'resolution=merge-duplicates,return=minimal',
-          body: { token, lang: lang === 'hi' ? 'hi' : 'en', user_id: cloud.userId, updated_at: new Date().toISOString() },
+          body: {
+            token,
+            lang: lang === 'hi' ? 'hi' : 'en',
+            user_id: cloud.userId,
+            updated_at: new Date().toISOString(),
+          },
         },
         fetchImpl
       ),
@@ -449,7 +521,13 @@ export async function deleteDeviceToken(cfg, cloud, token, fetchImpl) {
   const { res, session } = await withAuth(
     cfg,
     cloud,
-    (access) => call(cfg, `/rest/v1/device_tokens?token=eq.${encodeURIComponent(token)}`, { method: 'DELETE', token: access, prefer: 'return=minimal' }, fetchImpl),
+    (access) =>
+      call(
+        cfg,
+        `/rest/v1/device_tokens?token=eq.${encodeURIComponent(token)}`,
+        { method: 'DELETE', token: access, prefer: 'return=minimal' },
+        fetchImpl
+      ),
     fetchImpl
   );
   return { ok: res.ok, session };

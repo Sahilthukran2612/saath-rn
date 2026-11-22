@@ -102,9 +102,17 @@ export default function PatientPanel({ circle, onBack }) {
         <Card style={{ gap: 12 }}>
           <Body bold>{t('vis.title')}</Body>
           <Caption>
-            {visit.days == null ? t('vis.never') : visit.days === 0 ? t('vis.today') : t('vis.ago').replace('{n}', String(visit.days))}
+            {visit.days == null
+              ? t('vis.never')
+              : visit.days === 0
+                ? t('vis.today')
+                : t('vis.ago').replace('{n}', String(visit.days))}
           </Caption>
-          <BigButton icon={Check} label={t('vis.mark')} onPress={() => dispatch({ type: 'VISIT_MARK', id: circle.household_id, at: Date.now() })} />
+          <BigButton
+            icon={Check}
+            label={t('vis.mark')}
+            onPress={() => dispatch({ type: 'VISIT_MARK', id: circle.household_id, at: Date.now() })}
+          />
         </Card>
       ) : null}
       {doctor ? <PatientSugar readings={readings} loaded={loaded} /> : null}

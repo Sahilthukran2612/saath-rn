@@ -53,7 +53,11 @@ export default function CirclesSection() {
             <Body>{t('cf.timeOff')}</Body>
             <Caption>{t('cf.timeOffNote')}</Caption>
           </View>
-          <Toggle value={!!circle.time_off} label={t('cf.timeOff')} onValueChange={(on) => pause(circle, on)} />
+          <Toggle
+            value={!!circle.time_off}
+            label={t('cf.timeOff')}
+            onValueChange={(on) => pause(circle, on)}
+          />
         </View>
         {feed.length === 0 ? (
           <Body>{t('cf.empty')}</Body>

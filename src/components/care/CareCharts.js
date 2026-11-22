@@ -19,8 +19,14 @@ const RANGES = [7, 14, 30];
 // A figure and its label, side by side with the others: the numbers a chart is summarising.
 function StatTile({ value, label, unit }) {
   return (
-    <View className="flex-1 gap-0.5 rounded-lg bg-secondary px-3 py-3" accessibilityLabel={`${label}: ${value ?? '–'}`} accessible>
-      <Text style={{ fontFamily: fonts.bold, fontSize: 28, lineHeight: 32, color: colors.indigo }}>{value ?? '–'}</Text>
+    <View
+      className="flex-1 gap-0.5 rounded-lg bg-secondary px-3 py-3"
+      accessibilityLabel={`${label}: ${value ?? '–'}`}
+      accessible
+    >
+      <Text style={{ fontFamily: fonts.bold, fontSize: 28, lineHeight: 32, color: colors.indigo }}>
+        {value ?? '–'}
+      </Text>
       <Caption>{label}</Caption>
       {unit ? <Caption>{unit}</Caption> : null}
     </View>
@@ -46,14 +52,35 @@ export function BarChart({ data, max, width, height = 120, color = colors.indigo
           const x = i * (bw + gap);
           return (
             <React.Fragment key={d.key ?? i}>
-              <Rect x={x} y={top + plot - h} width={bw} height={h} rx={Math.min(6, bw / 2)} fill={d.value ? color : colors.line} />
+              <Rect
+                x={x}
+                y={top + plot - h}
+                width={bw}
+                height={h}
+                rx={Math.min(6, bw / 2)}
+                fill={d.value ? color : colors.line}
+              />
               {d.value && n <= 14 ? (
-                <SvgText x={x + bw / 2} y={top + plot - h - 5} fontSize={12} fontFamily={fonts.semi} fill={colors.inkSoft} textAnchor="middle">
+                <SvgText
+                  x={x + bw / 2}
+                  y={top + plot - h - 5}
+                  fontSize={12}
+                  fontFamily={fonts.semi}
+                  fill={colors.inkSoft}
+                  textAnchor="middle"
+                >
                   {d.value}
                 </SvgText>
               ) : null}
               {n <= 14 || i % 5 === 0 ? (
-                <SvgText x={x + bw / 2} y={height - 5} fontSize={12} fontFamily={fonts.regular} fill={colors.inkFaint} textAnchor="middle">
+                <SvgText
+                  x={x + bw / 2}
+                  y={height - 5}
+                  fontSize={12}
+                  fontFamily={fonts.regular}
+                  fill={colors.inkFaint}
+                  textAnchor="middle"
+                >
                   {d.label}
                 </SvgText>
               ) : null}
@@ -94,7 +121,9 @@ export function SugarAnalytics() {
         <Glyph icon={Droplet} size={26} color={colors.indigo} />
         <Title style={{ fontSize: 22, flex: 1 }}>{t('sugarLog')}</Title>
         {last ? (
-          <Text style={{ fontFamily: fonts.bold, fontSize: 30, lineHeight: 34, color: colors.indigo }}>{last.mgdl}</Text>
+          <Text style={{ fontFamily: fonts.bold, fontSize: 30, lineHeight: 34, color: colors.indigo }}>
+            {last.mgdl}
+          </Text>
         ) : null}
       </View>
       <Segmented
@@ -113,7 +142,12 @@ export function SugarAnalytics() {
             <StatTile value={sum.n} label={t('an.readings')} />
           </View>
           <View onLayout={(e) => setW(Math.floor(e.nativeEvent.layout.width))}>
-            <LineChart values={window.slice(-30).map((r) => r.mgdl)} width={w} height={120} label={t('sugarLog')} />
+            <LineChart
+              values={window.slice(-30).map((r) => r.mgdl)}
+              width={w}
+              height={120}
+              label={t('sugarLog')}
+            />
           </View>
           <Caption>{t('an.dailyAvg')}</Caption>
           <BarChart
@@ -125,9 +159,17 @@ export function SugarAnalytics() {
         </>
       )}
       <Body>{adviceText(state.lang, glucoseAdvice(last?.mgdl).level)}</Body>
-      {canLog ? <BigButton kind="quiet" icon={Plus} label={t('addReading')} onPress={() => setOpen(true)} /> : null}
+      {canLog ? (
+        <BigButton kind="quiet" icon={Plus} label={t('addReading')} onPress={() => setOpen(true)} />
+      ) : null}
       <Sheet visible={open} onClose={() => setOpen(false)} title={t('addReading')}>
-        <Field label={t('an.mgdl')} value={text} onChangeText={setText} keyboardType="number-pad" placeholder="mg/dL" />
+        <Field
+          label={t('an.mgdl')}
+          value={text}
+          onChangeText={setText}
+          keyboardType="number-pad"
+          placeholder="mg/dL"
+        />
         <BigButton icon={Plus} label={t('an.save')} onPress={submit} />
       </Sheet>
     </Card>
@@ -151,11 +193,23 @@ export function PatientSugar({ readings, loaded = true }) {
       <View className="flex-row items-center gap-3">
         <Glyph icon={Droplet} size={26} color={colors.indigo} />
         <Title style={{ fontSize: 22, flex: 1 }}>{t('pt.readings')}</Title>
-        {last ? <Text style={{ fontFamily: fonts.bold, fontSize: 30, lineHeight: 34, color: colors.indigo }}>{last.mgdl}</Text> : null}
+        {last ? (
+          <Text style={{ fontFamily: fonts.bold, fontSize: 30, lineHeight: 34, color: colors.indigo }}>
+            {last.mgdl}
+          </Text>
+        ) : null}
       </View>
-      <Segmented value={days} onChange={setDays} options={RANGES.map((d) => ({ value: d, label: t('an.days').replace('{n}', String(d)) }))} />
+      <Segmented
+        value={days}
+        onChange={setDays}
+        options={RANGES.map((d) => ({ value: d, label: t('an.days').replace('{n}', String(d)) }))}
+      />
       {sum.n === 0 ? (
-        loaded ? <Body>{t('pt.noReadings')}</Body> : <Caption>{t('ai.thinking')}</Caption>
+        loaded ? (
+          <Body>{t('pt.noReadings')}</Body>
+        ) : (
+          <Caption>{t('ai.thinking')}</Caption>
+        )
       ) : (
         <>
           <View className="flex-row gap-2">
@@ -165,10 +219,20 @@ export function PatientSugar({ readings, loaded = true }) {
             <StatTile value={sum.n} label={t('an.readings')} />
           </View>
           <View onLayout={(e) => setW(Math.floor(e.nativeEvent.layout.width))}>
-            <LineChart values={window.slice(-60).map((r) => r.mgdl)} width={w} height={120} label={t('pt.readings')} />
+            <LineChart
+              values={window.slice(-60).map((r) => r.mgdl)}
+              width={w}
+              height={120}
+              label={t('pt.readings')}
+            />
           </View>
           <Caption>{t('an.dailyAvg')}</Caption>
-          <BarChart width={w} height={110} label={t('an.dailyAvg')} data={daily.map((d) => ({ key: d.day, value: d.avg, label: weekdayLabel(d.ms, state.lang) }))} />
+          <BarChart
+            width={w}
+            height={110}
+            label={t('an.dailyAvg')}
+            data={daily.map((d) => ({ key: d.day, value: d.avg, label: weekdayLabel(d.ms, state.lang) }))}
+          />
         </>
       )}
       <Caption>{t('pt.readingsNote')}</Caption>
@@ -200,7 +264,11 @@ export function AdherenceChart() {
           max={state.medicines.length}
           color={colors.leaf}
           label={t('an.medWeek')}
-          data={rows.map((r) => ({ key: r.day, value: r.taken || null, label: weekdayLabel(r.ms, state.lang) }))}
+          data={rows.map((r) => ({
+            key: r.day,
+            value: r.taken || null,
+            label: weekdayLabel(r.ms, state.lang),
+          }))}
         />
       </View>
     </Card>
@@ -244,7 +312,9 @@ export function HeartAnalytics() {
           <Caption>{t('an.heartSession')}</Caption>
         </>
       )}
-      {!state.heart.device ? <BigButton kind="quiet" label={t('an.connect')} onPress={() => go('safety')} /> : null}
+      {!state.heart.device ? (
+        <BigButton kind="quiet" label={t('an.connect')} onPress={() => go('safety')} />
+      ) : null}
     </Card>
   );
 }

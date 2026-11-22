@@ -713,6 +713,13 @@ export const strings = {
       'You do not need to do more today. Sit, sip some water, and tell someone if you want company.',
     'sg.rest.b2': 'Today you can simply rest. Let someone know if you want company.',
     'sg.rest.b3': 'There is nothing you must do today. Sit, sip some water, and be easy on yourself.',
+    edit: 'Edit',
+    cancel: 'Cancel',
+    'me.alerts': 'Alerts',
+    'study.title': 'Study data',
+    'safety.calls': 'Who Saath calls',
+    'safety.callsEmpty': 'Add people to your circle',
+    'reset.confirm': 'This erases everything on this phone. It cannot be undone.',
   },
   hi: {
     tabToday: 'आज',
@@ -1425,6 +1432,13 @@ export const strings = {
     'sg.rest.b': 'आज और कुछ करने की ज़रूरत नहीं। बैठें, थोड़ा पानी पिएँ, और साथ चाहिए तो किसी को बताएँ।',
     'sg.rest.b2': 'आज बस आराम कर सकते हैं। साथ चाहिए तो किसी को बता दें।',
     'sg.rest.b3': 'आज कुछ करना ज़रूरी नहीं। बैठें, थोड़ा पानी पिएँ, और अपने साथ नरमी रखें।',
+    edit: 'बदलें',
+    cancel: 'रद्द करें',
+    'me.alerts': 'अलर्ट',
+    'study.title': 'अध्ययन डेटा',
+    'safety.calls': 'साथ किसे फ़ोन करेगा',
+    'safety.callsEmpty': 'अपने घेरे में लोग जोड़ें',
+    'reset.confirm': 'इससे इस फ़ोन का सारा डेटा मिट जाएगा। यह वापस नहीं होगा।',
   },
 };
 

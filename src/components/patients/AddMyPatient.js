@@ -20,14 +20,20 @@ export default function AddMyPatient() {
   return (
     <Card style={{ gap: 12 }}>
       <Body bold>{t(doctor ? 'amp.titleDoctor' : 'amp.title')}</Body>
-      <BigButton icon={UserPlus} label={t(doctor ? 'amp.btnDoctor' : 'amp.btn')} onPress={() => setOpen(true)} />
+      <BigButton
+        icon={UserPlus}
+        label={t(doctor ? 'amp.btnDoctor' : 'amp.btn')}
+        onPress={() => setOpen(true)}
+      />
       <Sheet visible={open} onClose={() => setOpen(false)} title={t(doctor ? 'amp.btnDoctor' : 'amp.btn')}>
         {ready ? (
           <View style={{ alignItems: 'center', gap: 14 }}>
             <View style={{ padding: 14, backgroundColor: '#FFFFFF', borderRadius: 16 }}>
               <QRCode value={addUrl({ name: state.profile.name, phone, role })} size={220} />
             </View>
-            <Body bold style={{ textAlign: 'center' }}>{t('amp.scan')}</Body>
+            <Body bold style={{ textAlign: 'center' }}>
+              {t('amp.scan')}
+            </Body>
             <Caption style={{ textAlign: 'center' }}>{t('amp.then')}</Caption>
           </View>
         ) : (

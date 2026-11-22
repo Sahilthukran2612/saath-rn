@@ -25,7 +25,6 @@ function CardTitle({
   ref,
   ...props
 }: React.ComponentProps<typeof Text> & React.RefAttributes<typeof Text>) {
-
   return (
     <Text
       ref={ref}

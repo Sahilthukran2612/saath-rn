@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Animated, View } from 'react-native';
 import Text from './AppText';
-import { colors, fonts } from '../theme';
+import { Check } from './icons';
+import { colors, fonts, radii } from '../theme';
 import { useReducedMotion } from './motion';
 import { confirm } from '../services/haptics';
 import { useScale } from './ui';
 
-// The violet rubber stamp: Saath's one signature move. When `show` turns true it lands with a thump:
-// it starts large and faint, drops to size on a critically damped spring, and the phone gives one firm
-// tap. It never loops. With reduced motion it simply appears. The stamp carries a word, not just colour.
-export default function Stamp({ show, word, sub, rotate = -6, size = 1, onLanded, silent = false }) {
+// "Done": a green capsule with a check that pops in when `show` turns true. It starts a little small and settles to
+// size on a spring with a hint of give, and the phone taps once. It never loops; with reduced motion it simply
+// appears. It always carries a word, not just colour.
+export default function Stamp({ show, word, sub, size = 1, onLanded, silent = false }) {
   const reduced = useReducedMotion();
   const k = useScale();
   const [v] = useState(() => new Animated.Value(show ? 1 : 0));
@@ -24,7 +25,7 @@ export default function Stamp({ show, word, sub, rotate = -6, size = 1, onLanded
       return undefined;
     }
     v.setValue(0);
-    const a = Animated.spring(v, { toValue: 1, damping: 14, stiffness: 340, mass: 0.9, useNativeDriver: true });
+    const a = Animated.spring(v, { toValue: 1, damping: 18, stiffness: 420, mass: 1, useNativeDriver: true });
     a.start(({ finished }) => {
       if (finished) {
         if (!silent) confirm();
@@ -42,47 +43,50 @@ export default function Stamp({ show, word, sub, rotate = -6, size = 1, onLanded
       importantForAccessibility="no-hide-descendants"
       style={{
         alignSelf: 'flex-start',
-        opacity: v.interpolate({ inputRange: [0, 0.35, 1], outputRange: [0, 0.7, 1] }),
-        transform: [
-          { rotate: `${rotate}deg` },
-          { scale: v.interpolate({ inputRange: [0, 1], outputRange: [1.7, 1] }) },
-        ],
+        opacity: v.interpolate({ inputRange: [0, 0.3, 1], outputRange: [0, 1, 1] }),
+        transform: [{ scale: v.interpolate({ inputRange: [0, 1], outputRange: [0.7, 1] }) }],
       }}
     >
       <View
         style={{
-          borderWidth: 3.5 * s,
-          borderColor: colors.stamp,
-          borderRadius: 12 * s,
-          paddingHorizontal: 14 * s,
-          paddingVertical: 6 * s,
+          flexDirection: 'row',
           alignItems: 'center',
+          gap: 8 * s,
+          backgroundColor: colors.leafTint,
+          borderRadius: radii.pill,
+          paddingHorizontal: 16 * s,
+          paddingVertical: 8 * s,
         }}
       >
-        {/* a second, thinner ring a little inside, as a pressed stamp leaves */}
         <View
           style={{
-            borderWidth: 1.5 * s,
-            borderColor: colors.stamp,
-            borderRadius: 8 * s,
-            paddingHorizontal: 12 * s,
-            paddingVertical: 2 * s,
+            width: 26 * s,
+            height: 26 * s,
+            borderRadius: 13 * s,
+            backgroundColor: colors.leaf,
             alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
+          <Check size={16 * s} color={colors.white} strokeWidth={3} />
+        </View>
+        <View>
           <Text
-            style={{
-              fontFamily: fonts.bold,
-              fontSize: 26 * s,
-              lineHeight: 34 * s,
-              letterSpacing: 1.2,
-              color: colors.stamp,
-            }}
+            style={{ fontFamily: fonts.semi, fontSize: 18 * s, lineHeight: 24 * s, color: colors.leafDeep }}
           >
             {word}
           </Text>
           {sub ? (
-            <Text style={{ fontFamily: fonts.semi, fontSize: 16 * s, lineHeight: 20 * s, color: colors.stamp }}>{sub}</Text>
+            <Text
+              style={{
+                fontFamily: fonts.regular,
+                fontSize: 16 * s,
+                lineHeight: 20 * s,
+                color: colors.leafDeep,
+              }}
+            >
+              {sub}
+            </Text>
           ) : null}
         </View>
       </View>
@@ -90,8 +94,7 @@ export default function Stamp({ show, word, sub, rotate = -6, size = 1, onLanded
   );
 }
 
-// A small, still stamp for lists: a task the person has stamped as done. No animation, so a long list
-// stays calm. It carries the word, not only the colour.
+// A small, still "done" capsule for lists. No animation, so a long list stays calm. It carries the word.
 export function StampMark({ word }) {
   const k = useScale();
   const s = Math.min(k, 1.2);
@@ -100,15 +103,19 @@ export function StampMark({ word }) {
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
       style={{
-        transform: [{ rotate: '-5deg' }],
-        borderWidth: 2.5,
-        borderColor: colors.stamp,
-        borderRadius: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        backgroundColor: colors.leafTint,
+        borderRadius: radii.pill,
         paddingHorizontal: 10 * s,
-        paddingVertical: 2,
+        paddingVertical: 3,
       }}
     >
-      <Text style={{ fontFamily: fonts.bold, fontSize: 16 * s, lineHeight: 22 * s, letterSpacing: 0.6, color: colors.stamp }}>{word}</Text>
+      <Check size={14 * s} color={colors.leafDeep} strokeWidth={3} />
+      <Text style={{ fontFamily: fonts.semi, fontSize: 16 * s, lineHeight: 22 * s, color: colors.leafDeep }}>
+        {word}
+      </Text>
     </View>
   );
 }

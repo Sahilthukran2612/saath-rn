@@ -176,6 +176,8 @@ describe('Today and the tab bar', () => {
       meds: { name: 'Test med', pillsLeft: 6, perDay: 2 },
       testPlan: { perDay: 2, strips: 8 },
     });
+    // Today stays focused; the numbers live on Care.
+    await fireEvent.press(screen.getByLabelText('Care'));
     expect(screen.getByText('3')).toBeTruthy(); // 6 tablets / 2 a day
     expect(screen.getByText('8')).toBeTruthy(); // strips left
   });

@@ -2,7 +2,8 @@
 // leaves the phone unless a doctor who joined the circle is at Full (2). The database enforces the same on the
 // reading side (docs/supabase/readings.sql). Pure, tested.
 
-export const doctorHasFullAccess = (joined) => (joined || []).some((m) => m.role === 'clinician' && m.dial === 2);
+export const doctorHasFullAccess = (joined) =>
+  (joined || []).some((m) => m.role === 'clinician' && m.dial === 2);
 
 export function readingsToPush(state, max = 200) {
   const cloud = state.cloud || {};

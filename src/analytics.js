@@ -59,7 +59,12 @@ export function adherence(log, medicines, days, nowMs) {
 export function heartSummary(readings) {
   const v = (readings || []).map((r) => r.bpm).filter(Number.isFinite);
   if (!v.length) return { n: 0, avg: null, min: null, max: null };
-  return { n: v.length, avg: Math.round(v.reduce((a, b) => a + b, 0) / v.length), min: Math.min(...v), max: Math.max(...v) };
+  return {
+    n: v.length,
+    avg: Math.round(v.reduce((a, b) => a + b, 0) / v.length),
+    min: Math.min(...v),
+    max: Math.max(...v),
+  };
 }
 
 // Short weekday letters for a chart axis, in English or Hindi.

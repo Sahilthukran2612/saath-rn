@@ -1,75 +1,74 @@
-// Saath, the counter stamp. A kirana bill book: white bill paper, ballpoint blue ink, a violet rubber
-// stamp for "done", carbon-pink and slip-yellow second copies, ledger green for OK. Brick is for real
-// safety alerts only. Token names are kept from the earlier system so every screen inherits the world.
+// Saath's design tokens. The look: a grey grouped page, flat white panels, Saath blue as the one accent for actions
+// and selection, and type that carries the hierarchy. Brick red is for a real safety alert and nothing else; green
+// means done or OK. Token names are kept stable so every screen picks up a change made here.
 export const colors = {
-  indigo: '#1A5CFF', // electric blue: the hero, primary actions, type accents
-  indigoDeep: '#0E3FC4',
-  indigoTint: '#E8F0FF', // pale blue wash: selected states, quiet buttons
+  indigo: '#1A5CFF', // Saath blue: actions, selection, links
+  indigoDeep: '#0E3FC4', // text and icons on the blue wash
+  indigoTint: '#E8F0FF', // the blue wash: selected states, tinted buttons
   indigoSoft: '#B8CEFF',
-  haldi: '#FFE066', // the yellow third copy of a slip
-  haldiTint: '#FFF4BF',
-  haldiDeep: '#5E4800', // text on the yellow slip
-  leaf: '#1F6F4A', // ledger green: done and OK
+  haldi: '#FFE066', // turmeric yellow: one warm accent in the illustrations, readings outside the range
+  haldiTint: '#FFF4BF', // notes and gentle warnings
+  haldiDeep: '#5E4800', // text on the yellow
+  leaf: '#1E7F4F', // done and OK
   leafDeep: '#14523A',
   leafTint: '#E0F1E8',
   brick: '#B3261E', // a real safety alert and nothing else
   brickTint: '#FBE9E7',
-  madder: '#9B3D2E', // mild warnings: low stock, missed, form errors
-  stamp: '#5B2A86', // violet rubber-stamp ink: the stamp only
+  madder: '#9B3D2E', // mild warnings: low stock, a missed task, form errors
+  stamp: '#5B2A86', // the "done" mark on a suggestion
   stampTint: '#EEE5F7',
-  carbon: '#FFD9E4', // the pink second copy of a slip
-  carbonDeep: '#7A1F45', // text on the pink slip
-  mist: '#F2F4FA', // the page: a soft blue-grey, so white cards lift off it without an outline
-  ink: '#10163A',
-  inkSoft: '#39426B',
-  inkFaint: '#525C86',
+  carbon: '#FFD9E4', // the pink care-reminder slip
+  carbonDeep: '#7A1F45',
+  mist: '#F2F2F7', // the page: grouped grey, so white panels separate without lines or shadows
+  ink: '#000000', // primary text
+  inkSoft: '#50535F', // secondary text
+  inkFaint: '#6A6D7A', // tertiary text and placeholders, still 4.5:1 on the page
   white: '#FFFFFF',
-  line: '#DCE3F5',
-  lineStrong: '#BCC7E8', // decorative lines and perforations only
-  control: '#717AA3', // borders and off-states of controls: 3:1 or more
+  line: '#E3E4EA', // separators inside a panel
+  lineStrong: '#C7C9D1', // grabbers and decorative strokes only
+  control: '#858894', // off-states and borders of controls: 3:1 on the page and on a panel
 
-  // Surface roles (bill paper tones). Depth is a slip lifting off the pad, not blur.
   surface: '#FFFFFF',
-  surfaceLow: '#F4F6FD', // slips and grouped lists
-  surfaceContainer: '#EDF1FB', // navigation bar
-  surfaceHigh: '#E5EBF9', // inputs, unselected tracks
-  outline: '#717AA3',
-  outlineVariant: '#BCC7E8',
+  surfaceLow: '#F7F7FA',
+  surfaceContainer: '#FFFFFF', // floating bars
+  surfaceHigh: '#E9E9EF', // fills: segmented tracks, inputs, switch off-track
+  outline: '#858894',
+  outlineVariant: '#D5D7DE',
+  paper: '#FFFFFF', // panel background (dark: an elevated grey)
 };
-colors.paper = '#FFFFFF'; // slip and card background: white bill paper (dark: a deep blue-black slip)
 
-// The night palette: the same tokens, re-inked. `white` stays white (it is the text on coloured buttons);
-// backgrounds that were white use `paper`. The yellow and pink slips stay light, like stickers on a dark
-// counter, so their dark text keeps its contrast.
+// The night palette: true black page, raised grey panels, the same accents lifted for contrast. `white` stays
+// white because it is the label on coloured buttons; backgrounds that were white use `paper`. The yellow and pink
+// slips stay light, like stickers, so their dark text keeps its contrast.
 export const darkColors = {
-  indigo: '#4672EE',
-  indigoDeep: '#C9D6FF', // used as text and icons on the tinted washes, so it turns light at night
-  indigoTint: '#1E2754',
-  indigoSoft: '#BFCDF3',
-  brick: '#D8453D',
-  haldiTint: '#3A3213',
-  haldiDeep: '#FFD84D', // text and icons on the dark yellow wash (the yellow slip itself keeps #5E4800 text)
-  leaf: '#2A8458',
+  indigo: '#3F74F5',
+  indigoDeep: '#C2D3FF',
+  indigoTint: '#1A2A52',
+  indigoSoft: '#AFC4FF',
+  brick: '#DE3F35',
+  haldiTint: '#3A2F10',
+  haldiDeep: '#FFD66B',
+  leaf: '#2A8C5A',
   leafDeep: '#8FE3B8',
-  leafTint: '#16382A',
-  brickTint: '#3D1B19',
-  madder: '#E8907D',
+  leafTint: '#123222',
+  brickTint: '#3A1614',
+  madder: '#F0907A',
   stamp: '#BE98EE',
   stampTint: '#2C1D40',
-  mist: '#0F1226',
-  ink: '#ECEFFC',
-  inkSoft: '#C3CAE8',
-  inkFaint: '#A3ACD2',
-  line: '#2B3355',
-  lineStrong: '#3C4672',
-  control: '#8993BF',
-  surface: '#14183A',
-  surfaceLow: '#1A1F45',
-  surfaceContainer: '#20264F',
-  surfaceHigh: '#2A3162',
-  outline: '#8993BF',
-  outlineVariant: '#3C4672',
-  paper: '#1B2048',
+  mist: '#000000',
+  ink: '#FFFFFF',
+  inkSoft: '#C7C7CC',
+  inkFaint: '#9A9AA1',
+  line: '#38383A',
+  lineStrong: '#48484A',
+  control: '#8E8E93',
+  surface: '#1C1C1E',
+  surfaceLow: '#151517',
+  surfaceContainer: '#1C1C1E',
+  surfaceHigh: '#2C2C2E',
+  outline: '#8E8E93',
+  outlineVariant: '#3A3A3C',
+  paper: '#1C1C1E',
 };
 
 export let themeName = 'light';
@@ -86,59 +85,53 @@ export function applyTheme(choice, systemScheme) {
 // Mukta carries Devanagari and Latin in one voice, so Hindi and English sit together.
 export const fonts = { regular: 'Mukta_400Regular', semi: 'Mukta_600SemiBold', bold: 'Mukta_700Bold' };
 
-// Legacy sizes (still used across screens).
-export const type = { body: 18, small: 16, title: 26, hero: 34 };
+// Apple's text styles, set in Mukta with Saath's floors: body 18, supporting text 16. Only the tab label is smaller.
+// Tracking tightens as size grows; leading is generous because Devanagari needs room above and below.
+export const textStyles = {
+  largeTitle: { font: fonts.bold, size: 34, line: 42, track: -0.6 },
+  title1: { font: fonts.bold, size: 28, line: 36, track: -0.4 },
+  title2: { font: fonts.bold, size: 22, line: 30, track: -0.2 },
+  title3: { font: fonts.semi, size: 20, line: 26, track: 0 },
+  headline: { font: fonts.semi, size: 18, line: 24, track: 0 },
+  body: { font: fonts.regular, size: 18, line: 26, track: 0 },
+  subhead: { font: fonts.regular, size: 16, line: 22, track: 0 },
+  tab: { font: fonts.semi, size: 13, line: 16, track: 0.1 },
+};
+
+export const type = { body: 18, small: 16, title: 22 };
 export const sizes = { target: 56, gutter: 20 };
-
-// Material 3 shape scale: small 8, medium 12, large 16, extra large 28, full.
-export const radii = { xs: 4, sm: 8, md: 12, lg: 16, xl: 28, hero: 28, pill: 999 };
-
-// Material 3 type scale on Mukta. Sizes are raised where Saath's floors apply (body 18, support 16);
-// only the navigation label goes below 16.
-export const roles = {
-  displaySmall: { font: fonts.bold, size: 36, line: 44, track: -0.4 },
-  headlineMedium: { font: fonts.bold, size: 30, line: 38, track: -0.3 },
-  headlineSmall: { font: fonts.bold, size: 24, line: 32, track: -0.2 },
-  titleLarge: { font: fonts.bold, size: 22, line: 28, track: 0 },
-  titleMedium: { font: fonts.semi, size: 18, line: 24, track: 0.1 },
-  bodyLarge: { font: fonts.regular, size: 18, line: 26, track: 0 },
-  bodyMedium: { font: fonts.regular, size: 16, line: 22, track: 0.1 },
-  labelLarge: { font: fonts.semi, size: 16, line: 22, track: 0.1 },
-  labelNav: { font: fonts.semi, size: 14, line: 18, track: 0.2 },
-};
-
-// Tracking and leading change with size: tight on large text, near zero on body.
 export const text = {
-  hero: { letterSpacing: -0.6, lineHeight: 1.12 },
-  title: { letterSpacing: -0.2, lineHeight: 1.22 },
-  body: { letterSpacing: 0, lineHeight: 1.4 },
-  small: { letterSpacing: 0.1, lineHeight: 1.35 },
+  title: { letterSpacing: -0.2, lineHeight: 1.3 },
+  body: { letterSpacing: 0, lineHeight: 1.42 },
+  small: { letterSpacing: 0, lineHeight: 1.38 },
 };
 
-// Tonal elevation does most of the work (see the surface roles). Shadows are small and used only on
-// raised controls and the hero seal, with plain Android elevation so they stay cheap on low-end phones.
+// Corners grow with the size of the thing: tiles 10, controls 14, panels 20, sheets 28, buttons fully round.
+export const radii = { xs: 6, sm: 10, md: 14, lg: 20, xl: 28, pill: 999 };
+
+// Panels are flat on the grey page. Only things that float over content (the tab bar, the helper button, sheets)
+// get a shadow, a soft one with a real offset.
 export const shadow = {
-  card: {
-    shadowColor: '#1B1E2B',
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
-  },
+  card: {},
   raised: {
-    shadowColor: '#1B1E2B',
-    shadowOpacity: 0.14,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 3,
+    shadowColor: '#000000',
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
   },
 };
 
-// Material 3 motion: emphasized decelerate for entrances, standard for state changes.
+// Springs in Apple's terms, converted to stiffness and damping (mass 1): damping ratio 1 settles without overshoot.
+//   settle  ratio 1,   response 0.35 s  most state changes
+//   snappy  ratio 1,   response 0.25 s  switches, segmented thumbs, the tab highlight
+//   sheet   ratio 0.8, response 0.3 s   sheets and drawers, the only place with a little give
 export const motion = {
-  settle: { damping: 22, stiffness: 260, mass: 1 },
-  pill: { damping: 20, stiffness: 300, mass: 1 },
-  enterMs: 210,
+  settle: { damping: 36, stiffness: 322, mass: 1 },
+  snappy: { damping: 50, stiffness: 632, mass: 1 },
+  sheet: { damping: 33, stiffness: 438, mass: 1 },
+  press: { damping: 24, stiffness: 520, mass: 1 },
+  enterMs: 220,
   staggerMs: 30,
   emphasizedDecelerate: [0.05, 0.7, 0.1, 1.0],
 };

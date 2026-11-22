@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import { ArrowRight, Check } from '../components/icons';
-import { BigButton, Body, Caption, Card, Chip, Screen, ScreenTitle, Title } from '../components/ui';
+import { BigButton, Body, Caption, Card, Chip, Screen, Title } from '../components/ui';
 import { Avatar, Field, ListGroup, ListRow, Segmented, Toggle, SectionTitle } from '../components/kit';
 import { SaathMark } from '../components/art';
 import SetupProgress from '../components/SetupProgress';
@@ -39,7 +39,7 @@ export default function OnboardingScreen() {
 
       {step === 0 ? (
         <View style={{ gap: 16 }}>
-          <ScreenTitle>{t('ob.welcome')}</ScreenTitle>
+          <Title style={{ fontSize: 30 }}>{t('ob.welcome')}</Title>
           <Body>{t('ob.intro')}</Body>
           <SectionTitle>{t('language')}</SectionTitle>
           <Segmented

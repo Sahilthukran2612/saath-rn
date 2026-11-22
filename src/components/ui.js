@@ -1,45 +1,46 @@
 import React, { useState } from 'react';
-import { Animated, Pressable, ScrollView, View, StyleSheet } from 'react-native';
-import { Button } from '@/components/ui/button';
-import { Text as UiText } from '@/components/ui/text';
-import { cn } from '@/lib/utils';
+import { Animated, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useReducedMotion } from './motion';
 import Text from './AppText';
-import { colors, fonts, type, sizes, text, shadow, radii } from '../theme';
+import { colors, fonts, motion, radii, shadow, sizes, text, textStyles, type } from '../theme';
 import { useStore } from '../state/store';
-import { Check, Lock } from './icons';
+import { useNav } from './nav';
+import { Check, ChevronLeft, Lock, UserRound } from './icons';
 import { tap } from '../services/haptics';
+
+const AnimatedText = Animated.createAnimatedComponent(Text);
 
 // Large-text mode scales every size; OS font scaling still applies on top.
 export const useScale = () => (useStore().state.largeText ? 1.35 : 1);
 
-// The small spring every pressable control shares: it gives a little under the finger on touch-down and returns on
-// release. Reduced motion keeps only the ripple.
+const style = (s, k = 1) => ({
+  fontFamily: s.font,
+  fontSize: s.size * k,
+  lineHeight: s.line * k,
+  letterSpacing: s.track,
+});
+
+// Feedback starts on touch-down: the control gives a little under the finger and dims, the way Apple's controls do,
+// and comes back the instant the finger lifts. Reduced motion keeps only the dim.
 function usePressSpring() {
   const reduced = useReducedMotion();
   const [scale] = useState(() => new Animated.Value(1));
   const to = (v) => {
-    if (!reduced)
-      Animated.spring(scale, {
-        toValue: v,
-        damping: 20,
-        stiffness: 420,
-        mass: 1,
-        useNativeDriver: true,
-      }).start();
+    if (!reduced) Animated.spring(scale, { toValue: v, ...motion.press, useNativeDriver: true }).start();
   };
   return { scale, to };
 }
-// Material state layer: a ripple clipped to the control's own shape, with a light haptic on touch-down.
+
 // `style` is the visible surface (background, radius, padding); `containerStyle` only places it.
 function PressScale({
   children,
-  style,
+  style: surface,
   containerStyle,
   onPress,
   disabled,
   haptic = true,
-  rippleColor = 'rgba(38,48,107,0.14)',
+  rippleColor,
   ...rest
 }) {
   const press = usePressSpring();
@@ -48,42 +49,144 @@ function PressScale({
       <Pressable
         {...rest}
         disabled={disabled}
-        android_ripple={{ color: rippleColor, foreground: true }}
         onPress={onPress}
         onPressIn={() => {
           press.to(0.97);
           if (haptic) tap();
         }}
         onPressOut={() => press.to(1)}
-        style={({ pressed }) => [style, styles.clip, pressed && { opacity: 0.96 }]}
+        style={({ pressed }) => [surface, styles.clip, pressed && { opacity: 0.72 }]}
       >
         {({ pressed }) => (typeof children === 'function' ? children({ pressed }) : children)}
       </Pressable>
     </Animated.View>
   );
 }
+// Tappable surface used for rows, tiles and icon buttons.
+export const PressRow = PressScale;
 
-// Every tab scrolls the same way: one gutter, one gap, and room under the last item for the floating tab bar.
-// `setup` is for the first-run and lock screens, which have no tab bar.
-export function Screen({ children, setup }) {
+// The account button that sits at the end of every tab's large title and opens Me.
+function AccountButton() {
+  const { state, t } = useStore();
+  const go = useNav();
+  const initials =
+    (state.profile?.name || '')
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((w) => w[0])
+      .join('')
+      .toUpperCase() || null;
   return (
-    <ScrollView
-      keyboardShouldPersistTaps="handled"
-      contentContainerStyle={setup ? styles.setup : styles.screen}
+    <PressScale
+      accessibilityRole="button"
+      accessibilityLabel={t('tabMe')}
+      onPress={() => go('me')}
+      style={styles.iconButton}
     >
+      <View style={styles.avatar}>
+        {initials ? (
+          <Text style={{ fontFamily: fonts.bold, fontSize: 16, color: colors.white }}>{initials}</Text>
+        ) : (
+          <Glyph icon={UserRound} size={20} color={colors.white} />
+        )}
+      </View>
+    </PressScale>
+  );
+}
+
+const BAR_H = 52;
+
+// Every screen is built the same way. A large title opens the page, with the account button at its end; as the page
+// scrolls, the title hands over to a slim bar that fades in at the top, as on an iPhone. A page inside a flow gets a
+// Back button in that bar instead. Content clears the floating tab bar and the phone's own bottom inset.
+// `setup` is for first-run and lock screens: no tab bar, no account button.
+export function Screen({ title, subtitle, onBack, backLabel, right, setup, children }) {
+  const { t } = useStore();
+  const k = useScale();
+  const insets = useSafeAreaInsets();
+  const [y] = useState(() => new Animated.Value(0));
+  const bar = y.interpolate({ inputRange: [28, 60], outputRange: [0, 1], extrapolate: 'clamp' });
+  const fade = y.interpolate({ inputRange: [0, 44], outputRange: [1, 0], extrapolate: 'clamp' });
+  const trailing = right !== undefined ? right : !setup && !onBack ? <AccountButton /> : null;
+  return (
+    <View style={{ flex: 1 }}>
+      <Animated.ScrollView
+        keyboardShouldPersistTaps="handled"
+        scrollEventThrottle={16}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y } } }], { useNativeDriver: true })}
+        contentContainerStyle={[
+          setup ? styles.setup : styles.screen,
+          { paddingTop: onBack ? BAR_H : setup ? 24 : 8, paddingBottom: (setup ? 32 : 120) + insets.bottom },
+        ]}
+      >
+        {title ? (
+          <Animated.View style={[styles.titleRow, { opacity: fade }]}>
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text
+                accessibilityRole="header"
+                style={[style(textStyles.largeTitle, Math.min(k, 1.2)), { color: colors.ink }]}
+              >
+                {title}
+              </Text>
+              {subtitle ? <Caption>{subtitle}</Caption> : null}
+            </View>
+            {trailing}
+          </Animated.View>
+        ) : null}
+        {children}
+      </Animated.ScrollView>
+      {title || onBack ? (
+        <View pointerEvents="box-none" style={styles.bar}>
+          <Animated.View
+            pointerEvents="none"
+            style={[StyleSheet.absoluteFill, styles.barFill, { opacity: bar }]}
+          />
+          {onBack ? (
+            <PressScale
+              accessibilityRole="button"
+              accessibilityLabel={t('back')}
+              onPress={onBack}
+              style={styles.back}
+            >
+              <Glyph icon={ChevronLeft} size={28} color={colors.indigo} strokeWidth={2.4} />
+              <Text style={{ fontFamily: fonts.regular, fontSize: 18, color: colors.indigo }}>
+                {backLabel || t('back')}
+              </Text>
+            </PressScale>
+          ) : null}
+          <AnimatedText
+            numberOfLines={1}
+            pointerEvents="none"
+            style={[styles.barTitle, { opacity: bar }]}
+            accessibilityElementsHidden
+            importantForAccessibility="no"
+          >
+            {title}
+          </AnimatedText>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+// A plain scroll area, for a list inside a panel.
+export function Scroll({ children, style: extra }) {
+  return (
+    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[{ gap: 16 }, extra]}>
       {children}
     </ScrollView>
   );
 }
 
 // Shown instead of a tab's content when this role may not see it.
-export function NoAccess() {
+export function NoAccess({ title }) {
   const { t } = useStore();
   return (
-    <Screen>
-      <Card tone="tint" style={{ alignItems: 'center', paddingVertical: 32, gap: 12 }}>
-        <Glyph icon={Lock} size={40} color={colors.indigo} />
-        <Body bold style={{ textAlign: 'center' }}>
+    <Screen title={title}>
+      <Card style={{ alignItems: 'center', paddingVertical: 36, gap: 12 }}>
+        <Glyph icon={Lock} size={36} color={colors.inkFaint} />
+        <Body style={{ textAlign: 'center' }} soft>
           {t('noAccess')}
         </Body>
       </Card>
@@ -91,24 +194,19 @@ export function NoAccess() {
   );
 }
 
-// The title at the top of a tab. No subtitle: the tab name already says where you are.
-export function ScreenTitle({ children }) {
-  return <Title style={{ fontSize: 30 }}>{children}</Title>;
-}
-export function Body({ children, style, bold, soft }) {
+export function Body({ children, style: extra, bold, soft }) {
   const k = useScale();
-  // Line height follows the font size actually used, including a caller's override,
-  // otherwise big glyphs and large titles are clipped inside a too-short line box.
-  const size = (StyleSheet.flatten(style)?.fontSize ?? type.body) * k;
+  // A caller's size is a base size; large text scales it too, and the line box follows the size actually used.
+  const size = (StyleSheet.flatten(extra)?.fontSize ?? type.body) * k;
   return (
     <Text
       style={[
         {
-          fontFamily: bold ? fonts.bold : fonts.regular,
+          fontFamily: bold ? fonts.semi : fonts.regular,
           letterSpacing: text.body.letterSpacing,
           color: soft ? colors.inkSoft : colors.ink,
         },
-        style,
+        extra,
         { fontSize: size, lineHeight: size * text.body.lineHeight },
       ]}
     >
@@ -117,8 +215,8 @@ export function Body({ children, style, bold, soft }) {
   );
 }
 
-// Smaller supporting text (Material "body medium"). Never below 16 so it stays readable for elders.
-export function Caption({ children, style }) {
+// Supporting text. Never below 16, so it stays readable for elders.
+export function Caption({ children, style: extra }) {
   const k = useScale();
   const size = type.small * k;
   return (
@@ -131,7 +229,7 @@ export function Caption({ children, style }) {
           letterSpacing: text.small.letterSpacing,
           color: colors.inkSoft,
         },
-        style,
+        extra,
       ]}
     >
       {children}
@@ -139,17 +237,16 @@ export function Caption({ children, style }) {
   );
 }
 
-// Headline (Material "headline small"). Neutral on-surface colour, like Google's own apps.
-export function Title({ children, style }) {
+// A heading inside a page (a panel title, a sheet title). The page title itself is the large title in Screen.
+export function Title({ children, style: extra }) {
   const k = useScale();
-  // A caller's size is a base size: large text scales it too, capped so big headings still fit the screen.
-  const size = (StyleSheet.flatten(style)?.fontSize ?? type.title) * Math.min(k, 1.2);
+  const size = (StyleSheet.flatten(extra)?.fontSize ?? type.title) * Math.min(k, 1.2);
   return (
     <Text
       accessibilityRole="header"
       style={[
         { fontFamily: fonts.bold, letterSpacing: text.title.letterSpacing, color: colors.ink },
-        style,
+        extra,
         { fontSize: size, lineHeight: size * text.title.lineHeight },
       ]}
     >
@@ -159,41 +256,30 @@ export function Title({ children, style }) {
 }
 
 // Renders a Lucide icon component.
-export function Glyph({ icon: Icon, size = 24, color = colors.ink, strokeWidth = 1.9 }) {
+export function Glyph({ icon: Icon, size = 24, color = colors.ink, strokeWidth = 2 }) {
   if (!Icon) return null;
-  if (typeof Icon === 'string') return <Text style={{ fontSize: size }}>{Icon}</Text>;
   return <Icon size={size} color={color} strokeWidth={strokeWidth} />;
 }
 
-// Buttons are React Native Reusables' Button on NativeWind classes: full-pill, at least 56 tall. One filled button
-// per screen. Kinds:
-//   primary  filled, blue              ok       filled, leaf green (done, "I'm OK")
-//   alert    filled, brick (real safety alerts only)
-//   quiet    tonal (secondary)         outlined outline, no fill      text   no container, lowest emphasis
-const BUTTON_VARIANT = {
-  primary: 'default',
-  ok: 'default',
-  alert: 'destructive',
-  quiet: 'secondary',
-  outlined: 'outline',
-  text: 'ghost',
+// Capsule buttons, at least 56 tall. One filled button per screen.
+//   primary  filled blue        ok    filled green (done, "I'm OK")      alert  filled brick (safety takeover only)
+//   quiet    blue-tinted fill   outlined  grey fill, blue label          text   no container, lowest emphasis
+const BUTTON = {
+  primary: () => [colors.indigo, colors.white],
+  ok: () => [colors.leaf, colors.white],
+  alert: () => [colors.brick, colors.white],
+  quiet: () => [colors.indigoTint, colors.indigoDeep],
+  outlined: () => [colors.surfaceHigh, colors.indigo],
+  text: () => ['transparent', colors.indigo],
 };
 
-export function BigButton({ label, icon, onPress, kind = 'primary', style, hint }) {
+export function BigButton({ label, icon, onPress, kind = 'primary', style: extra, hint }) {
   const k = useScale();
   const press = usePressSpring();
-  const fg = {
-    primary: colors.white,
-    ok: colors.white,
-    alert: colors.white,
-    quiet: colors.indigoDeep,
-    outlined: colors.indigo,
-    text: colors.indigo,
-  }[kind];
+  const [bg, fg] = (BUTTON[kind] || BUTTON.primary)();
   return (
     <Animated.View style={{ transform: [{ scale: press.scale }] }}>
-      <Button
-        variant={BUTTON_VARIANT[kind]}
+      <Pressable
         accessibilityRole="button"
         accessibilityLabel={label}
         accessibilityHint={hint}
@@ -203,95 +289,131 @@ export function BigButton({ label, icon, onPress, kind = 'primary', style, hint 
           tap();
         }}
         onPressOut={() => press.to(1)}
-        className={cn('h-auto min-h-14 rounded-full px-6 py-3', kind === 'ok' && 'bg-leaf active:bg-leaf/90')}
-        style={style}
+        style={({ pressed }) => [styles.button, { backgroundColor: bg }, pressed && { opacity: 0.8 }, extra]}
       >
-        {icon ? <Glyph icon={icon} size={24 * Math.min(k, 1.2)} color={fg} /> : null}
-        <UiText
-          className="text-center"
+        {icon ? <Glyph icon={icon} size={22 * Math.min(k, 1.2)} color={fg} strokeWidth={2.2} /> : null}
+        <Text
           style={{
-            fontFamily: fonts.bold,
+            fontFamily: fonts.semi,
             fontSize: type.body * k,
             lineHeight: type.body * k * 1.3,
             color: fg,
             flexShrink: 1,
+            textAlign: 'center',
           }}
         >
           {label}
-        </UiText>
-      </Button>
+        </Text>
+      </Pressable>
     </Animated.View>
   );
 }
 
-// A filled card: bill-white on the page, depth from a soft shadow. Tones are washes for notes and warnings.
-export function Card({ children, style, tone, ...rest }) {
-  const toneStyle =
-    tone === 'tint'
-      ? styles.cardTint
-      : tone === 'haldi'
-        ? styles.cardHaldi
-        : tone === 'carbon'
-          ? styles.cardCarbon
-          : null;
+// A flat panel on the grey page. Tones are washes for notes and warnings.
+const TONE = {
+  tint: () => colors.indigoTint,
+  haldi: () => colors.haldiTint,
+  carbon: () => colors.carbon,
+  leaf: () => colors.leafTint,
+};
+export function Card({ children, style: extra, tone, ...rest }) {
   return (
-    <View className="gap-2.5 rounded-lg bg-card p-5" style={[shadow.card, toneStyle, style]} {...rest}>
+    <View
+      style={[styles.card, { backgroundColor: TONE[tone] ? TONE[tone]() : colors.paper }, extra]}
+      {...rest}
+    >
       {children}
     </View>
   );
 }
 
-// Filter chip: outlined at rest, a blue wash with a leading check when selected.
+// A filter chip: a grey capsule at rest, the blue wash with a leading check when selected.
 export function Chip({ label, active, onPress, icon }) {
   const k = useScale();
-  const fg = active ? colors.indigoDeep : colors.inkSoft;
+  const fg = active ? colors.indigoDeep : colors.ink;
   return (
     <PressScale
       accessibilityRole="button"
       accessibilityState={{ selected: !!active }}
       accessibilityLabel={label}
       onPress={onPress}
-      style={[styles.chip, active && styles.chipActive]}
+      style={[styles.chip, { backgroundColor: active ? colors.indigoTint : colors.surfaceHigh }]}
     >
-      <View className="flex-row items-center gap-2">
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         {active ? (
-          <Glyph icon={Check} size={18 * Math.min(k, 1.2)} color={colors.indigoDeep} strokeWidth={2.4} />
+          <Glyph icon={Check} size={18 * Math.min(k, 1.2)} color={colors.indigoDeep} strokeWidth={2.6} />
         ) : icon ? (
-          <Glyph icon={icon} size={18 * Math.min(k, 1.2)} color={fg} />
+          <Glyph icon={icon} size={18 * Math.min(k, 1.2)} color={colors.inkSoft} />
         ) : null}
-        <Text
-          style={{
-            fontFamily: fonts.semi,
-            fontSize: type.small * k,
-            letterSpacing: text.small.letterSpacing,
-            color: fg,
-            flexShrink: 1,
-          }}
-        >
+        <Text style={{ fontFamily: fonts.semi, fontSize: type.small * k, color: fg, flexShrink: 1 }}>
           {label}
         </Text>
       </View>
     </PressScale>
   );
 }
-// Tappable row used for the routine list (checkbox semantics are set by the caller).
-export const PressRow = PressScale;
 
 const styles = StyleSheet.create({
   clip: { overflow: 'hidden' },
-  screen: { padding: sizes.gutter, paddingTop: 8, paddingBottom: 128, gap: 16 },
-  setup: { padding: 24, paddingTop: 32, gap: 18 },
-  cardTint: { backgroundColor: colors.indigoTint },
-  cardHaldi: { backgroundColor: colors.haldiTint },
-  cardCarbon: { backgroundColor: colors.carbon },
-  chip: {
-    minHeight: sizes.target,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+  screen: { paddingHorizontal: sizes.gutter, gap: 16 },
+  setup: { paddingHorizontal: 24, gap: 18 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 56, marginBottom: 4 },
+  bar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: BAR_H,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+  },
+  barFill: {
+    backgroundColor: colors.mist,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.outlineVariant,
+  },
+  barTitle: {
+    position: 'absolute',
+    left: 96,
+    right: 96,
+    textAlign: 'center',
+    fontFamily: fonts.semi,
+    fontSize: 18,
+    color: colors.ink,
+  },
+  back: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 48,
+    paddingRight: 12,
     borderRadius: radii.md,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
+  },
+  iconButton: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.indigo,
+    alignItems: 'center',
     justifyContent: 'center',
   },
-  chipActive: { backgroundColor: colors.indigoTint, borderColor: 'transparent' },
+  button: {
+    minHeight: sizes.target,
+    borderRadius: radii.pill,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  card: { borderRadius: radii.lg, padding: 20, gap: 12, ...shadow.card },
+  chip: {
+    minHeight: sizes.target,
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: radii.pill,
+    justifyContent: 'center',
+  },
 });

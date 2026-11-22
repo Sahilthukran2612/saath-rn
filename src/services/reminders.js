@@ -36,13 +36,21 @@ export async function scheduleReminders(tasks, bodyFor) {
   try {
     await n.cancelAllScheduledNotificationsAsync();
     if (Platform.OS === 'android') {
-      await n.setNotificationChannelAsync('reminders', { name: 'Reminders', importance: n.AndroidImportance.DEFAULT });
+      await n.setNotificationChannelAsync('reminders', {
+        name: 'Reminders',
+        importance: n.AndroidImportance.DEFAULT,
+      });
     }
     const plan = reminderPlan(tasks);
     for (const p of plan) {
       await n.scheduleNotificationAsync({
         content: { title: 'Saath', body: bodyFor(p.title), sound: true },
-        trigger: { type: n.SchedulableTriggerInputTypes.DAILY, hour: p.hour, minute: 0, channelId: 'reminders' },
+        trigger: {
+          type: n.SchedulableTriggerInputTypes.DAILY,
+          hour: p.hour,
+          minute: 0,
+          channelId: 'reminders',
+        },
       });
     }
     return plan.length;

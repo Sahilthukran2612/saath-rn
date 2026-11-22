@@ -52,7 +52,15 @@ const fits = (x, { region, diet, slot }) =>
   (!x.r || x.r.includes(region)) && (!x.d || x.d.includes(diet)) && (!x.s || x.s.includes(slot));
 
 // `recent` is a list of food ids given lately; `disliked` the ones the person turned down.
-export function suggestMeal({ region = 'north', diet = 'veg', slot = 'lunch', day, nonce = 0, recent = [], disliked = [] }) {
+export function suggestMeal({
+  region = 'north',
+  diet = 'veg',
+  slot = 'lunch',
+  day,
+  nonce = 0,
+  recent = [],
+  disliked = [],
+}) {
   const ctx = { region, diet, slot };
   const rand = rng(hash(`${day}|${slot}|${region}|${diet}|${nonce}`));
   const avoid = new Set([...recent, ...disliked]);
@@ -61,9 +69,7 @@ export function suggestMeal({ region = 'north', diet = 'veg', slot = 'lunch', da
 
   if (slot === 'snack') {
     const s = pick(usable(pools.snack), rand, avoid);
-    return s
-      ? { slot, ids: [s.id], text: { en: s.en[0].toUpperCase() + s.en.slice(1), hi: s.hi } }
-      : null;
+    return s ? { slot, ids: [s.id], text: { en: s.en[0].toUpperCase() + s.en.slice(1), hi: s.hi } } : null;
   }
 
   const grains = usable(pools.grain);
@@ -74,7 +80,14 @@ export function suggestMeal({ region = 'north', diet = 'veg', slot = 'lunch', da
   const grain = pick(grains, rand, avoid);
   const protein = pick(proteins, rand, avoid);
   const v1 = pick(vegs, rand, avoid);
-  const v2 = slot !== 'breakfast' ? pick(vegs.filter((v) => v.id !== v1.id), rand, avoid) : null;
+  const v2 =
+    slot !== 'breakfast'
+      ? pick(
+          vegs.filter((v) => v.id !== v1.id),
+          rand,
+          avoid
+        )
+      : null;
   const side = slot !== 'breakfast' && rand() < 0.65 ? pick(usable(pools.side), rand, avoid) : null;
 
   const vegEn = v2 ? `${v1.en} and ${v2.en}` : v1.en;

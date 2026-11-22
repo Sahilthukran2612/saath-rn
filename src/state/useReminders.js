@@ -14,8 +14,9 @@ export default function useReminders() {
       cancelReminders();
       return;
     }
-    scheduleReminders(JSON.parse(key).map(([id, title, hour]) => ({ id, title, hour })), (title) =>
-      t('rem.body').replace('{title}', title)
+    scheduleReminders(
+      JSON.parse(key).map(([id, title, hour]) => ({ id, title, hour })),
+      (title) => t('rem.body').replace('{title}', title)
     );
     // t changes every render; the language is what matters for the wording
     // eslint-disable-next-line react-hooks/exhaustive-deps

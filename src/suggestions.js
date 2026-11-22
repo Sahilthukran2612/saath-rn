@@ -55,7 +55,15 @@ const RULES = [
     make: (c) => {
       const late = overdueMedicines(c.medicines, c.medTaken, c.nowMs);
       if (!late.length) return null;
-      return { priority: 92, params: { names: late.map((m) => m.name).slice(0, 3).join(', ') } };
+      return {
+        priority: 92,
+        params: {
+          names: late
+            .map((m) => m.name)
+            .slice(0, 3)
+            .join(', '),
+        },
+      };
     },
   },
   {
@@ -136,7 +144,7 @@ const RULES = [
     tab: 'care',
     make: (c) => {
       if (c.mode !== 'adult' && c.mode !== 'teen') return null;
-      const last = lastAt((c.readings || []));
+      const last = lastAt(c.readings || []);
       if (last == null || c.nowMs - last < 24 * HOUR) return null;
       return { priority: 46, params: {} };
     },
@@ -189,11 +197,27 @@ const RULES = [
     tab: 'plan',
     make: (c) => {
       const h = hourOf(c.nowMs);
-      const slot = h >= 7 && h < 10 ? 'breakfast' : h >= 12 && h < 15 ? 'lunch' : h >= 17 && h < 19 ? 'snack' : h >= 19 && h < 22 ? 'dinner' : null;
+      const slot =
+        h >= 7 && h < 10
+          ? 'breakfast'
+          : h >= 12 && h < 15
+            ? 'lunch'
+            : h >= 17 && h < 19
+              ? 'snack'
+              : h >= 19 && h < 22
+                ? 'dinner'
+                : null;
       if (!slot || !c.foodPrefs) return null;
       if (c.lastMealAt != null && c.nowMs - c.lastMealAt < 3 * HOUR) return null;
       const f = c.foodPrefs;
-      const idea = suggestMeal({ region: f.region, diet: f.diet, slot, day: dayKey(c.nowMs), recent: f.recent, disliked: f.disliked });
+      const idea = suggestMeal({
+        region: f.region,
+        diet: f.diet,
+        slot,
+        day: dayKey(c.nowMs),
+        recent: f.recent,
+        disliked: f.disliked,
+      });
       if (!idea) return null;
       const lang = c.lang === 'hi' ? 'hi' : 'en';
       return { priority: 42, params: { slot: (c.labels && c.labels[slot]) || slot, idea: idea.text[lang] } };
@@ -222,12 +246,25 @@ const RULES = [
     id: 'rest',
     kind: 'habit',
     doodle: 'moon',
-    make: (c) => (weeklySummary(c.checkins || []).id === 'hard' || c.phase === 'crisis' ? { priority: 60, params: {} } : null),
+    make: (c) =>
+      weeklySummary(c.checkins || []).id === 'hard' || c.phase === 'crisis'
+        ? { priority: 60, params: {} }
+        : null,
   },
 ];
 
 // After a hard week or in a crisis phase, only these may appear: no new things to do.
-const CALM_ONLY = new Set(['med', 'company', 'rest', 'checkin', 'refill', 'strips', 'visit', 'sleep', 'water']);
+const CALM_ONLY = new Set([
+  'med',
+  'company',
+  'rest',
+  'checkin',
+  'refill',
+  'strips',
+  'visit',
+  'sleep',
+  'water',
+]);
 
 // How many phrasings a habit slip has (sg.<id>.b, sg.<id>.b2, ...). One is chosen per day, so the wording is not
 // the same every morning.
@@ -270,7 +307,9 @@ export function allSlips(ctx) {
       ...made,
       // Habits move with the person and the day: what they do, what they skip, and a small daily shuffle so the
       // set rotates. Care reminders keep their priority exactly.
-      priority: habit ? made.priority + learned(c.slipStats?.[rule.id]) + (hash(`${day}|${rule.id}`) % 9) : made.priority,
+      priority: habit
+        ? made.priority + learned(c.slipStats?.[rule.id]) + (hash(`${day}|${rule.id}`) % 9)
+        : made.priority,
       variant: VARIANTS[rule.id] ? hash(`${day}|v|${rule.id}`) % VARIANTS[rule.id] : 0,
     });
   }
@@ -298,7 +337,9 @@ export function buildPad(ctx, slips = { day: null, done: [], skipped: [] }, extr
   // A generated card about the same thing as a rule-based one (same drawing: feet, water, a walk...) is left out,
   // even if the rule-based one was already stamped or put aside today, so the same advice never shows twice.
   const covered = new Set(allSlips(ctx).map((s) => s.doodle));
-  const generated = calm ? [] : (extra || []).filter((s) => !gone.has(s.id) && (s.doodle === 'note' || !covered.has(s.doodle)));
+  const generated = calm
+    ? []
+    : (extra || []).filter((s) => !gone.has(s.id) && (s.doodle === 'note' || !covered.has(s.doodle)));
   if (generated.length < AI_MIN) return rules.slice(0, PAD_SIZE);
   const care = rules.filter((s) => s.kind === 'care');
   return [...care, ...generated].slice(0, AI_PAD_SIZE);
@@ -315,4 +356,3 @@ export function markSlip(slips, id, how, nowMs) {
   if (base[key].includes(id)) return base;
   return { ...base, [key]: [...base[key], id] };
 }
-

@@ -111,3 +111,4 @@ export { default as Smartphone } from 'lucide-react-native/icons/smartphone';
 export { default as Cloud } from 'lucide-react-native/icons/cloud';
 export { default as ArrowRight } from 'lucide-react-native/icons/arrow-right';
 export { default as MoreHorizontal } from 'lucide-react-native/icons/ellipsis';
+export { default as Download } from 'lucide-react-native/icons/download';

@@ -6,7 +6,13 @@ import { ListGroup, ListRow } from '../kit';
 import { useStore } from '../../state/store';
 import { useNow } from '../useNow';
 import { heartStatus } from '../../heart';
-import { askBluetoothPermission, bleAvailable, connectBand, disconnectBand, scanForBands } from '../../services/ble';
+import {
+  askBluetoothPermission,
+  bleAvailable,
+  connectBand,
+  disconnectBand,
+  scanForBands,
+} from '../../services/ble';
 import { colors } from '../../theme';
 
 // Connects a Bluetooth heart-rate band and shows the live rate. The rate stays on this phone. Saath only
@@ -61,7 +67,13 @@ export default function HeartCard() {
   };
 
   const line =
-    status.level === 'high' ? t('hr.high') : status.level === 'low' ? t('hr.low') : status.level === 'ok' ? t('hr.ok') : t('hr.wait');
+    status.level === 'high'
+      ? t('hr.high')
+      : status.level === 'low'
+        ? t('hr.low')
+        : status.level === 'ok'
+          ? t('hr.ok')
+          : t('hr.wait');
 
   return (
     <Card style={{ gap: 12 }}>
@@ -73,7 +85,10 @@ export default function HeartCard() {
         <View style={{ gap: 8 }}>
           <Caption>{t('hr.connected').replace('{name}', device.name)}</Caption>
           <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8 }}>
-            <Title style={{ fontSize: 56, lineHeight: 64 }} accessibilityLabel={last ? `${last.bpm} ${t('hr.bpm')}` : t('hr.wait')}>
+            <Title
+              style={{ fontSize: 56, lineHeight: 64 }}
+              accessibilityLabel={last ? `${last.bpm} ${t('hr.bpm')}` : t('hr.wait')}
+            >
               {last ? last.bpm : '-'}
             </Title>
             <Body>{t('hr.bpm')}</Body>
@@ -89,7 +104,14 @@ export default function HeartCard() {
           {found.length > 0 ? (
             <ListGroup>
               {found.map((d, i) => (
-                <ListRow key={d.id} icon={HeartPulse} title={d.name} label={d.name} onPress={() => pick(d)} last={i === found.length - 1} />
+                <ListRow
+                  key={d.id}
+                  icon={HeartPulse}
+                  title={d.name}
+                  label={d.name}
+                  onPress={() => pick(d)}
+                  last={i === found.length - 1}
+                />
               ))}
             </ListGroup>
           ) : null}

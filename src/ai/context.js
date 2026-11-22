@@ -3,7 +3,8 @@
 // Only coarse facts the model needs to word a helpful card: language, time of day, who the phone is for,
 // how the routine is going, and a few yes/no flags.
 
-const partOfDay = (hour) => (hour < 5 ? 'night' : hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : hour < 21 ? 'evening' : 'night');
+const partOfDay = (hour) =>
+  hour < 5 ? 'night' : hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : hour < 21 ? 'evening' : 'night';
 
 export function buildAiContext(state, nowMs = Date.now()) {
   const tasks = state.tasks || [];

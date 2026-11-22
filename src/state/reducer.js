@@ -112,7 +112,10 @@ function afterCall(state, seconds) {
   if (!al || al.phase !== 'escalating') return state;
   const clear = { hold: false, heldFor: 0, calling: null };
   if (seconds >= CFG.callReachedSec) {
-    return { ...state, alert: { ...al, ...clear, phase: 'done', remaining: 0, reached: al.chain[al.stepIndex]?.id ?? null } };
+    return {
+      ...state,
+      alert: { ...al, ...clear, phase: 'done', remaining: 0, reached: al.chain[al.stepIndex]?.id ?? null },
+    };
   }
   const next = al.stepIndex + 1;
   return {
@@ -173,7 +176,9 @@ function baseReducer(state, a) {
       if (al.hold) {
         // a call is in progress: the clock waits for it to end, but never forever
         const held = (al.heldFor || 0) + 1;
-        return held >= CFG.callMaxHoldSec ? afterCall(state, 0) : { ...state, alert: { ...al, heldFor: held } };
+        return held >= CFG.callMaxHoldSec
+          ? afterCall(state, 0)
+          : { ...state, alert: { ...al, heldFor: held } };
       }
       if (al.remaining > 1) return { ...state, alert: { ...al, remaining: al.remaining - 1 } };
       if (al.phase === 'countdown') {
@@ -410,20 +415,34 @@ function baseReducer(state, a) {
       return { ...state, heart: { device: a.device, readings: [], contact: true } };
     case 'HEART_READING':
       return state.heart.device
-        ? { ...state, heart: { ...state.heart, readings: addReading(state.heart.readings, a.bpm, a.at), contact: a.contact } }
+        ? {
+            ...state,
+            heart: {
+              ...state.heart,
+              readings: addReading(state.heart.readings, a.bpm, a.at),
+              contact: a.contact,
+            },
+          }
         : state;
     case 'CALL_START':
       return state.alert && state.alert.phase === 'escalating'
         ? {
             ...state,
-            alert: { ...state.alert, hold: true, heldFor: 0, calling: state.alert.chain[state.alert.stepIndex]?.id ?? null },
+            alert: {
+              ...state.alert,
+              hold: true,
+              heldFor: 0,
+              calling: state.alert.chain[state.alert.stepIndex]?.id ?? null,
+            },
           }
         : state;
     case 'CALL_END':
       return afterCall(state, Number(a.seconds) || 0);
     case 'CONTACT_ADD': {
       const name = String(a.name || '').trim();
-      const digits = String(a.phone || '').replace(/\D/g, '').slice(-10);
+      const digits = String(a.phone || '')
+        .replace(/\D/g, '')
+        .slice(-10);
       const role = ['family', 'neighbour', 'asha', 'clinician'].includes(a.role) ? a.role : 'family';
       const real = state.members;
       if (name.length < 2 || !validPhone(digits) || real.length >= 12) return state;
@@ -432,9 +451,10 @@ function baseReducer(state, a) {
       return {
         ...state,
         members: [...state.members, member],
-        profile: state.profile.emergencyId && state.members.some((m) => m.id === state.profile.emergencyId)
-          ? state.profile
-          : { ...state.profile, emergencyId: a.id },
+        profile:
+          state.profile.emergencyId && state.members.some((m) => m.id === state.profile.emergencyId)
+            ? state.profile
+            : { ...state.profile, emergencyId: a.id },
       };
     }
     case 'CONTACT_REMOVE': {
@@ -459,7 +479,9 @@ function baseReducer(state, a) {
     case 'JOINED_DIAL':
       return {
         ...state,
-        joined: state.joined.map((m) => (m.id === a.id && [0, 1, 2].includes(a.dial) ? { ...m, dial: a.dial } : m)),
+        joined: state.joined.map((m) =>
+          m.id === a.id && [0, 1, 2].includes(a.dial) ? { ...m, dial: a.dial } : m
+        ),
       };
     case 'CIRCLE_TIMEOFF':
       return {
@@ -486,11 +508,26 @@ function baseReducer(state, a) {
     case 'AI_CARDS':
       return { ...state, aiCards: { at: a.at, lang: a.lang, cards: (a.cards || []).slice(0, 7) } };
     case 'AI_CHAT_ADD':
-      return { ...state, aiChat: [...(state.aiChat || []), { id: a.id, role: a.role === 'assistant' ? 'assistant' : 'user', text: String(a.text).slice(0, 700) }].slice(-30) };
+      return {
+        ...state,
+        aiChat: [
+          ...(state.aiChat || []),
+          {
+            id: a.id,
+            role: a.role === 'assistant' ? 'assistant' : 'user',
+            text: String(a.text).slice(0, 700),
+          },
+        ].slice(-30),
+      };
     case 'AI_CHAT_CLEAR':
       return { ...state, aiChat: [] };
     case 'MED_ADD':
-      return { ...state, medicines: [...state.medicines, { id: a.id, name: a.name, dose: a.dose || '', when: a.when }].slice(-30) };
+      return {
+        ...state,
+        medicines: [...state.medicines, { id: a.id, name: a.name, dose: a.dose || '', when: a.when }].slice(
+          -30
+        ),
+      };
     case 'MED_REMOVE':
       return { ...state, medicines: state.medicines.filter((m) => m.id !== a.id) };
     case 'MED_TAKEN': {
@@ -560,7 +597,9 @@ function eventFor(prev, next, a) {
     case 'TOGGLE_TASK': {
       const was = prev.tasks.find((t) => t.id === a.id);
       const now = next.tasks.find((t) => t.id === a.id);
-      return was && now && !was.done && now.done ? { eventType: 1, kind: 'task_done', detail: now.title } : null;
+      return was && now && !was.done && now.done
+        ? { eventType: 1, kind: 'task_done', detail: now.title }
+        : null;
     }
     default:
       return null;

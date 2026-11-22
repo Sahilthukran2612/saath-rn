@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
-import { BigButton, Body, Caption, Card, Screen, ScreenTitle } from '../components/ui';
+import { BigButton, Body, Caption, Card, Screen, Title } from '../components/ui';
 import { Field } from '../components/kit';
 import { SaathMark } from '../components/art';
 import { Check } from '../components/icons';
@@ -31,7 +31,7 @@ export default function ConsentScreen() {
     <Screen setup>
       <SaathMark size={56} />
       <View style={{ gap: 6 }}>
-        <ScreenTitle>{t('consentTitle')}</ScreenTitle>
+        <Title style={{ fontSize: 30 }}>{t('consentTitle')}</Title>
         <Body>{t('consentBody')}</Body>
         <Caption>{t('consentSub')}</Caption>
       </View>

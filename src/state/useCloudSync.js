@@ -114,7 +114,14 @@ export default function useCloudSync() {
         const p = await fetchLatestPlan(cfg, cloud, householdId);
         keep(p.session);
         const clean = p.ok && p.row ? sanitizePlan(p.row.plan) : null;
-        if (clean) dispatch({ type: 'PLAN_APPLY', plan: clean, version: p.row.created_at, author: p.row.author_name, at: Date.now() });
+        if (clean)
+          dispatch({
+            type: 'PLAN_APPLY',
+            plan: clean,
+            version: p.row.created_at,
+            author: p.row.author_name,
+            at: Date.now(),
+          });
       }
 
       // This phone's push address, once per app run and language: so alerts arrive with Saath closed.

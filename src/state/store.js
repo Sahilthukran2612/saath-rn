@@ -70,7 +70,9 @@ export function StoreProvider({ children, preload, preloadRegistry }) {
       const id = `p${Date.now().toString(36)}`;
       const next = addProfile(registry, { id, name, pin, salt: salt() });
       if (next === registry) return false;
-      dispatch({ type: 'LOAD_PROFILE', saved: { profile: { ...startState.profile, name: String(name).trim() } },
+      dispatch({
+        type: 'LOAD_PROFILE',
+        saved: { profile: { ...startState.profile, name: String(name).trim() } },
       });
       setRegistry(next);
       return true;

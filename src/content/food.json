@@ -2,9 +2,27 @@
   "_readme": "Curated starter content. Editable by the team: change the text or add a meal. Every item is general guidance, not a diet plan. Mark anything region specific as 'verify locally' and ask a clinician or dietitian before relying on it.",
   "verify": "Verify locally. This is general guidance. Follow your clinician's plan.",
   "plate": [
-    { "id": "veg", "icon": "🥦", "share": "half", "en": "Half the plate: vegetables", "hi": "आधी थाली: सब्ज़ियाँ" },
-    { "id": "protein", "icon": "🫘", "share": "quarter", "en": "A quarter: dal, beans, egg, fish or paneer", "hi": "चौथाई: दाल, राजमा, अंडा, मछली या पनीर" },
-    { "id": "grain", "icon": "🫓", "share": "quarter", "en": "A quarter: roti, rice or millet", "hi": "चौथाई: रोटी, चावल या मोटा अनाज" }
+    {
+      "id": "veg",
+      "icon": "🥦",
+      "share": "half",
+      "en": "Half the plate: vegetables",
+      "hi": "आधी थाली: सब्ज़ियाँ"
+    },
+    {
+      "id": "protein",
+      "icon": "🫘",
+      "share": "quarter",
+      "en": "A quarter: dal, beans, egg, fish or paneer",
+      "hi": "चौथाई: दाल, राजमा, अंडा, मछली या पनीर"
+    },
+    {
+      "id": "grain",
+      "icon": "🫓",
+      "share": "quarter",
+      "en": "A quarter: roti, rice or millet",
+      "hi": "चौथाई: रोटी, चावल या मोटा अनाज"
+    }
   ],
   "regions": [
     {
@@ -12,7 +30,11 @@
       "en": "North",
       "hi": "उत्तर",
       "meals": [
-        { "icon": "🫓", "en": "Roti with dal and a vegetable, curd on the side", "hi": "रोटी, दाल और सब्ज़ी, साथ में दही" },
+        {
+          "icon": "🫓",
+          "en": "Roti with dal and a vegetable, curd on the side",
+          "hi": "रोटी, दाल और सब्ज़ी, साथ में दही"
+        },
         { "icon": "🥣", "en": "Vegetable daliya or oats porridge", "hi": "सब्ज़ी वाला दलिया या ओट्स" }
       ]
     },
@@ -21,7 +43,11 @@
       "en": "South",
       "hi": "दक्षिण",
       "meals": [
-        { "icon": "🍚", "en": "Small rice portion with sambar and vegetables", "hi": "थोड़ा चावल, सांभर और सब्ज़ियाँ" },
+        {
+          "icon": "🍚",
+          "en": "Small rice portion with sambar and vegetables",
+          "hi": "थोड़ा चावल, सांभर और सब्ज़ियाँ"
+        },
         { "icon": "🥞", "en": "Ragi dosa or idli with sambar", "hi": "रागी डोसा या इडली, सांभर के साथ" }
       ]
     },
@@ -30,7 +56,11 @@
       "en": "East",
       "hi": "पूर्व",
       "meals": [
-        { "icon": "🐟", "en": "Fish curry with vegetables and a small rice portion", "hi": "मछली की सब्ज़ी, सब्ज़ियाँ और थोड़ा चावल" },
+        {
+          "icon": "🐟",
+          "en": "Fish curry with vegetables and a small rice portion",
+          "hi": "मछली की सब्ज़ी, सब्ज़ियाँ और थोड़ा चावल"
+        },
         { "icon": "🥬", "en": "Dal with leafy greens (saag)", "hi": "दाल और साग" }
       ]
     },
@@ -39,17 +69,30 @@
       "en": "West",
       "hi": "पश्चिम",
       "meals": [
-        { "icon": "🫓", "en": "Bhakri (jowar or bajra) with dal and vegetables", "hi": "ज्वार या बाजरे की भाकरी, दाल और सब्ज़ी" },
+        {
+          "icon": "🫓",
+          "en": "Bhakri (jowar or bajra) with dal and vegetables",
+          "hi": "ज्वार या बाजरे की भाकरी, दाल और सब्ज़ी"
+        },
         { "icon": "🥗", "en": "Sprout salad or besan chilla", "hi": "अंकुरित सलाद या बेसन चीला" }
       ]
     }
   ],
   "fasting": [
-    { "en": "If you fast, tell your clinician first. Some medicines and insulin plans need changing.", "hi": "व्रत रखें तो पहले डॉक्टर को बताएँ। कुछ दवाओं और इंसुलिन की योजना बदलनी पड़ सकती है।" },
-    { "en": "Keep sugar, jaggery or a glucose biscuit with you during a fast.", "hi": "व्रत में चीनी, गुड़ या ग्लूकोज़ बिस्कुट साथ रखें।" }
+    {
+      "en": "If you fast, tell your clinician first. Some medicines and insulin plans need changing.",
+      "hi": "व्रत रखें तो पहले डॉक्टर को बताएँ। कुछ दवाओं और इंसुलिन की योजना बदलनी पड़ सकती है।"
+    },
+    {
+      "en": "Keep sugar, jaggery or a glucose biscuit with you during a fast.",
+      "hi": "व्रत में चीनी, गुड़ या ग्लूकोज़ बिस्कुट साथ रखें।"
+    }
   ],
   "festival": [
-    { "en": "At festivals, take a small portion of sweets after a full meal, not on an empty stomach.", "hi": "त्योहार में मिठाई थोड़ी लें, भरपेट खाने के बाद, खाली पेट नहीं।" },
+    {
+      "en": "At festivals, take a small portion of sweets after a full meal, not on an empty stomach.",
+      "hi": "त्योहार में मिठाई थोड़ी लें, भरपेट खाने के बाद, खाली पेट नहीं।"
+    },
     { "en": "Walk a little after a big meal.", "hi": "बड़े खाने के बाद थोड़ा टहलें।" }
   ],
   "mealIcons": ["🍚", "🫓", "🥗", "🥣", "🍌", "🍬", "🫖"]

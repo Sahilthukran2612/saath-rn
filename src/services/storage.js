@@ -41,11 +41,11 @@ const PERSIST = [
   'medTaken',
   'medLog',
   'slipStats',
- 'aiOn',
- 'readingsSyncedAt',
- 'lastOkAt',
- 'aiCards',
- 'aiChat',
+  'aiOn',
+  'readingsSyncedAt',
+  'lastOkAt',
+  'aiCards',
+  'aiChat',
   'foodPrefs',
   'meds',
   'testPlan',
@@ -84,7 +84,10 @@ async function readTokens(id) {
 async function writeTokens(id, cloud) {
   try {
     if (cloud?.access) {
-      await SecureStore.setItemAsync(tokenKey(id), JSON.stringify({ access: cloud.access, refresh: cloud.refresh }));
+      await SecureStore.setItemAsync(
+        tokenKey(id),
+        JSON.stringify({ access: cloud.access, refresh: cloud.refresh })
+      );
     } else {
       await SecureStore.deleteItemAsync(tokenKey(id));
     }

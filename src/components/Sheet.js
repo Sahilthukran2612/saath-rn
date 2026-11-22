@@ -1,10 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Dimensions, Keyboard, Modal, PanResponder, Pressable, ScrollView, View } from 'react-native';
+import {
+  Animated,
+  Dimensions,
+  Keyboard,
+  Modal,
+  PanResponder,
+  Pressable,
+  ScrollView,
+  View,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X } from './icons';
 import { Title } from './ui';
 import { useReducedMotion } from './motion';
 import { useStore } from '../state/store';
-import { colors, radii } from '../theme';
+import { colors, motion, radii } from '../theme';
 
 // A bottom drawer for forms, the way phones do it: it rises from the bottom edge on a critically damped spring, the
 // page behind dims, a grabber at the top can be pulled down to dismiss, and the sheet lifts above the keyboard. Tap
@@ -14,6 +24,7 @@ const H = Dimensions.get('window').height;
 export default function Sheet({ visible, onClose, title, children }) {
   const { t } = useStore();
   const reduced = useReducedMotion();
+  const insets = useSafeAreaInsets();
   const [mounted, setMounted] = useState(visible);
   const [kb, setKb] = useState(0);
   const [y] = useState(() => new Animated.Value(H));
@@ -28,13 +39,12 @@ export default function Sheet({ visible, onClose, title, children }) {
         dim.setValue(1);
       } else {
         Animated.parallel([
-          Animated.spring(y, { toValue: 0, damping: 24, stiffness: 260, mass: 1, useNativeDriver: true }),
+          Animated.spring(y, { toValue: 0, ...motion.sheet, useNativeDriver: true }),
           Animated.timing(dim, { toValue: 1, duration: 200, useNativeDriver: true }),
         ]).start();
       }
     } else if (mounted) {
       if (reduced) {
-         
         setMounted(false);
         return;
       }
@@ -67,9 +77,10 @@ export default function Sheet({ visible, onClose, title, children }) {
       onPanResponderMove: (_, g) => g.dy > 0 && y.setValue(g.dy),
       onPanResponderRelease: (_, g) => {
         if (g.dy > 120 || g.vy > 1) closeRef.current();
-        else Animated.spring(y, { toValue: 0, damping: 24, stiffness: 260, useNativeDriver: true }).start();
+        else
+          Animated.spring(y, { toValue: 0, ...motion.sheet, velocity: g.vy, useNativeDriver: true }).start();
       },
-    }),
+    })
   );
   /* eslint-enable react-hooks/refs */
   if (!mounted) return null;
@@ -78,9 +89,22 @@ export default function Sheet({ visible, onClose, title, children }) {
       <View style={{ flex: 1, justifyContent: 'flex-end' }}>
         <Animated.View
           pointerEvents="none"
-          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(8,12,40,0.45)', opacity: dim }}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.4)',
+            opacity: dim,
+          }}
         />
-        <Pressable accessibilityLabel={title} accessibilityRole="button" style={{ flex: 1 }} onPress={onClose} />
+        <Pressable
+          accessibilityLabel={title}
+          accessibilityRole="button"
+          style={{ flex: 1 }}
+          onPress={onClose}
+        />
         <Animated.View
           style={{
             transform: [{ translateY: y }],
@@ -88,25 +112,47 @@ export default function Sheet({ visible, onClose, title, children }) {
             backgroundColor: colors.paper,
             borderTopLeftRadius: radii.xl,
             borderTopRightRadius: radii.xl,
-            paddingBottom: kb,
+            paddingBottom: kb || insets.bottom,
           }}
         >
           <View {...pan.panHandlers} style={{ alignItems: 'center', paddingTop: 10, paddingBottom: 6 }}>
-            <View style={{ width: 44, height: 5, borderRadius: 3, backgroundColor: colors.lineStrong }} />
+            <View style={{ width: 36, height: 5, borderRadius: 3, backgroundColor: colors.lineStrong }} />
           </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingBottom: 6, gap: 8 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingHorizontal: 20,
+              paddingBottom: 6,
+              gap: 8,
+            }}
+          >
             <Title style={{ fontSize: 22, flex: 1 }}>{title}</Title>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t('sheet.close')}
               onPress={onClose}
               hitSlop={8}
-              style={{ width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' }}
+              style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}
             >
-              <X size={26} color={colors.inkSoft} />
+              <View
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16,
+                  backgroundColor: colors.surfaceHigh,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <X size={18} color={colors.inkSoft} strokeWidth={2.6} />
+              </View>
             </Pressable>
           </View>
-          <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 20, paddingTop: 8, gap: 14 }}>
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{ padding: 20, paddingTop: 8, gap: 14 }}
+          >
             {children}
           </ScrollView>
         </Animated.View>

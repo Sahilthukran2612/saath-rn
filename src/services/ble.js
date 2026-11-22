@@ -26,7 +26,8 @@ export async function askBluetoothPermission() {
   if (Platform.OS !== 'android') return false;
   try {
     const P = PermissionsAndroid.PERMISSIONS;
-    const wanted = Platform.Version >= 31 ? [P.BLUETOOTH_SCAN, P.BLUETOOTH_CONNECT] : [P.ACCESS_FINE_LOCATION];
+    const wanted =
+      Platform.Version >= 31 ? [P.BLUETOOTH_SCAN, P.BLUETOOTH_CONNECT] : [P.ACCESS_FINE_LOCATION];
     const res = await PermissionsAndroid.requestMultiple(wanted);
     return wanted.every((p) => res[p] === PermissionsAndroid.RESULTS.GRANTED);
   } catch {
@@ -82,11 +83,15 @@ export async function connectBand(id, onReading, onLost) {
     await disconnectBand();
     const device = await m.connectToDevice(id, { timeout: 10000 });
     await device.discoverAllServicesAndCharacteristics();
-    const subscription = device.monitorCharacteristicForService(HEART_SERVICE, HEART_MEASUREMENT, (error, ch) => {
-      if (error) return;
-      const r = ch?.value ? parseHeartRate(ch.value) : null;
-      if (r) onReading(r);
-    });
+    const subscription = device.monitorCharacteristicForService(
+      HEART_SERVICE,
+      HEART_MEASUREMENT,
+      (error, ch) => {
+        if (error) return;
+        const r = ch?.value ? parseHeartRate(ch.value) : null;
+        if (r) onReading(r);
+      }
+    );
     const lost = device.onDisconnected(() => {
       connected = null;
       lost.remove();

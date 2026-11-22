@@ -1,32 +1,154 @@
 {
   "_readme": "Ingredient pools for the on-device meal idea generator (src/mealGenerator.js). General healthy-plate foods only: no amounts, no calories, no claims about sugar. Hindi names need a native-speaker review. Curated offline content: verify locally.",
   "grain": [
-    { "id": "roti", "en": "multigrain roti", "hi": "मल्टीग्रेन रोटी", "r": ["north", "west", "east", "south"], "s": ["lunch", "dinner"] },
-    { "id": "jowar", "en": "jowar roti", "hi": "ज्वार की रोटी", "r": ["west", "south", "north"], "s": ["lunch", "dinner"] },
-    { "id": "bajra", "en": "bajra roti", "hi": "बाजरे की रोटी", "r": ["north", "west"], "s": ["lunch", "dinner"] },
-    { "id": "ragi", "en": "ragi roti", "hi": "रागी की रोटी", "r": ["south", "east"], "s": ["lunch", "dinner"] },
-    { "id": "rice", "en": "a small bowl of rice", "hi": "एक छोटी कटोरी चावल", "r": ["south", "east", "west", "north"], "s": ["lunch", "dinner"] },
-    { "id": "brownrice", "en": "a small bowl of brown rice", "hi": "एक छोटी कटोरी ब्राउन राइस", "r": ["south", "east", "west", "north"], "s": ["lunch", "dinner"] },
+    {
+      "id": "roti",
+      "en": "multigrain roti",
+      "hi": "मल्टीग्रेन रोटी",
+      "r": ["north", "west", "east", "south"],
+      "s": ["lunch", "dinner"]
+    },
+    {
+      "id": "jowar",
+      "en": "jowar roti",
+      "hi": "ज्वार की रोटी",
+      "r": ["west", "south", "north"],
+      "s": ["lunch", "dinner"]
+    },
+    {
+      "id": "bajra",
+      "en": "bajra roti",
+      "hi": "बाजरे की रोटी",
+      "r": ["north", "west"],
+      "s": ["lunch", "dinner"]
+    },
+    {
+      "id": "ragi",
+      "en": "ragi roti",
+      "hi": "रागी की रोटी",
+      "r": ["south", "east"],
+      "s": ["lunch", "dinner"]
+    },
+    {
+      "id": "rice",
+      "en": "a small bowl of rice",
+      "hi": "एक छोटी कटोरी चावल",
+      "r": ["south", "east", "west", "north"],
+      "s": ["lunch", "dinner"]
+    },
+    {
+      "id": "brownrice",
+      "en": "a small bowl of brown rice",
+      "hi": "एक छोटी कटोरी ब्राउन राइस",
+      "r": ["south", "east", "west", "north"],
+      "s": ["lunch", "dinner"]
+    },
     { "id": "idli", "en": "idli", "hi": "इडली", "r": ["south"], "s": ["breakfast"] },
     { "id": "dosa", "en": "a plain dosa", "hi": "सादा डोसा", "r": ["south"], "s": ["breakfast"] },
-    { "id": "daliya", "en": "vegetable daliya", "hi": "सब्ज़ी वाला दलिया", "r": ["north", "west", "east", "south"], "s": ["breakfast"] },
-    { "id": "oats", "en": "oats porridge", "hi": "ओट्स", "r": ["north", "west", "east", "south"], "s": ["breakfast"] },
-    { "id": "poha", "en": "poha with peas", "hi": "मटर वाला पोहा", "r": ["west", "north", "east"], "s": ["breakfast"] },
-    { "id": "upma", "en": "vegetable upma", "hi": "सब्ज़ी वाला उपमा", "r": ["south", "west"], "s": ["breakfast"] },
-    { "id": "paratha", "en": "a whole-wheat paratha with little oil", "hi": "कम तेल का गेहूँ का पराठा", "r": ["north"], "s": ["breakfast"] },
-    { "id": "besan", "en": "besan chilla", "hi": "बेसन का चीला", "r": ["north", "west", "east"], "s": ["breakfast"] }
+    {
+      "id": "daliya",
+      "en": "vegetable daliya",
+      "hi": "सब्ज़ी वाला दलिया",
+      "r": ["north", "west", "east", "south"],
+      "s": ["breakfast"]
+    },
+    {
+      "id": "oats",
+      "en": "oats porridge",
+      "hi": "ओट्स",
+      "r": ["north", "west", "east", "south"],
+      "s": ["breakfast"]
+    },
+    {
+      "id": "poha",
+      "en": "poha with peas",
+      "hi": "मटर वाला पोहा",
+      "r": ["west", "north", "east"],
+      "s": ["breakfast"]
+    },
+    {
+      "id": "upma",
+      "en": "vegetable upma",
+      "hi": "सब्ज़ी वाला उपमा",
+      "r": ["south", "west"],
+      "s": ["breakfast"]
+    },
+    {
+      "id": "paratha",
+      "en": "a whole-wheat paratha with little oil",
+      "hi": "कम तेल का गेहूँ का पराठा",
+      "r": ["north"],
+      "s": ["breakfast"]
+    },
+    {
+      "id": "besan",
+      "en": "besan chilla",
+      "hi": "बेसन का चीला",
+      "r": ["north", "west", "east"],
+      "s": ["breakfast"]
+    }
   ],
   "protein": [
-    { "id": "dal", "en": "dal", "hi": "दाल", "d": ["veg", "egg", "nonveg"], "s": ["lunch", "dinner", "breakfast"] },
-    { "id": "moong", "en": "moong dal", "hi": "मूँग दाल", "d": ["veg", "egg", "nonveg"], "s": ["lunch", "dinner", "breakfast"] },
+    {
+      "id": "dal",
+      "en": "dal",
+      "hi": "दाल",
+      "d": ["veg", "egg", "nonveg"],
+      "s": ["lunch", "dinner", "breakfast"]
+    },
+    {
+      "id": "moong",
+      "en": "moong dal",
+      "hi": "मूँग दाल",
+      "d": ["veg", "egg", "nonveg"],
+      "s": ["lunch", "dinner", "breakfast"]
+    },
     { "id": "rajma", "en": "rajma", "hi": "राजमा", "d": ["veg", "egg", "nonveg"], "s": ["lunch", "dinner"] },
-    { "id": "chana", "en": "chana", "hi": "चना", "d": ["veg", "egg", "nonveg"], "s": ["lunch", "dinner", "snack"] },
-    { "id": "sambar", "en": "sambar", "hi": "सांभर", "d": ["veg", "egg", "nonveg"], "s": ["lunch", "dinner", "breakfast"], "r": ["south"] },
+    {
+      "id": "chana",
+      "en": "chana",
+      "hi": "चना",
+      "d": ["veg", "egg", "nonveg"],
+      "s": ["lunch", "dinner", "snack"]
+    },
+    {
+      "id": "sambar",
+      "en": "sambar",
+      "hi": "सांभर",
+      "d": ["veg", "egg", "nonveg"],
+      "s": ["lunch", "dinner", "breakfast"],
+      "r": ["south"]
+    },
     { "id": "paneer", "en": "paneer", "hi": "पनीर", "d": ["veg", "egg", "nonveg"], "s": ["lunch", "dinner"] },
-    { "id": "curd", "en": "curd", "hi": "दही", "d": ["veg", "egg", "nonveg"], "s": ["breakfast", "lunch", "dinner"] },
-    { "id": "egg", "en": "a boiled egg", "hi": "उबला अंडा", "d": ["egg", "nonveg"], "s": ["breakfast", "dinner", "lunch"] },
-    { "id": "fish", "en": "fish curry", "hi": "मछली की सब्ज़ी", "d": ["nonveg"], "s": ["lunch", "dinner"], "r": ["east", "south", "west"] },
-    { "id": "chicken", "en": "chicken curry with little oil", "hi": "कम तेल की चिकन करी", "d": ["nonveg"], "s": ["lunch", "dinner"] }
+    {
+      "id": "curd",
+      "en": "curd",
+      "hi": "दही",
+      "d": ["veg", "egg", "nonveg"],
+      "s": ["breakfast", "lunch", "dinner"]
+    },
+    {
+      "id": "egg",
+      "en": "a boiled egg",
+      "hi": "उबला अंडा",
+      "d": ["egg", "nonveg"],
+      "s": ["breakfast", "dinner", "lunch"]
+    },
+    {
+      "id": "fish",
+      "en": "fish curry",
+      "hi": "मछली की सब्ज़ी",
+      "d": ["nonveg"],
+      "s": ["lunch", "dinner"],
+      "r": ["east", "south", "west"]
+    },
+    {
+      "id": "chicken",
+      "en": "chicken curry with little oil",
+      "hi": "कम तेल की चिकन करी",
+      "d": ["nonveg"],
+      "s": ["lunch", "dinner"]
+    }
   ],
   "veg": [
     { "id": "palak", "en": "spinach", "hi": "पालक" },

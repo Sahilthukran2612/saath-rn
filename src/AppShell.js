@@ -1,22 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { AppState, BackHandler, KeyboardAvoidingView, Linking, StyleSheet, View } from 'react-native';
+import { AppState, BackHandler, KeyboardAvoidingView, Linking, View } from 'react-native';
 import { parseAddUrl, parseJoinUrl } from './joinLink';
 import { looksAfterOthers, usesAi } from './who';
 import ChatWindow from './components/ai/ChatWindow';
-import Text from './components/AppText';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useStore } from './state/store';
-import { colors, fonts, themeName } from './theme';
+import { colors, themeName } from './theme';
 import AlertBanner from './components/AlertBanner';
 import CircleAlertBanner from './components/CircleAlertBanner';
 import HeartNotice from './components/HeartNotice';
 import { SHOW_HEART } from './features';
 import TabBar, { NAV_TABS } from './components/TabBar';
-import { ArrowLeft, UserRound } from './components/icons';
-import { Glyph, PressRow, useScale } from './components/ui';
-import { Badge } from './components/kit';
-import { SaathMark } from './components/art';
 import { Reveal } from './components/motion';
 import { NavContext } from './components/nav';
 import TodayScreen from './screens/TodayScreen';
@@ -46,30 +41,10 @@ const SCREENS = {
   me: MeScreen,
 };
 
-// Material 3 small top app bar: 64 high, brand or screen title, status, account.
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    minHeight: 64,
-    paddingHorizontal: 16,
-  },
-  iconButton: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
-  avatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.indigo,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
-
 export default function AppShell({ sensing = true }) {
   const { state, dispatch, t, registry, shared } = useStore();
   const [tab, setTab] = useState('today');
-  const k = useScale();
+  const insets = useSafeAreaInsets();
   const { impactG, inactiveHours } = state.baseline;
   useCloudSync();
   useReminders();
@@ -89,7 +64,9 @@ export default function AppShell({ sensing = true }) {
       dispatch({ type: 'JOIN_CODE', code });
       dispatch({ type: 'USAGE_IF_NEW', value: 'member' });
     };
-    Linking.getInitialURL().then(take).catch(() => {});
+    Linking.getInitialURL()
+      .then(take)
+      .catch(() => {});
     const sub = Linking.addEventListener('url', (e) => take(e.url));
     return () => sub.remove();
   }, [dispatch]);
@@ -166,7 +143,7 @@ export default function AppShell({ sensing = true }) {
 
   if (state.hydrated && registry.shared && registry.locked) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.mist }}>
+      <SafeAreaView edges={['top', 'left', 'right']} style={{ flex: 1, backgroundColor: colors.mist }}>
         <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
         <AlertBanner />
         <LockScreen />
@@ -177,10 +154,16 @@ export default function AppShell({ sensing = true }) {
   // A fresh install runs the setup once: who uses the phone, a name, the people to reach, the alert choices.
   if (state.hydrated && !state.onboarded) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.mist }}>
+      <SafeAreaView edges={['top', 'left', 'right']} style={{ flex: 1, backgroundColor: colors.mist }}>
         <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
         <AlertBanner />
-        {state.usage == null ? <RoleChoiceScreen /> : looksAfterOthers(state) ? <MemberOnboardingScreen /> : <OnboardingScreen />}
+        {state.usage == null ? (
+          <RoleChoiceScreen />
+        ) : looksAfterOthers(state) ? (
+          <MemberOnboardingScreen />
+        ) : (
+          <OnboardingScreen />
+        )}
       </SafeAreaView>
     );
   }
@@ -188,7 +171,7 @@ export default function AppShell({ sensing = true }) {
   // Under-18 users need a guardian's agreement first (needs legal review).
   if (state.hydrated && state.mode === 'teen' && state.consent.status !== 'granted') {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.mist }}>
+      <SafeAreaView edges={['top', 'left', 'right']} style={{ flex: 1, backgroundColor: colors.mist }}>
         <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
         <ConsentScreen />
       </SafeAreaView>
@@ -205,69 +188,11 @@ export default function AppShell({ sensing = true }) {
   const current = tab === 'me' || tabs.some(([id]) => id === tab) ? tab : 'today';
   const Screen = SCREENS[current];
   const onMe = current === 'me';
-  const initials =
-    (state.profile?.name || '')
-      .trim()
-      .split(/\s+/)
-      .slice(0, 2)
-      .map((w) => w[0])
-      .join('')
-      .toUpperCase() || null;
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.mist }}>
+    <SafeAreaView edges={['top', 'left', 'right']} style={{ flex: 1, backgroundColor: colors.mist }}>
       <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
         <NavContext.Provider value={setTab}>
           <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
-          <View style={styles.header}>
-            {onMe ? (
-              <PressRow
-                accessibilityRole="button"
-                accessibilityLabel={t('back')}
-                onPress={() => setTab('today')}
-                rippleColor="rgba(38,48,107,0.14)"
-                style={styles.iconButton}
-              >
-                <Glyph icon={ArrowLeft} size={24} color={colors.ink} />
-              </PressRow>
-            ) : (
-              <SaathMark size={32} />
-            )}
-            <Text
-              numberOfLines={1}
-              accessibilityRole="header"
-              style={{
-                flex: 1,
-                fontFamily: fonts.bold,
-                fontSize: 22 * Math.min(k, 1.2),
-                lineHeight: 28 * Math.min(k, 1.2),
-                color: colors.ink,
-              }}
-            >
-              {onMe ? t('tabMe') : t('appName')}
-            </Text>
-            {state.background ? (
-              <Badge tone="leaf" label={t('watch.bg')} />
-            ) : (
-              <Badge tone="indigo" label={t('watch.on')} />
-            )}
-            {onMe ? null : (
-              <PressRow
-                accessibilityRole="button"
-                accessibilityLabel={t('tabMe')}
-                onPress={() => setTab('me')}
-                rippleColor="rgba(38,48,107,0.14)"
-                style={styles.iconButton}
-              >
-                <View style={styles.avatar}>
-                  {initials ? (
-                    <Text style={{ fontFamily: fonts.bold, fontSize: 16, color: colors.white }}>{initials}</Text>
-                  ) : (
-                    <Glyph icon={UserRound} size={20} color={colors.white} />
-                  )}
-                </View>
-              </PressRow>
-            )}
-          </View>
           <AlertBanner />
           <CircleAlertBanner />
           {SHOW_HEART ? <HeartNotice /> : null}
@@ -278,7 +203,9 @@ export default function AppShell({ sensing = true }) {
               </Reveal>
             ) : null}
             {tabs.length > 1 ? <TabBar tab={current} onChange={setTab} t={t} tabs={tabs} /> : null}
-            {state.hydrated && !onMe && usesAi(state) ? <ChatWindow bottom={tabs.length > 1 ? 100 : 20} /> : null}
+            {state.hydrated && !onMe && usesAi(state) ? (
+              <ChatWindow bottom={(tabs.length > 1 ? 92 : 16) + Math.max(insets.bottom, 8)} />
+            ) : null}
           </View>
         </NavContext.Provider>
       </KeyboardAvoidingView>

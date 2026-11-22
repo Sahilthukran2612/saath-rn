@@ -6,7 +6,20 @@ import { sanitizeCard, sanitizeReply } from './guard';
 // and a plain "the helper needs internet" line. Nothing here throws.
 
 const TIMEOUT_MS = 14000;
-export const CARD_ICONS = ['glass', 'walker', 'plate', 'foot', 'strip', 'drop', 'note', 'face', 'steps', 'phone', 'stretch', 'moon'];
+export const CARD_ICONS = [
+  'glass',
+  'walker',
+  'plate',
+  'foot',
+  'strip',
+  'drop',
+  'note',
+  'face',
+  'steps',
+  'phone',
+  'stretch',
+  'moon',
+];
 export const CARD_TABS = ['care', 'plan', 'circle', 'safety'];
 
 async function post(body, cfg = cloudConfig(), fetchImpl = fetch) {
@@ -68,7 +81,12 @@ export async function fetchAiCards(ctx, cfg, fetchImpl) {
 
 // One chat turn. `messages` is the recent history: [{ role: 'user' | 'assistant', text }].
 export async function fetchAiReply(ctx, messages, cfg, fetchImpl) {
-  const history = messages.slice(-8).map((m) => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: String(m.text).slice(0, 500) }));
+  const history = messages
+    .slice(-8)
+    .map((m) => ({
+      role: m.role === 'assistant' ? 'assistant' : 'user',
+      content: String(m.text).slice(0, 500),
+    }));
   const r = await post({ kind: 'chat', ctx, messages: history }, cfg, fetchImpl);
   if (!r.ok) return { ok: false, reason: r.reason };
   const out = sanitizeReply(r.data?.reply, ctx.lang);

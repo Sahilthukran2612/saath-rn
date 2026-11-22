@@ -14,10 +14,7 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: cn(
-          'bg-primary border-transparent',
-          Platform.select({ web: '[a&]:hover:bg-primary/90' })
-        ),
+        default: cn('bg-primary border-transparent', Platform.select({ web: '[a&]:hover:bg-primary/90' })),
         secondary: cn(
           'bg-secondary border-transparent',
           Platform.select({ web: '[a&]:hover:bg-secondary/90' })
@@ -49,9 +46,10 @@ const badgeTextVariants = cva('text-xs font-medium', {
   },
 });
 
-type BadgeProps = React.ComponentProps<typeof View> & React.RefAttributes<View> & {
-  asChild?: boolean;
-} & VariantProps<typeof badgeVariants>;
+type BadgeProps = React.ComponentProps<typeof View> &
+  React.RefAttributes<View> & {
+    asChild?: boolean;
+  } & VariantProps<typeof badgeVariants>;
 
 function Badge({ className, variant, asChild, ...props }: BadgeProps) {
   const Component = asChild ? Slot : View;

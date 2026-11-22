@@ -13,7 +13,8 @@ import { joinUrl } from '../../joinLink';
 import { colors } from '../../theme';
 
 const ROLES = ['family', 'neighbour', 'asha', 'clinician'];
-const newCode = () => (Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)).slice(0, 8).toUpperCase();
+const newCode = () =>
+  (Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)).slice(0, 8).toUpperCase();
 
 // Invite by phone number. The code is shared as plain text through the phone's own share sheet (WhatsApp,
 // SMS). No web link is used: there is no website for it to open. The invite only works once it has reached
@@ -61,7 +62,9 @@ export default function InviteSection() {
     if (state.addPrefill) dispatch({ type: 'ADD_PREFILL', value: null });
     setQr({ name: name.trim(), code });
     try {
-      await Share.share({ message: fmt(t(role === 'clinician' ? 'inv.messageDoctor' : 'inv.message'), { code }) });
+      await Share.share({
+        message: fmt(t(role === 'clinician' ? 'inv.messageDoctor' : 'inv.message'), { code }),
+      });
     } catch {
       // the invite is saved even if the share sheet is dismissed
     }
@@ -124,7 +127,12 @@ export default function InviteSection() {
               lead={<Avatar name={i.name} role={i.role} />}
               title={i.name}
               subtitle={`${t(`role.${i.role}`)}. ${fmt(t('inv.code'), { code: i.code })}`}
-              trailing={<Badge label={i.cloud ? t('inv.sentBadge') : t('invitePending')} tone={i.cloud ? 'leaf' : 'haldi'} />}
+              trailing={
+                <Badge
+                  label={i.cloud ? t('inv.sentBadge') : t('invitePending')}
+                  tone={i.cloud ? 'leaf' : 'haldi'}
+                />
+              }
               onPress={() => setQr({ name: i.name, code: i.code })}
               label={t('inv.showQr')}
               chevron={false}
@@ -138,7 +146,9 @@ export default function InviteSection() {
             {signedIn ? t('inv.notSent') : t('inv.needSignIn')}
           </Body>
           {signedIn && failed ? <Body style={{ color: colors.madder }}>{t('inv.failed')}</Body> : null}
-          {signedIn ? <BigButton kind="quiet" icon={Send} label={t('inv.sendNow')} onPress={requestSync} /> : null}
+          {signedIn ? (
+            <BigButton kind="quiet" icon={Send} label={t('inv.sendNow')} onPress={requestSync} />
+          ) : null}
         </View>
       ) : null}
     </Card>

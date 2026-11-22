@@ -54,6 +54,36 @@ export function Reveal({ children, index = 0, style }) {
   );
 }
 
+// A page pushed inside a tab (a Plan section, Study data) slides in from the right on a critically damped spring,
+// the direction Back takes it away again. With reduced motion it just appears.
+export function Push({ children, style }) {
+  const reduced = useReducedMotion();
+  const [v] = useState(() => new Animated.Value(reduced ? 1 : 0));
+  useEffect(() => {
+    if (reduced) {
+      v.setValue(1);
+      return undefined;
+    }
+    const a = Animated.spring(v, { toValue: 1, ...motion.settle, useNativeDriver: true });
+    a.start();
+    return () => a.stop();
+  }, [reduced, v]);
+  return (
+    <Animated.View
+      style={[
+        { flex: 1 },
+        style,
+        {
+          opacity: v.interpolate({ inputRange: [0, 0.4, 1], outputRange: [0, 1, 1] }),
+          transform: [{ translateX: v.interpolate({ inputRange: [0, 1], outputRange: [48, 0] }) }],
+        },
+      ]}
+    >
+      {children}
+    </Animated.View>
+  );
+}
+
 // Animates a number toward a target with a critically damped spring. Reads the live value, so it
 // can be redirected mid-flight.
 export function useSpringValue(target, config = motion.settle) {

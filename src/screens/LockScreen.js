@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
-import { BigButton, Body, Caption, Screen, ScreenTitle, Title } from '../components/ui';
+import { BigButton, Body, Caption, Screen, Title } from '../components/ui';
 import { Avatar, Field, ListGroup, ListRow } from '../components/kit';
 import { SaathMark } from '../components/art';
 import { Lock, UserPlus } from '../components/icons';
@@ -52,7 +52,7 @@ export default function LockScreen() {
       <SaathMark size={56} />
       {pick === null ? (
         <>
-          <ScreenTitle>{t('sp.who')}</ScreenTitle>
+          <Title style={{ fontSize: 30 }}>{t('sp.who')}</Title>
           <ListGroup>
             {registry.profiles.map((p) => (
               <ListRow

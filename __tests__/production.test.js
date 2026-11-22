@@ -323,9 +323,10 @@ describe('the automatic-call switch', () => {
     await fireEvent.press(screen.getByLabelText('Call my contacts automatically: off'));
     await waitFor(() => expect(screen.getByLabelText('Call my contacts automatically: off')).toBeTruthy());
   });
-  test('the Safety trial card warns that a real run reaches real contacts', async () => {
+  test('the study data page warns that a real run reaches real contacts', async () => {
     await mount({ demo: false, autoCall: true });
-    await fireEvent.press(screen.getByLabelText('Safety'));
+    await fireEvent.press(screen.getByLabelText('Me'));
+    await fireEvent.press(screen.getByLabelText('Study data'));
     expect(screen.getByText(/A trial that runs to the end will really reach your contacts/)).toBeTruthy();
   });
 });

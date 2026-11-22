@@ -106,7 +106,7 @@ export default function HelpSection() {
                 <ListRow
                   key={d.id}
                   lead={<Avatar name={member?.name ?? '?'} role={member?.role} />}
-                  title={d.kind === 'help' ? t('helpButton') : (task ? taskLabel(task, t) : '—')}
+                  title={d.kind === 'help' ? t('helpButton') : task ? taskLabel(task, t) : '—'}
                   subtitle={nameOf(d.to)}
                   trailing={status}
                   onPress={active ? () => dispatch({ type: 'DELEGATION_DONE', id: d.id }) : undefined}

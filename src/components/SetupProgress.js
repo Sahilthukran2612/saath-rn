@@ -23,7 +23,11 @@ export default function SetupProgress({ step, total }) {
           }}
         />
       </View>
-      <Caption>{t('ob.step').replace('{n}', String(step + 1)).replace('{total}', String(total))}</Caption>
+      <Caption>
+        {t('ob.step')
+          .replace('{n}', String(step + 1))
+          .replace('{total}', String(total))}
+      </Caption>
     </View>
   );
 }

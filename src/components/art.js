@@ -3,7 +3,7 @@ import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { useStore } from '../state/store';
 import { colors } from '../theme';
 
-// Mood faces drawn as SVG so they match the line weight of the icon set and scale cleanly.
+// Mood faces drawn as SVG: a soft filled disc with the features in the same colour.
 // The mouth curve and brows change with the level (1 very hard ... 5 very good).
 export function MoodFace({ level = 3, size = 40, color = colors.indigo, fill = 'none' }) {
   const mouths = {
@@ -15,7 +15,13 @@ export function MoodFace({ level = 3, size = 40, color = colors.indigo, fill = '
   };
   return (
     <Svg width={size} height={size} viewBox="0 0 40 40">
-      <Circle cx="20" cy="20" r="17" stroke={color} strokeWidth="2.2" fill={fill} />
+      <Circle
+        cx="20"
+        cy="20"
+        r="18"
+        fill={fill === 'none' ? color : fill}
+        fillOpacity={fill === 'none' ? 0.12 : 1}
+      />
       <Circle cx="14.5" cy="16.5" r="1.8" fill={color} />
       <Circle cx="25.5" cy="16.5" r="1.8" fill={color} />
       {level === 1 && (
@@ -55,7 +61,7 @@ export function PlateDiagram({ size = 140 }) {
   );
 }
 
-// The Saath mark: two arcs held together, "with you". Used on the header and the consent screen.
+// The Saath mark: two arcs held together, "with you". Used on the setup and consent screens.
 export function SaathMark({ size = 36, color = colors.indigo, accent = colors.haldi }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 40 40">
@@ -72,4 +78,3 @@ export function SaathMark({ size = 36, color = colors.indigo, accent = colors.ha
     </Svg>
   );
 }
-

@@ -19,11 +19,9 @@ const mount = (preload) =>
   );
 
 describe('the I\'m OK card on Today', () => {
-  test('it has one round I\'m OK button, a status, the day\'s count and a last-confirmed line', async () => {
+  test('it has one round I\'m OK button, the day\'s count and a last-confirmed line', async () => {
     await mount({ mode: 'elder' });
     expect(screen.getAllByLabelText("I'm OK")).toHaveLength(1);
-    expect(screen.getByText("Today's status")).toBeTruthy();
-    expect(screen.getByText('Tap to confirm')).toBeTruthy();
     expect(screen.getByText('0 / 4 done today')).toBeTruthy();
     expect(screen.getByText('Not confirmed yet')).toBeTruthy();
   });
@@ -38,14 +36,12 @@ describe('the I\'m OK card on Today', () => {
     await fireEvent.press(screen.getByLabelText("I'm OK"));
     expect(screen.getByText('Your circle knows you are fine.')).toBeTruthy();
     expect(screen.getByText('Sent')).toBeTruthy();
-    expect(screen.getByText('Confirmed today')).toBeTruthy();
     expect(screen.getByText(/^Last confirmed: Today at /)).toBeTruthy();
   });
 
   test('a confirmation from an earlier day shows its date and asks again today', async () => {
     const yesterday = Date.now() - 26 * 3600000;
     await mount({ mode: 'elder', lastOkAt: yesterday });
-    expect(screen.getByText('Tap to confirm')).toBeTruthy();
     expect(screen.getByText(/^Last confirmed: .+, /)).toBeTruthy();
     expect(screen.queryByText(/Today at/)).toBeNull();
   });
@@ -73,9 +69,8 @@ describe('the last confirmed time', () => {
 
 // Hindi words are padded with invisible spaces, so these match on a part of the text.
 describe('Hindi', () => {
-  test('the words, the status and the last-confirmed line are Hindi', async () => {
+  test('the words and the last-confirmed line are Hindi', async () => {
     await mount({ mode: 'elder', lang: 'hi' });
-    expect(screen.getByText(/आज की स्थिति/)).toBeTruthy();
     expect(screen.getByText(/अभी पुष्टि नहीं/)).toBeTruthy();
     expect(screen.getByLabelText('मैं ठीक हूँ')).toBeTruthy();
   });

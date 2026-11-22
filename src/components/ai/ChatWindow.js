@@ -38,7 +38,14 @@ function Bubble({ m }) {
           paddingVertical: 10,
         }}
       >
-        <Text style={{ fontFamily: fonts.regular, fontSize: 17 * Math.min(k, 1.2), lineHeight: 25 * Math.min(k, 1.2), color: mine ? colors.white : colors.ink }}>
+        <Text
+          style={{
+            fontFamily: fonts.regular,
+            fontSize: 17 * Math.min(k, 1.2),
+            lineHeight: 25 * Math.min(k, 1.2),
+            color: mine ? colors.white : colors.ink,
+          }}
+        >
           {m.text}
         </Text>
       </View>
@@ -63,7 +70,13 @@ export default function ChatWindow({ bottom = 96 }) {
   useEffect(() => {
     if (!open) return;
     rise.setValue(reduced ? 1 : 0);
-    if (!reduced) Animated.timing(rise, { toValue: 1, duration: 240, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
+    if (!reduced)
+      Animated.timing(rise, {
+        toValue: 1,
+        duration: 240,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
   }, [open, reduced, rise]);
 
   const msgs = state.aiChat || [];
@@ -133,37 +146,89 @@ export default function ChatWindow({ bottom = 96 }) {
         ...shadow.raised,
       }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 8 }}>
-        <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.indigo, alignItems: 'center', justifyContent: 'center' }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 10,
+          paddingHorizontal: 16,
+          paddingTop: 14,
+          paddingBottom: 8,
+        }}
+      >
+        <View
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            backgroundColor: colors.indigo,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
           <Glyph icon={Sparkles} size={20} color={colors.white} />
         </View>
-        <Text accessibilityRole="header" style={{ flex: 1, fontFamily: fonts.bold, fontSize: 20 * Math.min(k, 1.2), color: colors.ink }}>
+        <Text
+          accessibilityRole="header"
+          style={{ flex: 1, fontFamily: fonts.bold, fontSize: 20 * Math.min(k, 1.2), color: colors.ink }}
+        >
           {t('ai.title')}
         </Text>
         {msgs.length > 0 ? (
-          <PressRow accessibilityRole="button" accessibilityLabel={t('ai.clear')} onPress={() => dispatch({ type: 'AI_CHAT_CLEAR' })} style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}>
+          <PressRow
+            accessibilityRole="button"
+            accessibilityLabel={t('ai.clear')}
+            onPress={() => dispatch({ type: 'AI_CHAT_CLEAR' })}
+            style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}
+          >
             <Glyph icon={Trash} size={22} color={colors.inkSoft} />
           </PressRow>
         ) : null}
-        <PressRow accessibilityRole="button" accessibilityLabel={t('ai.close')} onPress={() => setOpen(false)} style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}>
+        <PressRow
+          accessibilityRole="button"
+          accessibilityLabel={t('ai.close')}
+          onPress={() => setOpen(false)}
+          style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}
+        >
           <Glyph icon={X} size={24} color={colors.ink} />
         </PressRow>
       </View>
       <Caption style={{ paddingHorizontal: 16, paddingBottom: 8 }}>{t('ai.notice')}</Caption>
 
-      <ScrollView ref={scroll} keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 16, gap: 10, flexGrow: 1 }}>
+      <ScrollView
+        ref={scroll}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ padding: 16, gap: 10, flexGrow: 1 }}
+      >
         {msgs.length === 0 ? (
           <View style={{ gap: 10 }}>
-            <Text style={{ fontFamily: fonts.semi, fontSize: 18 * Math.min(k, 1.2), color: colors.ink }}>{t('ai.empty')}</Text>
+            <Text style={{ fontFamily: fonts.semi, fontSize: 18 * Math.min(k, 1.2), color: colors.ink }}>
+              {t('ai.empty')}
+            </Text>
             {QUICK.map((q) => (
               <PressRow
                 key={q}
                 accessibilityRole="button"
                 accessibilityLabel={t(q)}
                 onPress={() => send(t(q))}
-                style={{ minHeight: 56, borderRadius: radii.pill, borderWidth: 1, borderColor: colors.line, paddingHorizontal: 18, justifyContent: 'center' }}
+                style={{
+                  minHeight: 56,
+                  borderRadius: radii.pill,
+                  borderWidth: 1,
+                  borderColor: colors.line,
+                  paddingHorizontal: 18,
+                  justifyContent: 'center',
+                }}
               >
-                <Text style={{ fontFamily: fonts.semi, fontSize: 17 * Math.min(k, 1.2), color: colors.indigoDeep }}>{t(q)}</Text>
+                <Text
+                  style={{
+                    fontFamily: fonts.semi,
+                    fontSize: 17 * Math.min(k, 1.2),
+                    color: colors.indigoDeep,
+                  }}
+                >
+                  {t(q)}
+                </Text>
               </PressRow>
             ))}
           </View>
@@ -180,14 +245,31 @@ export default function ChatWindow({ bottom = 96 }) {
               setOpen(false);
               go('safety');
             }}
-            style={{ minHeight: 56, borderRadius: radii.pill, backgroundColor: colors.brick, alignItems: 'center', justifyContent: 'center' }}
+            style={{
+              minHeight: 56,
+              borderRadius: radii.pill,
+              backgroundColor: colors.brick,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
           >
-            <Text style={{ fontFamily: fonts.bold, fontSize: 18 * Math.min(k, 1.2), color: colors.white }}>{t('ai.openSafety')}</Text>
+            <Text style={{ fontFamily: fonts.bold, fontSize: 18 * Math.min(k, 1.2), color: colors.white }}>
+              {t('ai.openSafety')}
+            </Text>
           </PressRow>
         ) : null}
       </ScrollView>
 
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, borderTopWidth: 1, borderTopColor: colors.line }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 8,
+          padding: 12,
+          borderTopWidth: 1,
+          borderTopColor: colors.line,
+        }}
+      >
         <TextInput
           accessibilityLabel={t('ai.placeholder')}
           value={text}
@@ -215,7 +297,15 @@ export default function ChatWindow({ bottom = 96 }) {
           accessibilityRole="button"
           accessibilityLabel={t('ai.send')}
           onPress={() => send()}
-          style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: colors.indigo, alignItems: 'center', justifyContent: 'center', opacity: busy || !text.trim() ? 0.5 : 1 }}
+          style={{
+            width: 56,
+            height: 56,
+            borderRadius: 28,
+            backgroundColor: colors.indigo,
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: busy || !text.trim() ? 0.5 : 1,
+          }}
         >
           <Glyph icon={Send} size={24} color={colors.white} />
         </PressRow>

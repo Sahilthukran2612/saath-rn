@@ -1,65 +1,50 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
-  Moon,
+  FlaskConical,
   Languages,
   MessageCircle,
+  Moon,
   Phone,
-  RotateCcw,
   ShieldCheck,
   Siren,
   Sparkles,
   Type,
 } from '../components/icons';
-import { BigButton, Body, Caption, Screen, ScreenTitle } from '../components/ui';
+import { BigButton, Body, Caption, Card, Glyph, Screen } from '../components/ui';
 import { Avatar, Badge, ListGroup, ListRow, SectionTitle, Segmented, Toggle } from '../components/kit';
 import SharedPhone from '../components/me/SharedPhone';
 import Account from '../components/me/Account';
+import StudyData from '../components/me/StudyData';
+import { useNav } from '../components/nav';
 import { useStore } from '../state/store';
 import { foregroundAvailable } from '../services/foreground';
 import { askSmsPermission, smsAvailable } from '../services/sms';
 import { callsAvailable } from '../services/calls';
 import useChoices from '../state/useChoices';
-
 import { isDoctor, looksAfterOthers, usesAi } from '../who';
-import { colors } from '../theme';
+import { colors, radii } from '../theme';
 
-// The label gets the full width and the selector sits underneath, so neither is squeezed at large text.
-function LanguageRow({ lang, onChange, label }) {
+// A setting whose choice sits underneath its label, so neither is squeezed at large text.
+function ChoiceRow({ icon, label, children, note }) {
   return (
     <View style={{ padding: 16, gap: 12 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-        <View
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 20,
-            backgroundColor: colors.indigoTint,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Languages size={24} color={colors.indigoDeep} />
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+        <View style={styles.tile}>
+          <Glyph icon={icon} size={20} color={colors.indigo} strokeWidth={2.2} />
         </View>
         <Body>{label}</Body>
       </View>
-      <Segmented
-        value={lang}
-        onChange={onChange}
-        options={[
-          { value: 'en', label: 'English' },
-          { value: 'hi', label: 'हिन्दी' },
-        ]}
-      />
-      <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: colors.outlineVariant }} />
+      {children}
+      {note ? <Caption>{note}</Caption> : null}
     </View>
   );
 }
 
 // Light, dark, or follow the phone. The look is applied when Saath opens (every screen builds its styles then),
 // so the row says to reopen the app. The choice is kept on this phone only.
-function ThemeRow() {
+function ThemeChoice() {
   const { t } = useStore();
   const [choice, setChoice] = useState('auto');
   const [changed, setChanged] = useState(false);
@@ -74,54 +59,67 @@ function ThemeRow() {
     AsyncStorage.setItem('saath.theme', v).catch(() => {});
   };
   return (
-    <View style={{ padding: 16, gap: 12 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-        <View
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 20,
-            backgroundColor: colors.indigoTint,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Moon size={24} color={colors.indigoDeep} />
-        </View>
-        <Body>{t('theme.title')}</Body>
-      </View>
+    <ChoiceRow icon={Moon} label={t('theme.title')} note={changed ? t('theme.reopen') : null}>
       <Segmented
         value={choice}
         onChange={pick}
         options={['auto', 'light', 'dark'].map((v) => ({ value: v, label: t(`theme.${v}`) }))}
       />
-      {changed ? <Caption>{t('theme.reopen')}</Caption> : null}
+    </ChoiceRow>
+  );
+}
+
+function Section({ title, children }) {
+  return (
+    <View style={{ gap: 8 }}>
+      {title ? <SectionTitle>{title}</SectionTitle> : null}
+      {children}
     </View>
   );
 }
 
-const styles = StyleSheet.create({ warn: { color: colors.madder, paddingHorizontal: 4 } });
+const styles = StyleSheet.create({
+  warn: { color: colors.madder, paddingHorizontal: 4 },
+  tile: {
+    width: 36,
+    height: 36,
+    borderRadius: radii.sm,
+    backgroundColor: colors.indigoTint,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sep: { height: StyleSheet.hairlineWidth, backgroundColor: colors.outlineVariant, marginLeft: 66 },
+});
+
 export default function MeScreen() {
   const { state, dispatch, t } = useStore();
+  const go = useNav();
+  const [page, setPage] = useState(null);
   const set = (key, value) => dispatch({ type: 'SET', key, value });
   const choices = useChoices();
   const member = looksAfterOthers(state);
   const doctor = isDoctor(state); // looks after someone, has no sensors or emergency contacts of their own
+  if (page === 'study') return <StudyData onBack={() => setPage(null)} />;
+
+  // Erasing everything cannot be undone, so it asks once.
+  const reset = () =>
+    Alert.alert(t('resetData'), t('reset.confirm'), [
+      { text: t('cancel'), style: 'cancel' },
+      { text: t('resetData'), style: 'destructive', onPress: () => dispatch({ type: 'RESET' }) },
+    ]);
+
   return (
-    <Screen>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-        <Avatar name={state.profile.name || t('role.person')} role="person" size={64} />
-        <View style={{ flex: 1, gap: 4 }}>
-          <ScreenTitle>{state.profile.name || t('tabMe')}</ScreenTitle>
-          <Badge
-            label={doctor ? t('role.clinician') : member ? t('use.member') : t(`mode.${state.mode}`)}
-            tone="indigo"
-          />
-        </View>
-      </View>
+    <Screen title={state.profile.name || t('tabMe')} onBack={() => go('today')} backLabel={t('tabToday')}>
+      <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+        <Avatar name={state.profile.name || t('role.person')} role="person" size={56} />
+        <Badge
+          label={doctor ? t('role.clinician') : member ? t('use.member') : t(`mode.${state.mode}`)}
+          tone="indigo"
+        />
+      </Card>
 
       {member ? null : (
-        <View style={{ gap: 8 }}>
+        <Section title={t('me.alerts')}>
           <ListGroup>
             <ListRow
               icon={ShieldCheck}
@@ -185,47 +183,56 @@ export default function MeScreen() {
           {state.autoCallDenied ? <Caption style={styles.warn}>{t('call.denied')}</Caption> : null}
           {!smsAvailable ? <Caption style={styles.warn}>{t('sms.unavailable')}</Caption> : null}
           {state.autoSmsDenied ? <Caption style={styles.warn}>{t('sms.denied')}</Caption> : null}
-        </View>
+        </Section>
       )}
 
       {doctor ? null : (
-        <View style={{ gap: 8 }}>
-          <SectionTitle>{t('use.title')}</SectionTitle>
+        <Section title={t('use.title')}>
           <Segmented
             value={state.usage || 'person'}
             onChange={(v) => set('usage', v)}
             options={['person', 'member', 'both'].map((v) => ({ value: v, label: t(`use.${v}`) }))}
           />
-        </View>
+        </Section>
       )}
+
       <Account />
+
       {member ? null : (
         <>
           <SharedPhone />
-          <View style={{ gap: 8 }}>
-            <SectionTitle>{t('me.mode')}</SectionTitle>
+          <Section title={t('me.mode')}>
             <Segmented
               value={state.mode}
               onChange={(v) => set('mode', v)}
               options={['teen', 'elder', 'adult'].map((v) => ({ value: v, label: t(`mode.${v}`) }))}
             />
-          </View>
-          <View style={{ gap: 8 }}>
-            <SectionTitle>{t('me.phase')}</SectionTitle>
+          </Section>
+          <Section title={t('me.phase')}>
             <Segmented
               value={state.phase}
               onChange={(v) => set('phase', v)}
               options={['new', 'stable', 'crisis'].map((v) => ({ value: v, label: t(`phase.${v}`) }))}
             />
-          </View>
+          </Section>
         </>
       )}
 
-      <View style={{ gap: 8 }}>
-        <SectionTitle>{t('me.settings')}</SectionTitle>
+      <Section title={t('me.settings')}>
         <ListGroup>
-          <LanguageRow lang={state.lang} onChange={(v) => set('lang', v)} label={t('language')} />
-          <ThemeRow />
+          <ChoiceRow icon={Languages} label={t('language')}>
+            <Segmented
+              value={state.lang}
+              onChange={(v) => set('lang', v)}
+              options={[
+                { value: 'en', label: 'English' },
+                { value: 'hi', label: 'हिन्दी' },
+              ]}
+            />
+          </ChoiceRow>
+          <View style={styles.sep} />
+          <ThemeChoice />
+          <View style={styles.sep} />
           {usesAi(state) ? (
             <ListRow
               icon={Sparkles}
@@ -252,14 +259,15 @@ export default function MeScreen() {
             }
           />
         </ListGroup>
-      </View>
+      </Section>
 
-      <BigButton
-        kind="quiet"
-        icon={RotateCcw}
-        label={t('resetData')}
-        onPress={() => dispatch({ type: 'RESET' })}
-      />
+      {member ? null : (
+        <ListGroup>
+          <ListRow icon={FlaskConical} title={t('study.title')} onPress={() => setPage('study')} chevron />
+        </ListGroup>
+      )}
+
+      <BigButton kind="text" label={t('resetData')} onPress={reset} />
     </Screen>
   );
 }

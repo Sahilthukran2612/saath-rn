@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Eye, MoreHorizontal, ShieldCheck, X } from '../components/icons';
-import { BigButton, Body, Caption, Card, Chip, Glyph, Screen, ScreenTitle } from '../components/ui';
+import { BigButton, Body, Caption, Card, Chip, Glyph, Screen } from '../components/ui';
 import Sheet from '../components/Sheet';
 import { Avatar, Badge, ListGroup, ListRow, Segmented, Toggle, SectionTitle } from '../components/kit';
 import Perf from '../components/Perf';
@@ -117,8 +117,7 @@ export default function CircleScreen() {
   const isPerson = state.role === 'person';
   const viewer = (v) => (t(`role.${v}`) === `role.${v}` ? v : t(`role.${v}`));
   return (
-    <Screen>
-      <ScreenTitle>{t('tabCircle')}</ScreenTitle>
+    <Screen title={t('tabCircle')}>
       <Card tone="tint" style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
         <Glyph icon={ShieldCheck} size={28} color={colors.indigo} />
         <Body style={{ flex: 1 }}>{t('safetyAlways')}</Body>

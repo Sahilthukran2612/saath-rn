@@ -43,7 +43,9 @@ export async function setupPush() {
     const tok = await n.getDevicePushTokenAsync();
     return tok?.data ? { ok: true, token: String(tok.data) } : { ok: false, reason: 'error' };
   } catch (e) {
-    const missing = /firebase|fcm|google-services|FirebaseApp|SERVICE_NOT_AVAILABLE/i.test(String(e?.message || e));
+    const missing = /firebase|fcm|google-services|FirebaseApp|SERVICE_NOT_AVAILABLE/i.test(
+      String(e?.message || e)
+    );
     return { ok: false, reason: missing ? 'nofirebase' : 'error' };
   }
 }

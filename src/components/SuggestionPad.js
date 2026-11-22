@@ -36,7 +36,9 @@ function TopSlip({ slip, index, total, onDone, lang, nowMs }) {
   const busy = useRef(false);
   // a generated card carries its own words; a rule-based one looks its words up by id
   const title = slip.ai ? slip.title : fmt(t(`sg.${slip.id}.t`), slip.params || {});
-  const body = slip.ai ? slip.body : fmt(t(slip.variant ? `sg.${slip.id}.b${slip.variant + 1}` : `sg.${slip.id}.b`), slip.params || {});
+  const body = slip.ai
+    ? slip.body
+    : fmt(t(slip.variant ? `sg.${slip.id}.b${slip.variant + 1}` : `sg.${slip.id}.b`), slip.params || {});
   const care = slip.kind === 'care';
 
   const tear = (how) => {
@@ -71,7 +73,15 @@ function TopSlip({ slip, index, total, onDone, lang, nowMs }) {
         opacity: x.interpolate({ inputRange: [0, 0.8, 1], outputRange: [1, 1, 0] }),
       }}
     >
-      <View style={{ backgroundColor: colors.paper, borderRadius: radii.lg, padding: 16, gap: 10, ...shadow.raised }}>
+      <View
+        style={{
+          backgroundColor: colors.paper,
+          borderRadius: radii.lg,
+          padding: 16,
+          gap: 10,
+          ...shadow.raised,
+        }}
+      >
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View
             style={{
@@ -81,7 +91,13 @@ function TopSlip({ slip, index, total, onDone, lang, nowMs }) {
               paddingVertical: 4,
             }}
           >
-            <Text style={{ fontFamily: fonts.semi, fontSize: 16 * Math.min(k, 1.2), color: care ? colors.carbonDeep : '#5E4800' }}>
+            <Text
+              style={{
+                fontFamily: fonts.semi,
+                fontSize: 16 * Math.min(k, 1.2),
+                color: care ? colors.carbonDeep : '#5E4800',
+              }}
+            >
               {t(`sg.kind.${slip.kind}`)}
             </Text>
           </View>
@@ -98,7 +114,14 @@ function TopSlip({ slip, index, total, onDone, lang, nowMs }) {
           </View>
         </View>
         <View style={{ minHeight: stamped ? 70 : 0, justifyContent: 'center' }}>
-          <Stamp show={stamped} word={t('sg.stamped')} sub={new Date(nowMs).toLocaleDateString(lang === 'hi' ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'short' })} />
+          <Stamp
+            show={stamped}
+            word={t('sg.stamped')}
+            sub={new Date(nowMs).toLocaleDateString(lang === 'hi' ? 'hi-IN' : 'en-IN', {
+              day: 'numeric',
+              month: 'short',
+            })}
+          />
         </View>
         {stamped ? null : (
           <View style={{ gap: 8 }}>
@@ -107,9 +130,17 @@ function TopSlip({ slip, index, total, onDone, lang, nowMs }) {
               accessibilityLabel={t('sg.stamp')}
               onPress={stamp}
               rippleColor="rgba(255,255,255,0.24)"
-              style={{ minHeight: 56, borderRadius: radii.pill, backgroundColor: colors.indigo, alignItems: 'center', justifyContent: 'center' }}
+              style={{
+                minHeight: 56,
+                borderRadius: radii.pill,
+                backgroundColor: colors.indigo,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
             >
-              <Text style={{ fontFamily: fonts.bold, fontSize: 18 * k, color: colors.white }}>{t('sg.stamp')}</Text>
+              <Text style={{ fontFamily: fonts.bold, fontSize: 18 * k, color: colors.white }}>
+                {t('sg.stamp')}
+              </Text>
             </PressRow>
             <View style={{ flexDirection: 'row', gap: 8 }}>
               {slip.tab ? (
@@ -118,9 +149,19 @@ function TopSlip({ slip, index, total, onDone, lang, nowMs }) {
                   accessibilityLabel={t('sg.open')}
                   onPress={() => go(slip.tab)}
                   containerStyle={{ flex: 1 }}
-                  style={{ minHeight: 56, borderRadius: radii.pill, backgroundColor: colors.indigoTint, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 6 }}
+                  style={{
+                    minHeight: 56,
+                    borderRadius: radii.pill,
+                    backgroundColor: colors.indigoTint,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexDirection: 'row',
+                    gap: 6,
+                  }}
                 >
-                  <Text style={{ fontFamily: fonts.bold, fontSize: 18 * k, color: colors.indigoDeep }}>{t('sg.open')}</Text>
+                  <Text style={{ fontFamily: fonts.bold, fontSize: 18 * k, color: colors.indigoDeep }}>
+                    {t('sg.open')}
+                  </Text>
                   <Glyph icon={ChevronRight} size={20} color={colors.indigoDeep} />
                 </PressRow>
               ) : null}
@@ -129,9 +170,18 @@ function TopSlip({ slip, index, total, onDone, lang, nowMs }) {
                 accessibilityLabel={t('sg.skip')}
                 onPress={() => tear('skip')}
                 containerStyle={{ flex: 1 }}
-                style={{ minHeight: 56, borderRadius: radii.pill, borderWidth: 1, borderColor: colors.line, alignItems: 'center', justifyContent: 'center' }}
+                style={{
+                  minHeight: 56,
+                  borderRadius: radii.pill,
+                  borderWidth: 1,
+                  borderColor: colors.line,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
               >
-                <Text style={{ fontFamily: fonts.semi, fontSize: 18 * k, color: colors.inkSoft }}>{t('sg.skip')}</Text>
+                <Text style={{ fontFamily: fonts.semi, fontSize: 18 * k, color: colors.inkSoft }}>
+                  {t('sg.skip')}
+                </Text>
               </PressRow>
             </View>
           </View>
@@ -197,19 +247,53 @@ export default function SuggestionPad() {
       lang: state.lang,
       slipStats: state.slipStats,
       foodPrefs: state.foodPrefs,
-      labels: { breakfast: t('slot.breakfast'), lunch: t('slot.lunch'), snack: t('slot.snack'), dinner: t('slot.dinner') },
+      labels: {
+        breakfast: t('slot.breakfast'),
+        lunch: t('slot.lunch'),
+        snack: t('slot.snack'),
+        dinner: t('slot.dinner'),
+      },
       engaged: (state.tally?.imOk || 0) > 0 || state.tasks.some((x) => x.done),
     }),
-    [now, state.mode, state.phase, state.meds, state.testPlan, state.careEvents, state.meals, state.footChecks, state.checkins, state.readings, state.visitQuestions, state.ladder, state.profile?.condition, state.tasks, state.tally, state.medicines, state.medTaken, state.lang, state.slipStats, state.foodPrefs, t],
+    [
+      now,
+      state.mode,
+      state.phase,
+      state.meds,
+      state.testPlan,
+      state.careEvents,
+      state.meals,
+      state.footChecks,
+      state.checkins,
+      state.readings,
+      state.visitQuestions,
+      state.ladder,
+      state.profile?.condition,
+      state.tasks,
+      state.tally,
+      state.medicines,
+      state.medTaken,
+      state.lang,
+      state.slipStats,
+      state.foodPrefs,
+      t,
+    ]
   );
   const slipState = state.slips;
   const fresh = state.aiCards && state.aiCards.lang === state.lang ? state.aiCards.cards : null;
-  const pad = useMemo(() => buildPad(ctx, slipState, state.aiOn && usesAi(state) ? fresh : null), [ctx, slipState, state.aiOn, state.role, state.usage, fresh]);
+  const pad = useMemo(
+    () => buildPad(ctx, slipState, state.aiOn && usesAi(state) ? fresh : null),
+    [ctx, slipState, state.aiOn, state.role, state.usage, fresh]
+  );
 
   // Ask for new generated cards when there are none, they are from another day or language, or they are 3 hours old.
   // One try at a time, and after a failure not again for ten minutes. Offline, the rule-based pad simply stays.
   const busy = useRef(0);
-  const stale = !state.aiCards || state.aiCards.lang !== state.lang || dayKey(state.aiCards.at) !== dayKey(now) || now - state.aiCards.at > 3 * 3600000;
+  const stale =
+    !state.aiCards ||
+    state.aiCards.lang !== state.lang ||
+    dayKey(state.aiCards.at) !== dayKey(now) ||
+    now - state.aiCards.at > 3 * 3600000;
   useEffect(() => {
     if (!state.aiOn || !usesAi(state) || !state.hydrated || state.alert || !stale) return undefined;
     if (Date.now() - busy.current < 10 * 60000) return undefined;
@@ -235,14 +319,30 @@ export default function SuggestionPad() {
         <Title style={{ fontSize: 22 }}>{t('sg.title')}</Title>
       </View>
       {pad.length === 0 ? (
-        <View style={{ backgroundColor: colors.paper, borderRadius: radii.lg, padding: 16, gap: 10, ...shadow.raised }}>
+        <View
+          style={{
+            backgroundColor: colors.paper,
+            borderRadius: radii.lg,
+            padding: 16,
+            gap: 10,
+            ...shadow.raised,
+          }}
+        >
           <Stamp show word={t('sg.stamped')} silent />
           <Body>{t('sg.allDone')}</Body>
         </View>
       ) : (
         <View style={{ paddingBottom: pad.length > 1 ? 34 : 0 }}>
           <Copies count={pad.length - 1} />
-          <TopSlip key={pad[0].id} slip={pad[0]} index={0} total={pad.length} onDone={onDone} lang={state.lang} nowMs={now} />
+          <TopSlip
+            key={pad[0].id}
+            slip={pad[0]}
+            index={0}
+            total={pad.length}
+            onDone={onDone}
+            lang={state.lang}
+            nowMs={now}
+          />
         </View>
       )}
       <Caption>{t(pad.some((s) => s.ai) ? 'sg.noteAi' : 'sg.note')}</Caption>

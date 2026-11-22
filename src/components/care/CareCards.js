@@ -20,13 +20,7 @@ import { Badge, Field, ListGroup, ListRow, Stat, SectionTitle } from '../kit';
 import { useStore } from '../../state/store';
 import { useNow } from '../useNow';
 import { can } from '../../logic';
-import {
-  budgetSummary,
-  lowSugarPrompt,
-  refillStatus,
-  stripsPlan,
-  CLINICIAN_NOTE,
-} from '../../care';
+import { budgetSummary, lowSugarPrompt, refillStatus, stripsPlan, CLINICIAN_NOTE } from '../../care';
 import Doodle from '../doodles';
 import { colors, fonts, radii } from '../../theme';
 
@@ -90,10 +84,7 @@ export function SugarPromptCard() {
     <>
       {p ? (
         <Card tone="haldi" style={{ gap: 12 }}>
-          <CardHead
-            icon={Info}
-            title={t(`prompt.${p.id}.title`)}
-          />
+          <CardHead icon={Info} title={t(`prompt.${p.id}.title`)} />
           {p.steps.map((s, i) => (
             <View key={s} style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-start' }}>
               <View style={styles.stepNum}>
@@ -229,10 +220,7 @@ export function BudgetCard() {
   };
   return (
     <Card style={{ gap: 14 }}>
-      <CardHead
-        icon={Wallet}
-        title={t('budgetTitle')}
-      />
+      <CardHead icon={Wallet} title={t('budgetTitle')} />
       <View style={{ flexDirection: 'row', gap: 12 }}>
         <Stat value={`₹${s.thisMonth}`} label={t('thisMonth')} />
         <Stat value={`₹${s.lastMonth}`} label={t('lastMonth')} color={colors.inkSoft} />

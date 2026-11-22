@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { Body, Caption, Glyph, PressRow, Screen, ScreenTitle, Title } from '../components/ui';
+import { Body, Caption, Glyph, PressRow, Screen, Title } from '../components/ui';
 import { Stethoscope } from '../components/icons';
 import Doodle from '../components/doodles';
 import { Segmented } from '../components/kit';
@@ -46,7 +46,7 @@ export default function RoleChoiceScreen() {
   return (
     <Screen setup>
       <SaathMark size={56} />
-      <ScreenTitle>{t('rc.title')}</ScreenTitle>
+      <Title style={{ fontSize: 30 }}>{t('rc.title')}</Title>
       <Segmented
         value={state.lang}
         onChange={(v) => dispatch({ type: 'SET', key: 'lang', value: v })}

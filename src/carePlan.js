@@ -38,7 +38,8 @@ export function sanitizePlan(raw) {
     }))
     .filter((x) => x.title.length >= 2)
     .slice(0, MAX_TASKS);
-  const testPerDay = Number.isInteger(raw.testPerDay) && raw.testPerDay >= 0 && raw.testPerDay <= 8 ? raw.testPerDay : null;
+  const testPerDay =
+    Number.isInteger(raw.testPerDay) && raw.testPerDay >= 0 && raw.testPerDay <= 8 ? raw.testPerDay : null;
   const notes = text(raw.notes, 400);
   if (!meds.length && !tasks.length && testPerDay == null && !notes) return null;
   return { v: PLAN_VERSION, meds, tasks, testPerDay, notes };
@@ -85,7 +86,12 @@ export function planPatch(state, plan, meta) {
 export const emptyDraft = () => ({ meds: [], tasks: [], testPerDay: '', notes: '' });
 export const draftFromPlan = (p) =>
   p
-    ? { meds: p.meds.map((m) => ({ ...m })), tasks: p.tasks.map((x) => ({ ...x })), testPerDay: p.testPerDay == null ? '' : String(p.testPerDay), notes: p.notes || '' }
+    ? {
+        meds: p.meds.map((m) => ({ ...m })),
+        tasks: p.tasks.map((x) => ({ ...x })),
+        testPerDay: p.testPerDay == null ? '' : String(p.testPerDay),
+        notes: p.notes || '',
+      }
     : emptyDraft();
 export const planFromDraft = (d) =>
   sanitizePlan({
