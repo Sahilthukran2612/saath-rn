@@ -9,10 +9,11 @@ import { useNow } from '../useNow';
 import { describeEvent, newest, pendingAlert } from '../../circleFeed';
 import JoinCard from '../circle/JoinCard';
 import PatientPanel from './PatientPanel';
+import Doodle from '../doodles';
 import AddMyPatient from './AddMyPatient';
 import { visitStatus } from '../../visits';
 import { circlesFor, hiddenCount, isDoctor } from '../../who';
-import { colors, fonts, radii } from '../../theme';
+import { colors, fonts } from '../../theme';
 
 const ROLE_ORDER = ['family', 'asha', 'neighbour'];
 
@@ -79,35 +80,41 @@ export default function PatientsHome() {
 
   return (
     <View style={{ gap: 16 }}>
-      <View
-        style={{
-          backgroundColor: needing ? colors.brick : colors.indigo,
-          borderRadius: radii.xl,
-          padding: 22,
-          gap: 4,
-        }}
+      <Card
+        style={[
+          { flexDirection: 'row', alignItems: 'center', gap: 14 },
+          needing ? { backgroundColor: colors.brickTint } : null,
+        ]}
         accessibilityRole="header"
       >
-        <Text style={{ fontFamily: fonts.semi, fontSize: 16, lineHeight: 22, color: '#EEF3FF' }}>
-          {t(doctor ? 'pt.titleDoctor' : 'pt.title')}
-        </Text>
-        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 10 }}>
-          <Text style={{ fontFamily: fonts.bold, fontSize: 56, lineHeight: 64, color: colors.white }}>
-            {all.length}
+        <Doodle name="people" size={56} color={needing ? colors.brick : colors.indigo} />
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text
+            style={{
+              fontFamily: fonts.semi,
+              fontSize: 18,
+              lineHeight: 24,
+              color: needing ? colors.brick : colors.ink,
+            }}
+          >
+            {t(doctor ? 'pt.titleDoctor' : 'pt.title')}
           </Text>
-          <Text style={{ fontFamily: fonts.semi, fontSize: 20, lineHeight: 28, color: '#EEF3FF', flex: 1 }}>
+          <Caption style={needing ? { color: colors.brick } : null}>
             {all.length === 0
               ? t('pt.none')
               : needing
                 ? t('pt.need').replace('{n}', String(needing))
                 : t('pt.allWell')}
-          </Text>
+          </Caption>
         </View>
-      </View>
+      </Card>
 
       {all.length === 0 ? (
-        <Card tone="tint">
-          <Body bold>{t('mh.empty')}</Body>
+        <Card style={{ alignItems: 'center', gap: 10, paddingVertical: 28 }}>
+          <Doodle name="calendar" size={88} />
+          <Body style={{ textAlign: 'center' }} soft>
+            {t('mh.empty')}
+          </Body>
         </Card>
       ) : grouped ? (
         roles.map((r) => {

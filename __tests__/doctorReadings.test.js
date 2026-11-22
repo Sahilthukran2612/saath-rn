@@ -119,7 +119,7 @@ describe('the doctor’s patient screen', () => {
     await fireEvent.press(await screen.findByLabelText('Amma'));
     expect(await screen.findByText('Sugar readings')).toBeTruthy();
     expect(await screen.findByText('140')).toBeTruthy(); // the average of 100, 140 and 180
-    expect(screen.getByText(/never says what they mean/)).toBeTruthy();
+    expect(screen.getByText(/never what they mean/)).toBeTruthy();
     expect(screen.queryByLabelText('Add a reading')).toBeNull();
   });
 

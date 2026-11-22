@@ -47,7 +47,7 @@ describe('a clinician publishes a care plan and the person sees it', () => {
     await fireEvent.changeText(screen.getByLabelText('Sugar checks per day (number)'), '3');
     await fireEvent.changeText(screen.getByLabelText('A note for the person'), 'Review in two weeks');
     await fireEvent.press(screen.getByLabelText('Publish plan'));
-    expect(await screen.findByText(/Published\. Their phone updates by itself/)).toBeTruthy();
+    expect(await screen.findByText(/Published\. Their phone updates next time/)).toBeTruthy();
     expect(publishPlan).toHaveBeenCalledTimes(1);
     expect(publishPlan.mock.calls[0][2]).toBe('h-amma');
     expect(publishPlan.mock.calls[0][4]).toMatchObject({ testPerDay: 3, notes: 'Review in two weeks' });

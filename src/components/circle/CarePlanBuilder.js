@@ -4,6 +4,7 @@ import { Minus, Plus, Send, X } from '../icons';
 import { BigButton, Body, Caption, Card, Chip } from '../ui';
 import { Field, ListGroup, ListRow, SectionTitle } from '../kit';
 import { useStore } from '../../state/store';
+import { colors } from '../../theme';
 import { WHEN } from '../../medicines';
 import { draftFromPlan, emptyDraft, planFromDraft, sanitizePlan } from '../../carePlan';
 import { cloudConfig, fetchLatestPlan, isConfigured, publishPlan } from '../../services/cloud';
@@ -72,7 +73,7 @@ export default function CarePlanBuilder({ circle }) {
               key={`${m.name}-${i}`}
               title={m.name}
               subtitle={`${m.dose ? `${m.dose}, ` : ''}${t(`when.${m.when}`)}`}
-              trailing={<X size={22} color="#717AA3" />}
+              trailing={<X size={22} color={colors.control} />}
               onPress={() => set({ meds: draft.meds.filter((_, j) => j !== i) })}
               label={`${t('remove')}: ${m.name}`}
               chevron={false}
@@ -100,7 +101,7 @@ export default function CarePlanBuilder({ circle }) {
               key={`${x.title}-${i}`}
               title={x.title}
               subtitle={hourText(x.hour)}
-              trailing={<X size={22} color="#717AA3" />}
+              trailing={<X size={22} color={colors.control} />}
               onPress={() => set({ tasks: draft.tasks.filter((_, j) => j !== i) })}
               label={`${t('remove')}: ${x.title}`}
               chevron={false}

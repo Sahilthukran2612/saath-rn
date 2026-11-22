@@ -6,6 +6,7 @@ import Sheet from '../Sheet';
 import { Badge, ListGroup, ListRow, ScreenHeader, Toggle } from '../kit';
 import CarePlanBuilder from '../circle/CarePlanBuilder';
 import { useStore } from '../../state/store';
+import { colors } from '../../theme';
 import { useNow } from '../useNow';
 import { cloudConfig, fetchReadings, isConfigured, setMyTimeOff } from '../../services/cloud';
 import { PatientSugar } from '../care/CareCharts';
@@ -66,8 +67,8 @@ export default function PatientPanel({ circle, onBack }) {
       <Caption>{t('cf.note')}</Caption>
 
       {alert ? (
-        <Card style={{ borderColor: '#B3261E', borderWidth: 2 }}>
-          <Body bold style={{ color: '#B3261E' }}>
+        <Card style={{ backgroundColor: colors.brickTint }}>
+          <Body bold style={{ color: colors.brick }}>
             {describeEvent(alert, name, t)}
           </Body>
           <Caption>{ago(alert.created_at, now, t)}</Caption>

@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
     gap: 2,
     paddingVertical: 6,
   },
-  actionText: { fontFamily: fonts.semi, fontSize: 15, color: colors.white },
+  actionText: { fontFamily: fonts.semi, fontSize: 16, color: colors.white },
   action: {
     minHeight: 64,
     borderRadius: radii.pill,

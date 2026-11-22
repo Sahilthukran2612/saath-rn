@@ -17,6 +17,7 @@ import {
 import { validPhone } from '../../logic';
 
 import { fmt } from '../../i18n/strings';
+import { colors } from '../../theme';
 const last10 = (p) => String(p).replace(/\D/g, '').slice(-10);
 
 // The account: a phone number and a password. It is how the circle's phones know who is who (the roles and who
@@ -73,7 +74,7 @@ export default function Account() {
   return (
     <Card style={{ gap: 12 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-        <Cloud size={24} color="#26306B" />
+        <Cloud size={24} color={colors.indigo} />
         <Body bold style={{ flex: 1 }}>
           {t('acc.title')}
         </Body>
@@ -86,8 +87,14 @@ export default function Account() {
             {state.cloud.phone ? fmt(t('acc.in'), { phone: `+91 ${state.cloud.phone}` }) : t('acc.inAnon')}
           </Body>
           {state.cloud.phone ? <Caption>{t('acc.multi')}</Caption> : <Caption>{t('acc.anonNote')}</Caption>}
-          <Caption>{fmt(t('acc.waiting'), { n: state.outbox.length })}</Caption>
-          {state.cloud.pushState ? <Caption>{t(`push.${state.cloud.pushState}`)}</Caption> : null}
+          {state.outbox.length > 0 ? (
+            <Caption>{fmt(t('acc.waiting'), { n: state.outbox.length })}</Caption>
+          ) : null}
+          {state.cloud.pushState ? (
+            <Caption style={state.cloud.pushState === 'on' ? { color: colors.leafDeep } : null}>
+              {t(`push.${state.cloud.pushState}`)}
+            </Caption>
+          ) : null}
           <BigButton
             kind="quiet"
             label={t('acc.out')}

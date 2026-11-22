@@ -81,9 +81,9 @@ describe('the care-giver setup (family, neighbour, ASHA, clinician)', () => {
     await fireEvent.press(screen.getByLabelText('Next')); // name
     await fireEvent.press(screen.getByLabelText('Next')); // account (already signed in)
     expect(screen.getByText('Join the person you look after')).toBeTruthy();
-    expect(screen.getByText(/Your role, for example neighbour or clinician, comes from their invite/)).toBeTruthy();
+    expect(screen.getByText(/Your role comes from their invite/)).toBeTruthy();
     expect(screen.getByText(/only works for the phone number the person entered for you/)).toBeTruthy();
-    expect(screen.getByText(/No code yet\? Ask the person to open Circle/)).toBeTruthy();
+    expect(screen.getByText(/No code yet\? Ask the person to send one/)).toBeTruthy();
     expect(screen.getByLabelText('I will join later')).toBeTruthy();
   });
   test('a care-giver who has joined sees how many circles and can start', async () => {

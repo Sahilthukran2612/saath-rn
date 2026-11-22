@@ -382,7 +382,7 @@ describe('account card', () => {
     configure();
     await open({});
     expect(screen.getByLabelText('Skip for now')).toBeTruthy();
-    expect(screen.getByText(/Works on this phone only/)).toBeTruthy();
+    expect(screen.getByText(/This phone only/)).toBeTruthy();
   });
   test('shows who is signed in, how many updates wait, and signs out', async () => {
     configure();
@@ -399,6 +399,6 @@ describe('account card', () => {
     configure();
     await open({ cloud: { phone: '', userId: 'u', access: 'A', refresh: 'R', householdId: 'h' } });
     expect(screen.getByText('Sync is on for this phone')).toBeTruthy();
-    expect(screen.getByText(/this account is lost and your circle must invite you again/)).toBeTruthy();
+    expect(screen.getByText(/loses this account/)).toBeTruthy();
   });
 });

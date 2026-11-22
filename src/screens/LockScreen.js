@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View } from 'react-native';
 import { BigButton, Body, Caption, Screen, Title } from '../components/ui';
 import { Avatar, Field, ListGroup, ListRow } from '../components/kit';
-import { SaathMark } from '../components/art';
+import Doodle from '../components/doodles';
 import { Lock, UserPlus } from '../components/icons';
 import { useStore } from '../state/store';
 import { pinValid, waitSeconds } from '../profiles';
@@ -49,7 +49,9 @@ export default function LockScreen() {
 
   return (
     <Screen setup>
-      <SaathMark size={56} />
+      <View style={{ alignItems: 'center', paddingTop: 8 }}>
+        <Doodle name="people" size={104} />
+      </View>
       {pick === null ? (
         <>
           <Title style={{ fontSize: 30 }}>{t('sp.who')}</Title>

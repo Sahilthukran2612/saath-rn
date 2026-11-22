@@ -263,7 +263,7 @@ describe('screens', () => {
     await fireEvent.press(screen.getByLabelText('Amma'));
     expect(screen.getByText('You see: Routine')).toBeTruthy();
     expect(screen.getByText('Amma said they are OK.')).toBeTruthy();
-    expect(screen.getByText(/only see what they chose to share/)).toBeTruthy();
+    expect(screen.getByText(/You see only what they share/)).toBeTruthy();
     await fireEvent.press(screen.getByLabelText('Back'));
     expect(screen.getByText('People I look after')).toBeTruthy();
   });

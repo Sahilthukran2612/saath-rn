@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { ArrowRight, Check } from '../components/icons';
 import { BigButton, Body, Caption, Screen, Title } from '../components/ui';
 import { Field } from '../components/kit';
-import { SaathMark } from '../components/art';
+import Doodle from '../components/doodles';
 import SetupProgress from '../components/SetupProgress';
 import Account from '../components/me/Account';
 import JoinCard from '../components/circle/JoinCard';
@@ -34,7 +34,9 @@ export default function MemberOnboardingScreen() {
 
   return (
     <Screen setup>
-      <SaathMark size={56} />
+      <View style={{ alignItems: 'center', paddingTop: 8 }}>
+        <Doodle name="people" size={104} />
+      </View>
       <SetupProgress step={step} total={STEPS} />
 
       {step === 0 ? (

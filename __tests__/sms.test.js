@@ -141,6 +141,6 @@ describe('the setting on the Me tab', () => {
   test('it explains the cost and that it needs signal, not internet', async () => {
     await mount({});
     await openMe();
-    expect(screen.getByText(/Uses your SMS plan and mobile signal, not internet/)).toBeTruthy();
+    expect(screen.getByText(/Uses your SMS plan, not internet/)).toBeTruthy();
   });
 });

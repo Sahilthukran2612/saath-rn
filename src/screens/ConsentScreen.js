@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View } from 'react-native';
 import { BigButton, Body, Caption, Card, Screen, Title } from '../components/ui';
 import { Field } from '../components/kit';
-import { SaathMark } from '../components/art';
+import Doodle from '../components/doodles';
 import { Check } from '../components/icons';
 import { useStore } from '../state/store';
 import { validPhone } from '../logic';
@@ -29,7 +29,9 @@ export default function ConsentScreen() {
 
   return (
     <Screen setup>
-      <SaathMark size={56} />
+      <View style={{ alignItems: 'center', paddingTop: 8 }}>
+        <Doodle name="shield" size={104} />
+      </View>
       <View style={{ gap: 6 }}>
         <Title style={{ fontSize: 30 }}>{t('consentTitle')}</Title>
         <Body>{t('consentBody')}</Body>
