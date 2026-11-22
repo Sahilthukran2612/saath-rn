@@ -1,4 +1,4 @@
-﻿// Who is holding this phone. There are three kinds, and they are kept apart on purpose:
+// Who is holding this phone. There are three kinds, and they are kept apart on purpose:
 //   person  "I need care"            sensors, contacts, the privacy dial, their own care
 //   member  "I look after someone"   a guardian, neighbour or ASHA, for each person they were invited by
 //   doctor  "I am a doctor"          their patients only; never a guardian, neighbour or ASHA to anyone

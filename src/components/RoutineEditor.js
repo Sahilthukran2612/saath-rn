@@ -71,7 +71,6 @@ export default function RoutineEditor() {
   const [text, setText] = useState('');
   const timeOff = state.members.some((m) => m.timeOff);
   const nudge = shouldNudge({ nowMs: now, timeOff, phase: state.phase });
-  const waiting = state.queue.length;
 
   const add = () => {
     const title = text.trim();

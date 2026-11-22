@@ -10,7 +10,7 @@ import { colors } from '../../theme';
 // here is what the server checks before it shows that person anything (row-level security): it is the
 // real control, not a label.
 export default function JoinedSection() {
-  const { state, dispatch, t } = useStore();
+  const { state, t } = useStore();
   const { setDial, msg, live } = useJoinedDial();
   if (!live) return null;
   // People already in the list above (same name and role as a contact I added) are not repeated here.

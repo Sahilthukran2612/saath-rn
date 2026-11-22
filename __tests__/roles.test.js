@@ -115,7 +115,7 @@ describe('the care-giver\u2019s app', () => {
   test('the dashboard names each person they look after and their role with that person', async () => {
     await mount(memberApp);
     expect(screen.getByLabelText('Amma')).toBeTruthy();
-    expect(screen.getByText(/Neighbour ·/)).toBeTruthy();
+    expect(screen.getByText(/Neighbour,/)).toBeTruthy();
   });
   test('opening a person says what role they have and what they may see', async () => {
     await mount(memberApp);

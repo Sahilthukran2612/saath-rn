@@ -20,8 +20,8 @@ function MedRow({ m, taken, last }) {
     <ListRow
       icon={Pill}
       title={m.name}
-      subtitle={`${m.dose ? `${m.dose} · ` : ''}${t(`when.${m.when}`)}${
-        m.plan && author ? ` · ${t('plan.setBy').replace('{who}', author)}` : ''
+      subtitle={`${m.dose ? `${m.dose}, ` : ''}${t(`when.${m.when}`)}${
+        m.plan && author ? `. ${t('plan.setBy').replace('{who}', author)}` : ''
       }`}
       trailing={<CheckMark done={taken} size={34} />}
       onPress={() => dispatch({ type: 'MED_TAKEN', id: m.id, now: nowMs() })}
@@ -42,7 +42,7 @@ export default function Medicines() {
   const [open, setOpen] = useState(false);
   const taken = new Set(takenToday(state.medTaken, now));
   const sorted = [...state.medicines].sort(
-    (a, b) => WHEN.findIndex(([id]) => id === a.when) - WHEN.findIndex(([id]) => id === b.when),
+    (a, b) => WHEN.findIndex(([id]) => id === a.when) - WHEN.findIndex(([id]) => id === b.when)
   );
   const add = () => {
     if (!validMedicine(name)) return;

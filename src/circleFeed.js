@@ -1,6 +1,7 @@
 // What a circle member sees about the person they look after. Pure, so it can be tested.
 // Events arrive already filtered by the server's row-level security (the Privacy Dial): this file
 // only decides how to word them and which ones need attention.
+import { fmt } from './i18n/strings';
 
 export const ALERT_KINDS = ['fall', 'quiet'];
 const RESOLVES = ['im_ok', 'false_alarm'];
@@ -14,7 +15,7 @@ const KEY = {
   task_done: 'ev.task',
 };
 
-export const fmt = (s, v) => Object.entries(v).reduce((o, [k, x]) => o.split(`{${k}}`).join(String(x)), s);
+export { fmt };
 
 export const isAlert = (e) => e.event_type === 0 && ALERT_KINDS.includes(e.kind);
 

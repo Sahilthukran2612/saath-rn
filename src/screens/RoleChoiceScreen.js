@@ -1,6 +1,6 @@
 import React from 'react';
-import { ScrollView, View } from 'react-native';
-import { Body, Caption, Glyph, PressRow, Title } from '../components/ui';
+import { View } from 'react-native';
+import { Body, Caption, Glyph, PressRow, Screen, ScreenTitle, Title } from '../components/ui';
 import { Stethoscope } from '../components/icons';
 import Doodle from '../components/doodles';
 import { Segmented } from '../components/kit';
@@ -44,9 +44,9 @@ export default function RoleChoiceScreen() {
   const { state, dispatch, t } = useStore();
   const pick = (usage) => dispatch({ type: 'SET', key: 'usage', value: usage });
   return (
-    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 24, paddingTop: 32, gap: 18 }}>
+    <Screen setup>
       <SaathMark size={56} />
-      <Title style={{ fontSize: 32, letterSpacing: -0.6 }}>{t('rc.title')}</Title>
+      <ScreenTitle>{t('rc.title')}</ScreenTitle>
       <Segmented
         value={state.lang}
         onChange={(v) => dispatch({ type: 'SET', key: 'lang', value: v })}
@@ -55,10 +55,25 @@ export default function RoleChoiceScreen() {
           { value: 'hi', label: 'हिन्दी' },
         ]}
       />
-      <Choice doodle="walker" title={t('rc.person')} note={t('rc.personNote')} onPress={() => pick('person')} />
-      <Choice doodle="phone" title={t('rc.member')} note={t('rc.memberNote')} onPress={() => pick('member')} />
-      <Choice icon={Stethoscope} title={t('rc.doctor')} note={t('rc.doctorNote')} onPress={() => pick('doctor')} />
+      <Choice
+        doodle="walker"
+        title={t('rc.person')}
+        note={t('rc.personNote')}
+        onPress={() => pick('person')}
+      />
+      <Choice
+        doodle="phone"
+        title={t('rc.member')}
+        note={t('rc.memberNote')}
+        onPress={() => pick('member')}
+      />
+      <Choice
+        icon={Stethoscope}
+        title={t('rc.doctor')}
+        note={t('rc.doctorNote')}
+        onPress={() => pick('doctor')}
+      />
       <Caption>{t('rc.change')}</Caption>
-    </ScrollView>
+    </Screen>
   );
 }

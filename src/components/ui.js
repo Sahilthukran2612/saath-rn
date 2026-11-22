@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { Animated, Pressable, View, StyleSheet } from 'react-native';
+import { Animated, Pressable, ScrollView, View, StyleSheet } from 'react-native';
 import { Button } from '@/components/ui/button';
 import { Text as UiText } from '@/components/ui/text';
 import { cn } from '@/lib/utils';
 import { useReducedMotion } from './motion';
 import Text from './AppText';
-import { colors, fonts, type, sizes, text, shadow, radii, roles } from '../theme';
+import { colors, fonts, type, sizes, text, shadow, radii } from '../theme';
 import { useStore } from '../state/store';
-import { Check } from './icons';
+import { Check, Lock } from './icons';
 import { tap } from '../services/haptics';
 
 // Large-text mode scales every size; OS font scaling still applies on top.
@@ -19,7 +19,14 @@ function usePressSpring() {
   const reduced = useReducedMotion();
   const [scale] = useState(() => new Animated.Value(1));
   const to = (v) => {
-    if (!reduced) Animated.spring(scale, { toValue: v, damping: 20, stiffness: 420, mass: 1, useNativeDriver: true }).start();
+    if (!reduced)
+      Animated.spring(scale, {
+        toValue: v,
+        damping: 20,
+        stiffness: 420,
+        mass: 1,
+        useNativeDriver: true,
+      }).start();
   };
   return { scale, to };
 }
@@ -35,26 +42,19 @@ function PressScale({
   rippleColor = 'rgba(38,48,107,0.14)',
   ...rest
 }) {
-  // Feedback starts on touch-down, not on release: the control gives a little under the finger on a critically
-  // damped spring, and comes back the instant it lets go. Reduced motion keeps only the ripple.
-  const reduced = useReducedMotion();
-  const [scale] = useState(() => new Animated.Value(1));
-  const to = (v) =>
-    reduced
-      ? null
-      : Animated.spring(scale, { toValue: v, damping: 20, stiffness: 420, mass: 1, useNativeDriver: true }).start();
+  const press = usePressSpring();
   return (
-    <Animated.View style={[containerStyle, { transform: [{ scale }] }]}>
+    <Animated.View style={[containerStyle, { transform: [{ scale: press.scale }] }]}>
       <Pressable
         {...rest}
         disabled={disabled}
         android_ripple={{ color: rippleColor, foreground: true }}
         onPress={onPress}
         onPressIn={() => {
-          to(0.97);
+          press.to(0.97);
           if (haptic) tap();
         }}
-        onPressOut={() => to(1)}
+        onPressOut={() => press.to(1)}
         style={({ pressed }) => [style, styles.clip, pressed && { opacity: 0.96 }]}
       >
         {({ pressed }) => (typeof children === 'function' ? children({ pressed }) : children)}
@@ -63,29 +63,53 @@ function PressScale({
   );
 }
 
-const roleStyle = (role, k = 1) => ({
-  fontFamily: role.font,
-  fontSize: role.size * k,
-  lineHeight: role.line * k,
-  letterSpacing: role.track,
-});
+// Every tab scrolls the same way: one gutter, one gap, and room under the last item for the floating tab bar.
+// `setup` is for the first-run and lock screens, which have no tab bar.
+export function Screen({ children, setup }) {
+  return (
+    <ScrollView
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={setup ? styles.setup : styles.screen}
+    >
+      {children}
+    </ScrollView>
+  );
+}
 
+// Shown instead of a tab's content when this role may not see it.
+export function NoAccess() {
+  const { t } = useStore();
+  return (
+    <Screen>
+      <Card tone="tint" style={{ alignItems: 'center', paddingVertical: 32, gap: 12 }}>
+        <Glyph icon={Lock} size={40} color={colors.indigo} />
+        <Body bold style={{ textAlign: 'center' }}>
+          {t('noAccess')}
+        </Body>
+      </Card>
+    </Screen>
+  );
+}
+
+// The title at the top of a tab. No subtitle: the tab name already says where you are.
+export function ScreenTitle({ children }) {
+  return <Title style={{ fontSize: 30 }}>{children}</Title>;
+}
 export function Body({ children, style, bold, soft }) {
   const k = useScale();
   // Line height follows the font size actually used, including a caller's override,
   // otherwise big glyphs and large titles are clipped inside a too-short line box.
-  const size = StyleSheet.flatten(style)?.fontSize ?? type.body * k;
+  const size = (StyleSheet.flatten(style)?.fontSize ?? type.body) * k;
   return (
     <Text
       style={[
         {
           fontFamily: bold ? fonts.bold : fonts.regular,
-          fontSize: size,
-          lineHeight: size * text.body.lineHeight,
           letterSpacing: text.body.letterSpacing,
           color: soft ? colors.inkSoft : colors.ink,
         },
         style,
+        { fontSize: size, lineHeight: size * text.body.lineHeight },
       ]}
     >
       {children}
@@ -118,19 +142,15 @@ export function Caption({ children, style }) {
 // Headline (Material "headline small"). Neutral on-surface colour, like Google's own apps.
 export function Title({ children, style }) {
   const k = useScale();
-  const size = StyleSheet.flatten(style)?.fontSize ?? type.title * k;
+  // A caller's size is a base size: large text scales it too, capped so big headings still fit the screen.
+  const size = (StyleSheet.flatten(style)?.fontSize ?? type.title) * Math.min(k, 1.2);
   return (
     <Text
       accessibilityRole="header"
       style={[
-        {
-          fontFamily: fonts.bold,
-          fontSize: size,
-          lineHeight: size * text.title.lineHeight,
-          letterSpacing: text.title.letterSpacing,
-          color: colors.ink,
-        },
+        { fontFamily: fonts.bold, letterSpacing: text.title.letterSpacing, color: colors.ink },
         style,
+        { fontSize: size, lineHeight: size * text.title.lineHeight },
       ]}
     >
       {children}
@@ -138,7 +158,7 @@ export function Title({ children, style }) {
   );
 }
 
-// Renders a Lucide icon component (or, for older call sites, an emoji string).
+// Renders a Lucide icon component.
 export function Glyph({ icon: Icon, size = 24, color = colors.ink, strokeWidth = 1.9 }) {
   if (!Icon) return null;
   if (typeof Icon === 'string') return <Text style={{ fontSize: size }}>{Icon}</Text>;
@@ -150,7 +170,14 @@ export function Glyph({ icon: Icon, size = 24, color = colors.ink, strokeWidth =
 //   primary  filled, blue              ok       filled, leaf green (done, "I'm OK")
 //   alert    filled, brick (real safety alerts only)
 //   quiet    tonal (secondary)         outlined outline, no fill      text   no container, lowest emphasis
-const BUTTON_VARIANT = { primary: 'default', ok: 'default', alert: 'destructive', quiet: 'secondary', outlined: 'outline', text: 'ghost' };
+const BUTTON_VARIANT = {
+  primary: 'default',
+  ok: 'default',
+  alert: 'destructive',
+  quiet: 'secondary',
+  outlined: 'outline',
+  text: 'ghost',
+};
 
 export function BigButton({ label, icon, onPress, kind = 'primary', style, hint }) {
   const k = useScale();
@@ -199,7 +226,14 @@ export function BigButton({ label, icon, onPress, kind = 'primary', style, hint 
 
 // A filled card: bill-white on the page, depth from a soft shadow. Tones are washes for notes and warnings.
 export function Card({ children, style, tone, ...rest }) {
-  const toneStyle = tone === 'tint' ? styles.cardTint : tone === 'haldi' ? styles.cardHaldi : tone === 'carbon' ? styles.cardCarbon : null;
+  const toneStyle =
+    tone === 'tint'
+      ? styles.cardTint
+      : tone === 'haldi'
+        ? styles.cardHaldi
+        : tone === 'carbon'
+          ? styles.cardCarbon
+          : null;
   return (
     <View className="gap-2.5 rounded-lg bg-card p-5" style={[shadow.card, toneStyle, style]} {...rest}>
       {children}
@@ -245,28 +279,13 @@ export const PressRow = PressScale;
 
 const styles = StyleSheet.create({
   clip: { overflow: 'hidden' },
-  btn: {
-    minHeight: sizes.target,
-    borderRadius: radii.pill,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  btnRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
-  // a slip: white bill paper with a ballpoint-blue edge; tint is a pale wash, haldi the yellow copy, carbon the pink copy
-  card: {
-    backgroundColor: colors.paper,
-    borderRadius: radii.lg,
-    padding: sizes.gutter,
-    gap: 10,
-    ...shadow.card,
-  },
+  screen: { padding: sizes.gutter, paddingTop: 8, paddingBottom: 128, gap: 16 },
+  setup: { padding: 24, paddingTop: 32, gap: 18 },
   cardTint: { backgroundColor: colors.indigoTint },
   cardHaldi: { backgroundColor: colors.haldiTint },
   cardCarbon: { backgroundColor: colors.carbon },
   chip: {
-    minHeight: sizes.target - 8,
+    minHeight: sizes.target,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: radii.md,
@@ -275,8 +294,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   chipActive: { backgroundColor: colors.indigoTint, borderColor: 'transparent' },
-  chipRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
 });
-
-// Re-exported so components can opt into a raised surface without importing the theme.
-export const raised = shadow.raised;

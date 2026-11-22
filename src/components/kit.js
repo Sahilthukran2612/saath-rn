@@ -1,5 +1,5 @@
 import React from 'react';
-import { Animated, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Animated, Pressable, StyleSheet, View } from 'react-native';
 import Text from './AppText';
 import Svg, { Circle, Defs, LinearGradient, Path, Stop } from 'react-native-svg';
 import { ArrowLeft, Check, ChevronRight } from './icons';
@@ -299,49 +299,6 @@ export function ProgressRing({
         />
       </Svg>
       {children}
-    </View>
-  );
-}
-
-// ---- Dye ring: the one memorable element. Bandhani-style dots, one per routine task, around a live arc ----
-export function DyeRing({ total, done, size = 232, children }) {
-  const n = Math.max(total, 1);
-  const rDots = size / 2 - 11;
-  const dots = Array.from({ length: n }, (_, i) => {
-    const a = (-90 + (i * 360) / n) * (Math.PI / 180);
-    return { x: size / 2 + rDots * Math.cos(a), y: size / 2 + rDots * Math.sin(a), on: i < done };
-  });
-  const ringSize = size - 54;
-  return (
-    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
-      <Svg width={size} height={size} style={StyleSheet.absoluteFill}>
-        {/* faint bandhani texture: a ring of tiny dots behind the task dots */}
-        {Array.from({ length: 40 }, (_, i) => {
-          const a = (i * 360 * Math.PI) / (40 * 180);
-          return (
-            <Circle
-              key={`t${i}`}
-              cx={size / 2 + (rDots - 2) * Math.cos(a)}
-              cy={size / 2 + (rDots - 2) * Math.sin(a)}
-              r={1.6}
-              fill={colors.indigoSoft}
-              opacity={0.55}
-            />
-          );
-        })}
-        {dots.map((d, i) => (
-          <Circle key={i} cx={d.x} cy={d.y} r={d.on ? 9 : 6} fill={d.on ? colors.leaf : colors.indigoSoft} />
-        ))}
-      </Svg>
-      <ProgressRing
-        size={ringSize}
-        stroke={10}
-        progress={total ? done / total : 0}
-        color={colors.leaf}
-        track={colors.indigoTint}
-      >
-        {children}
-      </ProgressRing>
     </View>
   );
 }

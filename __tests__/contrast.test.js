@@ -17,7 +17,7 @@ export const ratio = (a, b) => {
 
 const c = colors;
 // [text colour, background, what it is, minimum]
-const TILES = ['Blue', 'Violet', 'Orange', 'Teal', 'Pink'].map((k) => [c[`tile${k}Fg`], c[`tile${k}`], `icon on the ${k} tile`, 3.0]);
+const TILES = [[c.indigo, c.indigoTint, 'task icon on its blue wash', 3.0]];
 const TEXT = [
   [c.ink, c.white, 'body text on a card', 4.5],
   [c.ink, c.mist, 'body text on the page', 4.5],

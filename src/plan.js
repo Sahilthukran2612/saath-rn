@@ -1,4 +1,4 @@
-﻿// Phase 3 logic: handover, visit prep, health passport, wellbeing, risk screening, school card.
+// Phase 3 logic: handover, visit prep, health passport, wellbeing, risk screening, school card.
 // Pure functions. Screening and summaries only: nothing here diagnoses or sets a dose.
 import { canShareItem } from './logic';
 import { glucoseTrend, refillStatus } from './care';

@@ -41,7 +41,7 @@ const PAIRS = [
   [d.white, d.brick, 'alert screen text (large)', 4.0],
   [d.brick, d.paper, 'alert text on a card (large)', 3.0],
   [d.control, d.paper, 'control borders', 3.0],
-  ...['Blue', 'Violet', 'Orange', 'Teal', 'Pink'].map((k) => [d[`tile${k}Fg`], d[`tile${k}`], `icon on the ${k} tile`, 3.0]),
+  [d.indigo, d.indigoTint, 'task icon on its blue wash', 3.0],
   [d.control, d.mist, 'control borders on the page', 3.0],
 ];
 

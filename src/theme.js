@@ -36,25 +36,12 @@ export const colors = {
   outline: '#717AA3',
   outlineVariant: '#BCC7E8',
 };
-// Pastel icon tiles: a rounded square with a tinted ground and a strong glyph, one hue per kind of thing.
-Object.assign(colors, {
-  tileBlue: '#E6EFFF', tileBlueFg: '#1A5CFF',
-  tileViolet: '#EFE7FF', tileVioletFg: '#6A3DE8',
-  tileOrange: '#FFEBD6', tileOrangeFg: '#B54F00',
-  tileTeal: '#D9F5F2', tileTealFg: '#0B7F78',
-  tilePink: '#FFE1E6', tilePinkFg: '#C2255C',
-});
 colors.paper = '#FFFFFF'; // slip and card background: white bill paper (dark: a deep blue-black slip)
 
 // The night palette: the same tokens, re-inked. `white` stays white (it is the text on coloured buttons);
 // backgrounds that were white use `paper`. The yellow and pink slips stay light, like stickers on a dark
 // counter, so their dark text keeps its contrast.
 export const darkColors = {
-  tileBlue: '#1B2A55', tileBlueFg: '#8FB0FF',
-  tileViolet: '#2B2350', tileVioletFg: '#B9A2FF',
-  tileOrange: '#3A2A18', tileOrangeFg: '#FFB366',
-  tileTeal: '#12363A', tileTealFg: '#6FE0D6',
-  tilePink: '#3D1F2B', tilePinkFg: '#FF9DB8',
   indigo: '#4672EE',
   indigoDeep: '#C9D6FF', // used as text and icons on the tinted washes, so it turns light at night
   indigoTint: '#1E2754',
@@ -101,8 +88,7 @@ export const fonts = { regular: 'Mukta_400Regular', semi: 'Mukta_600SemiBold', b
 
 // Legacy sizes (still used across screens).
 export const type = { body: 18, small: 16, title: 26, hero: 34 };
-export const sizes = { target: 56, gutter: 20, radius: 16 };
-export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 };
+export const sizes = { target: 56, gutter: 20 };
 
 // Material 3 shape scale: small 8, medium 12, large 16, extra large 28, full.
 export const radii = { xs: 4, sm: 8, md: 12, lg: 16, xl: 28, hero: 28, pill: 999 };
@@ -147,10 +133,6 @@ export const shadow = {
     elevation: 3,
   },
 };
-
-// State layers: a ripple on Android, never a squish. Opacity values follow Material 3.
-export const states = { pressed: 0.12, hovered: 0.08, focused: 0.12 };
-export const press = { scale: 1, spring: { damping: 20, stiffness: 400, mass: 1 } };
 
 // Material 3 motion: emphasized decelerate for entrances, standard for state changes.
 export const motion = {

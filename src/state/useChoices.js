@@ -4,7 +4,7 @@ import { askCallPermissions, callsAvailable } from '../services/calls';
 // The alert choices that need the phone's permission, in one place so the setup flow and the Me tab behave the
 // same: ask first, and if it is refused the switch stays off and says why.
 export default function useChoices() {
-  const { state, dispatch } = useStore();
+  const { dispatch } = useStore();
   const set = (key, value) => dispatch({ type: 'SET', key, value });
   return {
     autoCall: async (on) => {

@@ -10,7 +10,7 @@ export default function PlanNotice() {
   if (!p || p.seen || state.alert) return null;
   return (
     <Card tone="tint" style={{ gap: 8 }}>
-      <Title style={{ fontSize: 20 }}>{t('plan.updated').replace('{who}', p.author)}</Title>
+      <Title style={{ fontSize: 22 }}>{t('plan.updated').replace('{who}', p.author)}</Title>
       <Body>{t('plan.what').replace('{meds}', String(p.meds)).replace('{tasks}', String(p.tasks))}</Body>
       {p.notes ? <Body bold>{p.notes}</Body> : null}
       <Caption>{t('plan.check')}</Caption>

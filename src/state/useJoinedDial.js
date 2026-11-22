@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useStore } from './store';
 import { cloudConfig, isConfigured, setMemberDial } from '../services/cloud';
 

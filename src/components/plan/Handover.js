@@ -18,8 +18,7 @@ import {
 } from '../../plan';
 import { colors, radii } from '../../theme';
 
-const fmt = (s, vars) =>
-  Object.entries(vars).reduce((acc, [k, v]) => acc.replace(`{${k}}`, String(v ?? '—')), s);
+import { fmt } from '../../i18n/strings';
 const row = { flexDirection: 'row', flexWrap: 'wrap', gap: 8 };
 
 // The person decides when they are ready. A parent may agree or say "not yet".

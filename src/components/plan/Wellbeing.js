@@ -25,7 +25,7 @@ export function CheckinSection() {
   const summary = weeklySummary(state.checkins);
   return (
     <View style={{ gap: 16 }}>
-      <Title style={{ fontSize: 24 }}>{t('checkin.title')}</Title>
+      <Title style={{ fontSize: 22 }}>{t('checkin.title')}</Title>
       <View style={styles.moodRow}>
         {[1, 2, 3, 4, 5].map((n) => {
           const on = thisWeek?.mood === n;
@@ -189,7 +189,7 @@ export function BodySection() {
   return (
     <View style={{ gap: 18 }}>
       <View style={{ gap: 10 }}>
-        <Title style={{ fontSize: 24 }}>{t('foot.title')}</Title>
+        <Title style={{ fontSize: 22 }}>{t('foot.title')}</Title>
         <ListGroup>
           {FOOT_ITEMS.map((id) => (
             <ListRowCheck

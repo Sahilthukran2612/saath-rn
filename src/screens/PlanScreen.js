@@ -1,16 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, View } from 'react-native';
-import { Lock } from '../components/icons';
 import Doodle from '../components/doodles';
-import { Body, Caption, Card, Glyph, Title } from '../components/ui';
+import { NoAccess, Screen, ScreenTitle } from '../components/ui';
 import { ListGroup, ListRow, ScreenHeader } from '../components/kit';
 import { Reveal } from '../components/motion';
 import { LadderSection, PassportSection, VisitSection } from '../components/plan/Handover';
 import { BodySection, CheckinSection, FoodSection, SchoolSection } from '../components/plan/Wellbeing';
 import { useStore } from '../state/store';
-import { colors } from '../theme';
-
-const TILE_KINDS = ['Blue', 'Violet', 'Orange', 'Teal', 'Pink'];
 
 const SECTIONS = {
   ladder: { doodle: 'steps', Comp: LadderSection, teenOnly: true },
@@ -40,24 +35,10 @@ export default function PlanScreen() {
       dispatch({ type: 'VIEW', viewer: state.role, item: t(`sec.${viewing}`), at: Date.now() });
   }, [viewing, isPerson, state.role, dispatch, t]);
 
-  if (ids.length === 0) {
-    return (
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 20, paddingTop: 8, paddingBottom: 128 }}>
-        <Card tone="tint" style={{ alignItems: 'center', paddingVertical: 32, gap: 12 }}>
-          <Glyph icon={Lock} size={40} color={colors.indigo} />
-          <Body bold style={{ textAlign: 'center' }}>
-            {t('noAccess')}
-          </Body>
-        </Card>
-      </ScrollView>
-    );
-  }
+  if (ids.length === 0) return <NoAccess />;
   const Comp = viewing ? SECTIONS[viewing].Comp : null;
   return (
-    <ScrollView
-      keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{ padding: 20, paddingTop: 8, paddingBottom: 128, gap: 16 }}
-    >
+    <Screen>
       {viewing ? (
         <>
           <ScreenHeader title={t(`sec.${viewing}`)} onBack={() => setOpen(null)} backLabel={t('back')} />
@@ -67,28 +48,12 @@ export default function PlanScreen() {
         </>
       ) : (
         <>
-          <View style={{ gap: 2 }}>
-            <Title style={{ fontSize: 32 }}>{t('tabPlan')}</Title>
-            <Caption>{t('planSub')}</Caption>
-          </View>
+          <ScreenTitle>{t('tabPlan')}</ScreenTitle>
           <ListGroup>
-            {ids.map((id, i) => (
+            {ids.map((id) => (
               <ListRow
                 key={id}
-                lead={
-                  <View
-                    style={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: 14,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: colors[`tile${TILE_KINDS[i % TILE_KINDS.length]}`],
-                    }}
-                  >
-                    <Doodle name={SECTIONS[id].doodle} size={34} color={colors[`tile${TILE_KINDS[i % TILE_KINDS.length]}Fg`]} />
-                  </View>
-                }
+                lead={<Doodle name={SECTIONS[id].doodle} size={40} />}
                 title={t(`sec.${id}`)}
                 chevron
                 onPress={() => setOpen(id)}
@@ -97,6 +62,6 @@ export default function PlanScreen() {
           </ListGroup>
         </>
       )}
-    </ScrollView>
+    </Screen>
   );
 }

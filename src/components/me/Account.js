@@ -16,7 +16,7 @@ import {
 } from '../../services/cloud';
 import { validPhone } from '../../logic';
 
-const fmt = (s, v) => Object.entries(v).reduce((o, [k, x]) => o.replace(`{${k}}`, String(x)), s);
+import { fmt } from '../../i18n/strings';
 const last10 = (p) => String(p).replace(/\D/g, '').slice(-10);
 
 // The account: a phone number and a password. It is how the circle's phones know who is who (the roles and who
@@ -82,7 +82,9 @@ export default function Account() {
         <Caption>{t('acc.off')}</Caption>
       ) : signedIn ? (
         <View style={{ gap: 10 }}>
-          <Body>{state.cloud.phone ? fmt(t('acc.in'), { phone: `+91 ${state.cloud.phone}` }) : t('acc.inAnon')}</Body>
+          <Body>
+            {state.cloud.phone ? fmt(t('acc.in'), { phone: `+91 ${state.cloud.phone}` }) : t('acc.inAnon')}
+          </Body>
           {state.cloud.phone ? <Caption>{t('acc.multi')}</Caption> : <Caption>{t('acc.anonNote')}</Caption>}
           <Caption>{fmt(t('acc.waiting'), { n: state.outbox.length })}</Caption>
           {state.cloud.pushState ? <Caption>{t(`push.${state.cloud.pushState}`)}</Caption> : null}
@@ -104,7 +106,12 @@ export default function Account() {
           <Caption>{t('acc.quickNote')}</Caption>
           <Sheet visible={sheet} onClose={() => setSheet(false)} title={t('acc.open')}>
             <Field label={t('acc.phone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
-            <Field label={t('acc.pass')} value={password} onChangeText={setPassword} secureTextEntry={!show} />
+            <Field
+              label={t('acc.pass')}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!show}
+            />
             <View style={{ flexDirection: 'row' }}>
               <Chip label={show ? t('acc.hide') : t('acc.show')} onPress={() => setShow(!show)} />
             </View>

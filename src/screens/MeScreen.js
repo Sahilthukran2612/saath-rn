@@ -1,10 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Moon, Languages, MessageCircle, Phone, RotateCcw, ShieldCheck, Siren, Sparkles, Type } from '../components/icons';
-import { BigButton, Body, Caption, Title } from '../components/ui';
+import {
+  Moon,
+  Languages,
+  MessageCircle,
+  Phone,
+  RotateCcw,
+  ShieldCheck,
+  Siren,
+  Sparkles,
+  Type,
+} from '../components/icons';
+import { BigButton, Body, Caption, Screen, ScreenTitle } from '../components/ui';
 import { Avatar, Badge, ListGroup, ListRow, SectionTitle, Segmented, Toggle } from '../components/kit';
-import { Reveal } from '../components/motion';
 import SharedPhone from '../components/me/SharedPhone';
 import Account from '../components/me/Account';
 import { useStore } from '../state/store';
@@ -91,7 +100,7 @@ function ThemeRow() {
   );
 }
 
-const styles = StyleSheet.create({ warn: { color: colors.madder, paddingHorizontal: 4, paddingTop: 8, paddingBottom: 128 } });
+const styles = StyleSheet.create({ warn: { color: colors.madder, paddingHorizontal: 4 } });
 export default function MeScreen() {
   const { state, dispatch, t } = useStore();
   const set = (key, value) => dispatch({ type: 'SET', key, value });
@@ -99,14 +108,11 @@ export default function MeScreen() {
   const member = looksAfterOthers(state);
   const doctor = isDoctor(state); // looks after someone, has no sensors or emergency contacts of their own
   return (
-    <ScrollView
-      keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{ padding: 20, paddingTop: 8, paddingBottom: 128, gap: 18 }}
-    >
+    <Screen>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
         <Avatar name={state.profile.name || t('role.person')} role="person" size={64} />
         <View style={{ flex: 1, gap: 4 }}>
-          <Title style={{ fontSize: 28 }}>{state.profile.name || t('tabMe')}</Title>
+          <ScreenTitle>{state.profile.name || t('tabMe')}</ScreenTitle>
           <Badge
             label={doctor ? t('role.clinician') : member ? t('use.member') : t(`mode.${state.mode}`)}
             tone="indigo"
@@ -114,8 +120,8 @@ export default function MeScreen() {
         </View>
       </View>
 
-      {!member ? (
-        <Reveal index={0}>
+      {member ? null : (
+        <View style={{ gap: 8 }}>
           <ListGroup>
             <ListRow
               icon={ShieldCheck}
@@ -175,56 +181,48 @@ export default function MeScreen() {
           </ListGroup>
           {!foregroundAvailable ? <Caption style={styles.warn}>{t('bg.unavailable')}</Caption> : null}
           {state.backgroundDenied ? <Caption style={styles.warn}>{t('bg.denied')}</Caption> : null}
-          {!callsAvailable ? (
-            <Caption style={styles.warn}>{t('call.unavailable')}</Caption>
-          ) : null}
+          {!callsAvailable ? <Caption style={styles.warn}>{t('call.unavailable')}</Caption> : null}
           {state.autoCallDenied ? <Caption style={styles.warn}>{t('call.denied')}</Caption> : null}
-          {!smsAvailable ? (
-            <Caption style={styles.warn}>{t('sms.unavailable')}</Caption>
-          ) : null}
+          {!smsAvailable ? <Caption style={styles.warn}>{t('sms.unavailable')}</Caption> : null}
           {state.autoSmsDenied ? <Caption style={styles.warn}>{t('sms.denied')}</Caption> : null}
-        </Reveal>
-      ) : null}
+        </View>
+      )}
 
-      <Reveal index={1}>
-        <SectionTitle>{t('use.title')}</SectionTitle>
-        <View style={{ height: 8 }} />
-        {doctor ? null : (
+      {doctor ? null : (
+        <View style={{ gap: 8 }}>
+          <SectionTitle>{t('use.title')}</SectionTitle>
           <Segmented
             value={state.usage || 'person'}
             onChange={(v) => set('usage', v)}
             options={['person', 'member', 'both'].map((v) => ({ value: v, label: t(`use.${v}`) }))}
           />
-        )}
-        <View style={{ height: 18 }} />
-        <Account />
-        {member ? null : (
-          <>
-            <View style={{ height: 18 }} />
-            <SharedPhone />
-            <View style={{ height: 18 }} />
+        </View>
+      )}
+      <Account />
+      {member ? null : (
+        <>
+          <SharedPhone />
+          <View style={{ gap: 8 }}>
             <SectionTitle>{t('me.mode')}</SectionTitle>
-            <View style={{ height: 8 }} />
             <Segmented
               value={state.mode}
               onChange={(v) => set('mode', v)}
               options={['teen', 'elder', 'adult'].map((v) => ({ value: v, label: t(`mode.${v}`) }))}
             />
-            <View style={{ height: 16 }} />
+          </View>
+          <View style={{ gap: 8 }}>
             <SectionTitle>{t('me.phase')}</SectionTitle>
-            <View style={{ height: 8 }} />
             <Segmented
               value={state.phase}
               onChange={(v) => set('phase', v)}
               options={['new', 'stable', 'crisis'].map((v) => ({ value: v, label: t(`phase.${v}`) }))}
             />
-          </>
-        )}
-      </Reveal>
+          </View>
+        </>
+      )}
 
-      <Reveal index={2}>
+      <View style={{ gap: 8 }}>
         <SectionTitle>{t('me.settings')}</SectionTitle>
-        <View style={{ height: 8 }} />
         <ListGroup>
           <LanguageRow lang={state.lang} onChange={(v) => set('lang', v)} label={t('language')} />
           <ThemeRow />
@@ -233,7 +231,13 @@ export default function MeScreen() {
               icon={Sparkles}
               title={t('ai.setting')}
               subtitle={t('ai.settingNote')}
-              trailing={<Toggle value={state.aiOn !== false} label={t('ai.setting')} onValueChange={(v) => set('aiOn', v)} />}
+              trailing={
+                <Toggle
+                  value={state.aiOn !== false}
+                  label={t('ai.setting')}
+                  onValueChange={(v) => set('aiOn', v)}
+                />
+              }
             />
           ) : null}
           <ListRow
@@ -248,16 +252,14 @@ export default function MeScreen() {
             }
           />
         </ListGroup>
-      </Reveal>
+      </View>
 
-      <Reveal index={3}>
-        <BigButton
-          kind="quiet"
-          icon={RotateCcw}
-          label={t('resetData')}
-          onPress={() => dispatch({ type: 'RESET' })}
-        />
-      </Reveal>
-    </ScrollView>
+      <BigButton
+        kind="quiet"
+        icon={RotateCcw}
+        label={t('resetData')}
+        onPress={() => dispatch({ type: 'RESET' })}
+      />
+    </Screen>
   );
 }

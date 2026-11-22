@@ -40,7 +40,7 @@ export default function FoodIdeas() {
         }),
       })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [prefs.region, prefs.diet, prefs.recent, prefs.disliked, today, nonce, first],
+    [prefs.region, prefs.diet, prefs.recent, prefs.disliked, today, nonce, first]
   );
   const set = (patch) => dispatch({ type: 'FOOD_PREFS', patch });
 
@@ -57,13 +57,20 @@ export default function FoodIdeas() {
         <SectionTitle>{t('food.region')}</SectionTitle>
         <View style={row}>
           {food.regions.map((r) => (
-            <Chip key={r.id} label={r[lang]} active={prefs.region === r.id} onPress={() => set({ region: r.id })} />
+            <Chip
+              key={r.id}
+              label={r[lang]}
+              active={prefs.region === r.id}
+              onPress={() => set({ region: r.id })}
+            />
           ))}
         </View>
       </View>
       {ideas.map(({ slot, idea }, i) => (
         <Card key={slot} tone={i === 0 ? 'tint' : undefined} style={{ gap: 10 }}>
-          <Caption style={{ fontFamily: undefined }}>{`${t(`slot.${slot}`)}${i === 0 ? ` · ${t('food.now')}` : ''}`}</Caption>
+          <Caption
+            style={{ fontFamily: undefined }}
+          >{`${t(`slot.${slot}`)}${i === 0 ? `, ${t('food.now')}` : ''}`}</Caption>
           {idea ? (
             <>
               <Body bold>{idea.text[lang]}</Body>
@@ -78,7 +85,11 @@ export default function FoodIdeas() {
                   icon={Utensils}
                   onPress={() => setNonce((n) => ({ ...n, [slot]: (n[slot] || 0) + 1 }))}
                 />
-                <Chip label={t('food.notme')} icon={X} onPress={() => setAsking(asking === slot ? null : slot)} />
+                <Chip
+                  label={t('food.notme')}
+                  icon={X}
+                  onPress={() => setAsking(asking === slot ? null : slot)}
+                />
               </View>
               {asking === slot ? (
                 <View style={{ gap: 8 }}>

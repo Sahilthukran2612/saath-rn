@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { ScrollView, View } from 'react-native';
-import { BigButton, Body, Caption, Title } from '../components/ui';
+import { View } from 'react-native';
+import { BigButton, Body, Caption, Screen, ScreenTitle, Title } from '../components/ui';
 import { Avatar, Field, ListGroup, ListRow } from '../components/kit';
 import { SaathMark } from '../components/art';
 import { Lock, UserPlus } from '../components/icons';
@@ -19,7 +19,8 @@ export default function LockScreen() {
   const [msg, setMsg] = useState('');
 
   const say = (res) => {
-    if (res.reason === 'wait') setMsg(t('sp.wait').replace('{s}', String(waitSeconds(res.reg, nowMs()) || 60)));
+    if (res.reason === 'wait')
+      setMsg(t('sp.wait').replace('{s}', String(waitSeconds(res.reg, nowMs()) || 60)));
     else if (res.reason === 'alert') setMsg(t('sp.alertFirst'));
     else setMsg(t('sp.wrong').replace('{n}', String(res.triesLeft ?? 0)));
   };
@@ -47,11 +48,11 @@ export default function LockScreen() {
   const person = registry.profiles.find((p) => p.id === pick);
 
   return (
-    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 24, paddingTop: 32, gap: 18 }}>
+    <Screen setup>
       <SaathMark size={56} />
       {pick === null ? (
         <>
-          <Title style={{ fontSize: 32, letterSpacing: -0.6 }}>{t('sp.who')}</Title>
+          <ScreenTitle>{t('sp.who')}</ScreenTitle>
           <ListGroup>
             {registry.profiles.map((p) => (
               <ListRow
@@ -103,6 +104,6 @@ export default function LockScreen() {
         </>
       )}
       <View style={{ height: 8 }} />
-    </ScrollView>
+    </Screen>
   );
 }

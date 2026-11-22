@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Eye, MoreHorizontal, ShieldCheck, X } from '../components/icons';
-import { BigButton, Body, Caption, Card, Chip, Glyph, Title } from '../components/ui';
+import { BigButton, Body, Caption, Card, Chip, Glyph, Screen, ScreenTitle } from '../components/ui';
 import Sheet from '../components/Sheet';
 import { Avatar, Badge, ListGroup, ListRow, Segmented, Toggle, SectionTitle } from '../components/kit';
-import { Reveal } from '../components/motion';
 import Perf from '../components/Perf';
 import InviteSection from '../components/circle/InviteSection';
 import HelpSection from '../components/circle/HelpSection';
@@ -40,7 +39,9 @@ function MemberRow({ m, last }) {
   const roleLabel = t(`role.${m.role}`);
   const { base, note } = splitName(m.name, roleLabel);
   // One quiet line under the name: who they are, and their number only if they agreed to show it.
-  const line = [note ? `${roleLabel}, ${note}` : roleLabel, visible ? m.phone : t('contactHidden')].filter(Boolean).join(' · ');
+  const line = [note ? `${roleLabel}, ${note}` : roleLabel, visible ? m.phone : t('contactHidden')]
+    .filter(Boolean)
+    .join(', ');
   return (
     <View style={styles.member}>
       <View style={styles.memberTop}>
@@ -52,11 +53,18 @@ function MemberRow({ m, last }) {
         {isPerson ? (
           <Toggle value={dial > 0} label={t('dial.in')} onValueChange={(on) => setLevel(on ? 1 : 0)} />
         ) : (
-          <Badge label={t(`dial${m.dial}`)} tone={m.dial === 2 ? 'indigo' : m.dial === 1 ? 'leaf' : 'haldi'} />
+          <Badge
+            label={t(`dial${m.dial}`)}
+            tone={m.dial === 2 ? 'indigo' : m.dial === 1 ? 'leaf' : 'haldi'}
+          />
         )}
       </View>
       {isPerson && dial > 0 ? (
-        <Segmented value={dial} onChange={setLevel} options={[1, 2].map((d) => ({ value: d, label: t(`dial${d}`) }))} />
+        <Segmented
+          value={dial}
+          onChange={setLevel}
+          options={[1, 2].map((d) => ({ value: d, label: t(`dial${d}`) }))}
+        />
       ) : null}
       {state.mode === 'teen' && m.guardian ? <Caption>{t('guardianLimit')}</Caption> : null}
       {isPerson || state.role === m.role ? (
@@ -71,13 +79,21 @@ function MemberRow({ m, last }) {
         {isPerson ? (
           <View style={styles.inlineToggle}>
             <Body style={{ flex: 1 }}>{t('timeOff')}</Body>
-            <Toggle value={m.timeOff} label={t('timeOff')} onValueChange={(on) => dispatch({ type: 'SET_TIME_OFF', id: m.id, on })} />
+            <Toggle
+              value={m.timeOff}
+              label={t('timeOff')}
+              onValueChange={(on) => dispatch({ type: 'SET_TIME_OFF', id: m.id, on })}
+            />
           </View>
         ) : null}
         {state.role === m.role ? (
           <View style={styles.inlineToggle}>
             <Body style={{ flex: 1 }}>{t('shareMyNumber')}</Body>
-            <Toggle value={m.shareContact} label={t('shareMyNumber')} onValueChange={(on) => dispatch({ type: 'SET_SHARE_CONTACT', id: m.id, on })} />
+            <Toggle
+              value={m.shareContact}
+              label={t('shareMyNumber')}
+              onValueChange={(on) => dispatch({ type: 'SET_SHARE_CONTACT', id: m.id, on })}
+            />
           </View>
         ) : null}
         {isPerson ? (
@@ -101,51 +117,26 @@ export default function CircleScreen() {
   const isPerson = state.role === 'person';
   const viewer = (v) => (t(`role.${v}`) === `role.${v}` ? v : t(`role.${v}`));
   return (
-    <ScrollView
-      keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{ padding: 20, paddingTop: 8, paddingBottom: 128, gap: 18 }}
-    >
-      <View style={{ gap: 2 }}>
-        <Title style={{ fontSize: 32, letterSpacing: -0.6 }}>{t('tabCircle')}</Title>
-      </View>
-      <Reveal index={0}>
-        <Card tone="tint" style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-          <Glyph icon={ShieldCheck} size={28} color={colors.indigo} />
-          <Body style={{ flex: 1 }}>{t('safetyAlways')}</Body>
-        </Card>
-      </Reveal>
-      <Reveal index={1}>
+    <Screen>
+      <ScreenTitle>{t('tabCircle')}</ScreenTitle>
+      <Card tone="tint" style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <Glyph icon={ShieldCheck} size={28} color={colors.indigo} />
+        <Body style={{ flex: 1 }}>{t('safetyAlways')}</Body>
+      </Card>
+      <View style={{ gap: 8 }}>
         <SectionTitle>{t('privacyDial')}</SectionTitle>
-        <View style={{ height: 8 }} />
         <View style={styles.group}>
           {state.members.map((m, i) => (
             <MemberRow key={m.id} m={m} last={i === state.members.length - 1} />
           ))}
         </View>
-      </Reveal>
-      {isPerson ? (
-        <Reveal index={2}>
-          <InviteSection />
-        </Reveal>
-      ) : null}
-      {isPerson || state.role === 'family' ? (
-        <Reveal index={3}>
-          <HelpSection />
-        </Reveal>
-      ) : null}
-      {isPerson ? (
-        <Reveal index={4}>
-          <JoinedSection />
-        </Reveal>
-      ) : null}
-      {state.circles.length > 0 ? (
-        <Reveal index={4}>
-          <CirclesSection />
-        </Reveal>
-      ) : null}
-      <Reveal index={5}>
+      </View>
+      {isPerson ? <InviteSection /> : null}
+      {isPerson || state.role === 'family' ? <HelpSection /> : null}
+      {isPerson ? <JoinedSection /> : null}
+      {state.circles.length > 0 ? <CirclesSection /> : null}
+      <View style={{ gap: 8 }}>
         <SectionTitle>{t('whoViewed')}</SectionTitle>
-        <View style={{ height: 8 }} />
         {state.audit.length === 0 ? (
           <Card tone="tint" style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <Glyph icon={Eye} size={24} color={colors.inkSoft} />
@@ -166,8 +157,8 @@ export default function CircleScreen() {
               ))}
           </ListGroup>
         )}
-      </Reveal>
-    </ScrollView>
+      </View>
+    </Screen>
   );
 }
 
@@ -179,8 +170,6 @@ const styles = StyleSheet.create({
     ...shadow.card,
   },
   member: { padding: 16, gap: 12 },
-  divider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
   memberTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  contact: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   inlineToggle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
 });

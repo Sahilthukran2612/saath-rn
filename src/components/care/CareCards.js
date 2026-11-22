@@ -16,14 +16,12 @@ import {
   Wallet,
 } from '../icons';
 import { BigButton, Body, Caption, Card, Chip, Glyph, Title } from '../ui';
-import { Badge, Field, LineChart, ListGroup, ListRow, Stat, SectionTitle } from '../kit';
+import { Badge, Field, ListGroup, ListRow, Stat, SectionTitle } from '../kit';
 import { useStore } from '../../state/store';
 import { useNow } from '../useNow';
-import { adviceText } from '../../i18n/strings';
-import { can, glucoseAdvice } from '../../logic';
+import { can } from '../../logic';
 import {
   budgetSummary,
-  glucoseTrend,
   lowSugarPrompt,
   refillStatus,
   stripsPlan,
@@ -73,80 +71,6 @@ function Bar({ value, max, color }) {
   );
 }
 
-export function GlucoseCard() {
-  const { state, dispatch, t } = useStore();
-  const [text, setText] = useState('');
-  const [w, setW] = useState(280);
-  const last = state.readings[state.readings.length - 1];
-  const trend = glucoseTrend(state.readings);
-  const canLog = can(state.role, 'logReading');
-  const submit = () => {
-    const v = parseInt(text, 10);
-    if (!Number.isNaN(v) && v > 0 && v < 700) {
-      dispatch({ type: 'ADD_READING', id: String(Date.now()), mgdl: v, at: Date.now() });
-      setText('');
-    }
-  };
-  const TrendIcon = trend.direction === 'up' ? TrendingUp : trend.direction === 'down' ? TrendingDown : Minus;
-  return (
-    <Card style={{ gap: 14 }}>
-      <CardHead
-        icon={Droplet}
-        title={t('sugarLog')}
-      />
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8 }}>
-        <Text
-          style={{
-            fontFamily: fonts.bold,
-            fontSize: 56,
-            lineHeight: 62,
-            letterSpacing: -1.6,
-            color: colors.indigo,
-          }}
-        >
-          {last ? last.mgdl : '–'}
-        </Text>
-        <Caption style={{ paddingBottom: 12 }}>mg/dL</Caption>
-        <View style={{ flex: 1 }} />
-        {trend.count > 1 ? (
-          <View style={styles.trendPill}>
-            <Glyph icon={TrendIcon} size={18} color={colors.indigo} />
-            <Text style={{ fontFamily: fonts.semi, fontSize: 16, color: colors.indigo }}>
-              {t(TREND_KEY[trend.direction])}
-            </Text>
-          </View>
-        ) : null}
-      </View>
-      {trend.count > 1 ? (
-        <Caption>
-          {t('average')}: {trend.avg}
-        </Caption>
-      ) : null}
-      <View onLayout={(e) => setW(Math.floor(e.nativeEvent.layout.width))}>
-        <LineChart
-          values={state.readings.slice(-8).map((r) => r.mgdl)}
-          width={w}
-          height={110}
-          label={t('sugarLog')}
-        />
-      </View>
-      <Body>{adviceText(state.lang, glucoseAdvice(last?.mgdl).level)}</Body>
-      {canLog ? (
-        <>
-          <Field
-            label={t('addReading')}
-            value={text}
-            onChangeText={setText}
-            keyboardType="number-pad"
-            placeholder="mg/dL"
-          />
-          <BigButton icon={Plus} label={t('addReading')} onPress={submit} />
-        </>
-      ) : null}
-    </Card>
-  );
-}
-
 // Rule-based prompt from what was logged. The phone cannot sense sugar. No dose anywhere.
 export function SugarPromptCard() {
   const { state, dispatch, t } = useStore();
@@ -168,8 +92,6 @@ export function SugarPromptCard() {
         <Card tone="haldi" style={{ gap: 12 }}>
           <CardHead
             icon={Info}
-            bg={colors.white}
-            color={colors.haldiDeep}
             title={t(`prompt.${p.id}.title`)}
           />
           {p.steps.map((s, i) => (
@@ -380,7 +302,6 @@ export function BudgetCard() {
 }
 
 const styles = StyleSheet.create({
-  tile: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
   trendPill: {
     flexDirection: 'row',
     alignItems: 'center',

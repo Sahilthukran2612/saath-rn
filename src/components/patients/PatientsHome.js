@@ -55,7 +55,7 @@ export default function PatientsHome() {
         lead={<Avatar name={nameOf(c)} role={c.role} size={44} />}
         title={nameOf(c)}
         subtitle={
-          (grouped ? '' : `${t(`role.${c.role}`)} · `) +
+          (grouped ? '' : `${t(`role.${c.role}`)}, `) +
           (latest ? describeEvent(latest, nameOf(c), t) : t('cf.empty'))
         }
         trailing={
@@ -80,16 +80,27 @@ export default function PatientsHome() {
   return (
     <View style={{ gap: 16 }}>
       <View
-        style={{ backgroundColor: needing ? colors.brick : colors.indigo, borderRadius: radii.xl, padding: 22, gap: 4 }}
+        style={{
+          backgroundColor: needing ? colors.brick : colors.indigo,
+          borderRadius: radii.xl,
+          padding: 22,
+          gap: 4,
+        }}
         accessibilityRole="header"
       >
         <Text style={{ fontFamily: fonts.semi, fontSize: 16, lineHeight: 22, color: '#EEF3FF' }}>
           {t(doctor ? 'pt.titleDoctor' : 'pt.title')}
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 10 }}>
-          <Text style={{ fontFamily: fonts.bold, fontSize: 56, lineHeight: 64, color: colors.white }}>{all.length}</Text>
+          <Text style={{ fontFamily: fonts.bold, fontSize: 56, lineHeight: 64, color: colors.white }}>
+            {all.length}
+          </Text>
           <Text style={{ fontFamily: fonts.semi, fontSize: 20, lineHeight: 28, color: '#EEF3FF', flex: 1 }}>
-            {all.length === 0 ? t('pt.none') : needing ? t('pt.need').replace('{n}', String(needing)) : t('pt.allWell')}
+            {all.length === 0
+              ? t('pt.none')
+              : needing
+                ? t('pt.need').replace('{n}', String(needing))
+                : t('pt.allWell')}
           </Text>
         </View>
       </View>
@@ -100,7 +111,9 @@ export default function PatientsHome() {
         </Card>
       ) : grouped ? (
         roles.map((r) => {
-          const list = all.filter((c) => c.role === r).sort((a, b) => Number(!!alertOf(b)) - Number(!!alertOf(a)));
+          const list = all
+            .filter((c) => c.role === r)
+            .sort((a, b) => Number(!!alertOf(b)) - Number(!!alertOf(a)));
           return (
             <View key={r} style={{ gap: 8 }}>
               <SectionTitle>{t(`pt.as.${r}`)}</SectionTitle>
@@ -118,7 +131,9 @@ export default function PatientsHome() {
 
       {hidden > 0 ? (
         <Card tone="haldi">
-          <Caption style={{ color: colors.ink }}>{t(doctor ? 'pt.hiddenDoctor' : 'pt.hiddenMember').replace('{n}', String(hidden))}</Caption>
+          <Caption style={{ color: colors.ink }}>
+            {t(doctor ? 'pt.hiddenDoctor' : 'pt.hiddenMember').replace('{n}', String(hidden))}
+          </Caption>
         </Card>
       ) : null}
       <AddMyPatient />

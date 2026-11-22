@@ -64,7 +64,6 @@ export default function CarePlanBuilder({ circle }) {
 
   return (
     <View style={{ gap: 14 }}>
-
       <SectionTitle>{t('plan.meds')}</SectionTitle>
       {draft.meds.length > 0 ? (
         <ListGroup>
@@ -72,7 +71,7 @@ export default function CarePlanBuilder({ circle }) {
             <ListRow
               key={`${m.name}-${i}`}
               title={m.name}
-              subtitle={`${m.dose ? `${m.dose} · ` : ''}${t(`when.${m.when}`)}`}
+              subtitle={`${m.dose ? `${m.dose}, ` : ''}${t(`when.${m.when}`)}`}
               trailing={<X size={22} color="#717AA3" />}
               onPress={() => set({ meds: draft.meds.filter((_, j) => j !== i) })}
               label={`${t('remove')}: ${m.name}`}
@@ -120,7 +119,12 @@ export default function CarePlanBuilder({ circle }) {
         <BigButton kind="quiet" icon={Plus} label={t('addTask')} onPress={addTask} />
       </Card>
 
-      <Field label={t('plan.testPerDay')} value={draft.testPerDay} keyboardType="number-pad" onChangeText={(v) => set({ testPerDay: v.replace(/\D/g, '').slice(0, 1) })} />
+      <Field
+        label={t('plan.testPerDay')}
+        value={draft.testPerDay}
+        keyboardType="number-pad"
+        onChangeText={(v) => set({ testPerDay: v.replace(/\D/g, '').slice(0, 1) })}
+      />
       <Field label={t('plan.notes')} value={draft.notes} multiline onChangeText={(v) => set({ notes: v })} />
 
       <BigButton icon={Send} label={t('plan.publish')} onPress={publish} />

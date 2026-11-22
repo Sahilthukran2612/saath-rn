@@ -73,24 +73,3 @@ export function SaathMark({ size = 36, color = colors.indigo, accent = colors.ha
   );
 }
 
-// A quiet ikat-like band used as a header motif: repeating diamonds in two tints.
-export function IkatBand({ width = 320, height = 14, color = colors.indigoSoft, accent = colors.haldi }) {
-  const step = 14;
-  const n = Math.ceil(width / step);
-  return (
-    <Svg width={width} height={height}>
-      {Array.from({ length: n }, (_, i) => {
-        const x = i * step + step / 2;
-        const mid = height / 2;
-        return (
-          <Path
-            key={i}
-            d={`M ${x - 6} ${mid} L ${x} ${mid - 6} L ${x + 6} ${mid} L ${x} ${mid + 6} Z`}
-            fill={i % 4 === 0 ? accent : color}
-            opacity={i % 4 === 0 ? 0.9 : 0.55}
-          />
-        );
-      })}
-    </Svg>
-  );
-}

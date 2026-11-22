@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { View } from 'react-native';
 import { ArrowRight, Check } from '../components/icons';
-import { BigButton, Body, Caption, Title } from '../components/ui';
+import { BigButton, Body, Caption, Screen, Title } from '../components/ui';
 import { Field } from '../components/kit';
 import { SaathMark } from '../components/art';
 import SetupProgress from '../components/SetupProgress';
@@ -33,7 +33,7 @@ export default function MemberOnboardingScreen() {
   };
 
   return (
-    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 24, paddingTop: 32, gap: 18 }}>
+    <Screen setup>
       <SaathMark size={56} />
       <SetupProgress step={step} total={STEPS} />
 
@@ -83,6 +83,6 @@ export default function MemberOnboardingScreen() {
         )}
         {back ? <BigButton kind="quiet" label={t('back')} onPress={back} /> : null}
       </View>
-    </ScrollView>
+    </Screen>
   );
 }

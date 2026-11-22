@@ -8,14 +8,13 @@ import {
   Segmented,
   Field,
   ProgressRing,
-  DyeRing,
   CheckMark,
   LineChart,
   StageTrack,
   Avatar,
   Badge,
 } from '../src/components/kit';
-import { MoodFace, PlateDiagram, SaathMark, IkatBand } from '../src/components/art';
+import { MoodFace, PlateDiagram, SaathMark } from '../src/components/art';
 import { taskIcon } from '../src/components/taskIcons';
 import { colors, fonts } from '../src/theme';
 
@@ -112,15 +111,6 @@ describe('drawn components render without crashing at the edges', () => {
       </>
     );
   });
-  test('dye ring with zero tasks, all tasks done, and more done than total', async () => {
-    await wrap(
-      <>
-        <DyeRing total={0} done={0} />
-        <DyeRing total={4} done={4} />
-        <DyeRing total={2} done={9} />
-      </>
-    );
-  });
   test('chart needs two points, and handles flat and extreme values', async () => {
     await wrap(
       <>
@@ -130,7 +120,7 @@ describe('drawn components render without crashing at the edges', () => {
       </>
     );
   });
-  test('check mark, stage track, avatar, badge, mood faces, plate, mark and band', async () => {
+  test('check mark, stage track, avatar, badge, mood faces, plate and mark', async () => {
     await wrap(
       <>
         <CheckMark done />
@@ -146,7 +136,6 @@ describe('drawn components render without crashing at the edges', () => {
         ))}
         <PlateDiagram />
         <SaathMark />
-        <IkatBand />
       </>
     );
   });

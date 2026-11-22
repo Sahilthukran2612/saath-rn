@@ -1,4 +1,4 @@
-﻿// An ASHA's household round: when they last visited each home, and which homes are due. A visit is a note the ASHA
+// An ASHA's household round: when they last visited each home, and which homes are due. A visit is a note the ASHA
 // makes for themselves on their own phone. It is not sent, and it is not a health record.
 export const VISIT_EVERY_DAYS = 14;
 const DAY = 24 * 3600000;

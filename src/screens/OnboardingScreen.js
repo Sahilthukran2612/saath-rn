@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { View } from 'react-native';
 import { ArrowRight, Check } from '../components/icons';
-import { BigButton, Body, Caption, Card, Chip, Title } from '../components/ui';
+import { BigButton, Body, Caption, Card, Chip, Screen, ScreenTitle, Title } from '../components/ui';
 import { Avatar, Field, ListGroup, ListRow, Segmented, Toggle, SectionTitle } from '../components/kit';
 import { SaathMark } from '../components/art';
 import SetupProgress from '../components/SetupProgress';
@@ -33,16 +33,13 @@ export default function OnboardingScreen() {
   };
 
   return (
-    <ScrollView
-      keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{ padding: 24, paddingTop: 32, gap: 18 }}
-    >
+    <Screen setup>
       <SaathMark size={56} />
       <SetupProgress step={step} total={STEPS} />
 
       {step === 0 ? (
         <View style={{ gap: 16 }}>
-          <Title style={{ fontSize: 32, letterSpacing: -0.6 }}>{t('ob.welcome')}</Title>
+          <ScreenTitle>{t('ob.welcome')}</ScreenTitle>
           <Body>{t('ob.intro')}</Body>
           <SectionTitle>{t('language')}</SectionTitle>
           <Segmented
@@ -125,11 +122,7 @@ export default function OnboardingScreen() {
             <ListRow
               title={t('sms.title')}
               subtitle={
-                !smsAvailable
-                  ? t('sms.unavailable')
-                  : state.autoSmsDenied
-                    ? t('sms.denied')
-                    : t('sms.note')
+                !smsAvailable ? t('sms.unavailable') : state.autoSmsDenied ? t('sms.denied') : t('sms.note')
               }
               trailing={
                 <Toggle
@@ -200,6 +193,6 @@ export default function OnboardingScreen() {
         )}
         {step > 0 ? <BigButton kind="quiet" label={t('back')} onPress={() => setStep((s) => s - 1)} /> : null}
       </View>
-    </ScrollView>
+    </Screen>
   );
 }
