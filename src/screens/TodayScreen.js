@@ -31,6 +31,7 @@ import OkRing from '../components/OkRing';
 import Doodle from '../components/doodles';
 import { useStore } from '../state/store';
 import { looksAfterOthers } from '../who';
+import { SHOW_BUDGET } from '../features';
 import { adviceText } from '../i18n/strings';
 import { can, glucoseAdvice } from '../logic';
 import { budgetSummary, refillStatus } from '../care';
@@ -245,7 +246,7 @@ function AdultHome() {
               color={refill.level === 'now' ? colors.madder : colors.indigo}
             />
             <Stat value={state.testPlan.strips} label={t('stripsLeft')} />
-            <Stat value={`₹${spend.thisMonth}`} label={t('spend')} />
+            {SHOW_BUDGET ? <Stat value={`₹${spend.thisMonth}`} label={t('spend')} /> : null}
           </View>
         </Card>
         <ListGroup>
@@ -255,7 +256,7 @@ function AdultHome() {
             subtitle={`${state.meds.name}`}
             onPress={() => go('care')}
           />
-          <ListRow icon={Wallet} title={t('budgetTitle')} onPress={() => go('care')} />
+          {SHOW_BUDGET ? <ListRow icon={Wallet} title={t('budgetTitle')} onPress={() => go('care')} /> : null}
         </ListGroup>
         </View>
       </Reveal>

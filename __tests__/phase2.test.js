@@ -82,12 +82,13 @@ const mount = (preload) =>
   );
 
 describe('Care and alert screens', () => {
-  test('Care shows the sugar log, stock and budget', async () => {
+  test('Care shows the sugar log and stock, and the budget is hidden', async () => {
     await mount({ mode: 'adult' });
     await fireEvent.press(screen.getByLabelText('Care'));
     expect(screen.getByText('Sugar log')).toBeTruthy();
     expect(screen.getByText('Medicine stock')).toBeTruthy();
-    expect(screen.getByText('Care budget')).toBeTruthy();
+    expect(screen.queryByText('Care budget')).toBeNull();
+    expect(screen.queryByLabelText('Add cost')).toBeNull();
   });
   test('insulin logged 3 hours ago with no meal shows a prompt with the safe steps', async () => {
     await mount({ careEvents: { lastInsulinAt: Date.now() - 3 * 3600000, lastMealAt: null } });
@@ -108,12 +109,10 @@ describe('Care and alert screens', () => {
     expect(screen.queryByLabelText('Care')).toBeNull();
     expect(screen.queryByText('Sugar log')).toBeNull();
   });
-  test('a family member can add a cost', async () => {
-    await mount({ role: 'family' });
-    await fireEvent.press(screen.getByLabelText('Care'));
-    await fireEvent.changeText(screen.getByLabelText('Amount in rupees'), '150');
-    await fireEvent.press(screen.getByLabelText('Add cost'));
-    expect(screen.getAllByText(/₹/).length).toBeGreaterThan(0);
+  test('the adult Today screen has no spend figure and no budget link while the budget is hidden', async () => {
+    await mount({ mode: 'adult' });
+    expect(screen.queryByText('Budget')).toBeNull();
+    expect(screen.queryByText(/₹/)).toBeNull();
   });
   test('escalation step shows tap-to-call and a prefilled message', async () => {
     const spy = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
