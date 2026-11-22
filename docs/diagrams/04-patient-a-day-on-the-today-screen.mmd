@@ -1,0 +1,20 @@
+flowchart TD
+  T["Today screen, patient only"] --> OK["I'm OK card: one button inside one progress ring"]
+  T --> TK["Today's tasks"]
+  T --> SP["Today's slips: suggestion cards"]
+  T --> MN["Medicines now and care plan notice"]
+  T --> HL["Floating helper button"]
+  T --> NAV["Floating bar: Circle, Safety, Care, Plan. Me behind the avatar"]
+
+  OK --> OK1["Tap: last confirmed time saved, the circle is told, spoken aloud"]
+  TK --> TK1["Tick a task: the ring fills by tasks done today"]
+  SP --> SP1["Care cards from rules first, then up to seven AI ideas"]
+  SP1 --> SP2{"Choose"}
+  SP2 -->|"Stamp it"| SP3["Counts as done, learns what you do"]
+  SP2 -->|"Open"| SP4["Jumps to the screen it is about"]
+  SP2 -->|"Not today"| SP5["Put aside, shown less often"]
+  HL --> H1["Chat about health, food, routine or the app (see diagram 13)"]
+  NAV --> N1["Circle: privacy dial and invites (6)"]
+  NAV --> N2["Safety: watching and alerts (5)"]
+  NAV --> N3["Care: medicines, sugar log, charts, stock"]
+  NAV --> N4["Plan: handover, visit prep, passport, check-in, food, body, school"]

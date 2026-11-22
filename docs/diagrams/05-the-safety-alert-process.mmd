@@ -1,0 +1,20 @@
+flowchart TD
+  S["Phone sensors watching: foreground service when switched on"] --> D1{"Hard impact then stillness?"}
+  S --> D2{"No movement for hours? Default 6 h, outside 10 pm to 7 am"}
+  D1 -->|"Yes"| A["Alert opens: Are you OK? 30 second countdown and a loud tone"]
+  D2 -->|"Yes"| A
+  A --> Q{"Answered?"}
+  Q -->|"I'm OK"| OK["Closed. Counted as answered. Circle told the person is fine"]
+  Q -->|"False alarm"| FA["Closed. Thresholds are adjusted so it learns"]
+  Q -->|"No answer in 30 s"| E["Escalate: contacts one by one, about 20 seconds each"]
+  E --> E1["Each step offers Call, SMS and WhatsApp buttons"]
+  E --> E2{"Auto call or auto SMS switched on?"}
+  E2 -->|"Yes"| E3["Call or text by itself, only to numbers the person typed"]
+  E3 --> E4{"Call lasted about 50 seconds?"}
+  E4 -->|"Yes"| DONE["Taken as someone answered. Chain stops"]
+  E4 -->|"No"| NEXT["Next contact"]
+  E1 --> NEXT
+  NEXT --> L{"More contacts?"}
+  L -->|"Yes"| E
+  L -->|"No"| NR["Nobody reached. Loud siren here if switched on"]
+  A --> EV["Safety event sent to the circle (see diagram 9)"]

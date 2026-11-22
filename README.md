@@ -65,4 +65,4 @@ Not built: SMS gateway or missed-call alerts, glucometer photo, voice input, for
 - There is no demo mode: a fresh install holds no sample people, numbers, readings or costs, and nothing is simulated. Scheme and pharmacy information will be marked "verify locally".
 
 ## More
-`docs/SPEC.md`, `SCREENS.md`, `DATA_MODEL.md`, `ARCHITECTURE.md`, `TEST_REPORT.md`, `PAPER_MAP.md`, `DEMO_SCRIPT.md`, `VOICEOVER.md`.
+`docs/USER_MANUAL.md` (how to use it, per role), `docs/DIAGRAMS.md` (every process, user flow and the backend data as Mermaid diagrams; each also in `docs/diagrams/`), `docs/SPEC.md`, `SCREENS.md`, `DATA_MODEL.md`, `ARCHITECTURE.md`, `TEST_REPORT.md`, `PAPER_MAP.md`, `DEMO_SCRIPT.md`, `VOICEOVER.md`.

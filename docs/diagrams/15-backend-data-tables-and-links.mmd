@@ -1,0 +1,99 @@
+erDiagram
+  AUTH_USERS ||--o| HOUSEHOLDS : "one household per patient account"
+  AUTH_USERS |o--o{ MEMBERS : "joins as a member"
+  AUTH_USERS ||--o{ DEVICE_TOKENS : "phones"
+  AUTH_USERS ||--o{ INVITE_ATTEMPTS : "wrong code tries"
+  HOUSEHOLDS ||--o{ MEMBERS : "the circle"
+  HOUSEHOLDS ||--o{ EVENTS : "feed"
+  HOUSEHOLDS ||--o{ INVITES : "codes"
+  HOUSEHOLDS ||--o{ CONSENTS : "guardian step"
+  HOUSEHOLDS ||--o{ AUDIT : "who viewed"
+  HOUSEHOLDS ||--o{ CARE_PLANS : "doctor plans"
+  HOUSEHOLDS ||--o{ READINGS : "shared sugar readings"
+  MEMBERS ||--o{ AUDIT : "viewer"
+
+  AUTH_USERS {
+    uuid id PK
+  }
+  HOUSEHOLDS {
+    uuid id PK
+    uuid person_user_id FK "unique"
+    text person_name "what the circle sees"
+    timestamptz created_at
+  }
+  MEMBERS {
+    uuid id PK
+    uuid household_id FK
+    uuid user_id FK "null until the invite is accepted"
+    text name
+    text role "person family neighbour asha clinician"
+    smallint dial "0 safety, 1 routine, 2 full"
+    boolean time_off
+    boolean share_contact
+    text phone "shown only if share_contact"
+    boolean guardian
+    smallint min_dial
+    timestamptz created_at
+  }
+  EVENTS {
+    uuid id PK
+    uuid household_id FK
+    smallint event_type "0 safety, 1 routine, 2 summary"
+    text kind "fall quiet im_ok task_done weekly_summary"
+    text detail "short, no doses"
+    timestamptz created_at
+  }
+  INVITES {
+    uuid id PK
+    uuid household_id FK
+    text name
+    text role "family neighbour asha clinician"
+    text code "unique, 6 to 12 characters"
+    text phone "10 digits, the number it is for"
+    text status "pending or accepted"
+    timestamptz created_at
+  }
+  INVITE_ATTEMPTS {
+    uuid user_id
+    timestamptz at
+  }
+  CONSENTS {
+    uuid id PK
+    uuid household_id FK
+    text guardian_name
+    text guardian_phone
+    timestamptz agreed_at
+  }
+  AUDIT {
+    uuid id PK
+    uuid household_id FK
+    uuid viewer_member_id FK
+    text what
+    timestamptz viewed_at
+  }
+  DEVICE_TOKENS {
+    text token PK
+    uuid user_id FK
+    text lang "en or hi"
+    text platform "android"
+    timestamptz updated_at
+  }
+  CARE_PLANS {
+    uuid id PK
+    uuid household_id FK
+    uuid author_user
+    text author_name
+    jsonb plan "medicines, tasks, tests per day, note"
+    timestamptz created_at
+  }
+  READINGS {
+    uuid household_id PK
+    text client_id PK
+    smallint mgdl "20 to 600"
+    timestamptz at
+    timestamptz created_at
+  }
+  AI_USAGE {
+    date day PK
+    integer n "calls today"
+  }

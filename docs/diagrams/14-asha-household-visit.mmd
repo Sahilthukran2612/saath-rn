@@ -1,0 +1,10 @@
+flowchart TD
+  H["People I look after, ASHA worker"] --> B{"14 days since the last visit, or never visited?"}
+  B -->|"Yes"| V["Visit due badge on that household"]
+  B -->|"No"| OKB["No reminder"]
+  V --> O["Open the household panel"]
+  OKB --> O
+  O --> S["Safety alerts and whatever the dial allows"]
+  O --> VC["Household visit card: how long ago the last visit was"]
+  VC --> M["Tap: I visited today"]
+  M --> R["Saved on the ASHA's own phone, never sent. Reminder resets for 14 days"]

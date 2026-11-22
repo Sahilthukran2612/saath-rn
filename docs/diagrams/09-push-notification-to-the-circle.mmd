@@ -1,0 +1,16 @@
+sequenceDiagram
+  autonumber
+  participant P as Patient phone
+  participant DB as Postgres
+  participant PF as Edge Function push
+  participant F as Firebase Cloud Messaging
+  participant M as Member phones
+
+  P->>DB: Insert a safety event (fall or quiet)
+  DB->>DB: Row-level security allows the person or a member
+  DB->>PF: Trigger events_push calls the function
+  PF->>PF: Only safety events (type 0) are pushed
+  PF->>DB: Read members who may see it, then their device tokens
+  PF->>F: Send the message in each phone's language
+  F-->>M: Notification arrives, even with Saath closed
+  M->>M: Banner on any tab until the member says they saw it

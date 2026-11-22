@@ -1,0 +1,21 @@
+flowchart TD
+  A["Install and open Saath"] --> B["How will you use Saath? Choose a language"]
+  B --> C1["I need care"]
+  B --> C2["I look after someone"]
+  B --> C3["I am a doctor"]
+
+  C1 --> P1["Step 1: language, and who uses the phone: Teen, Elder or Adult"]
+  P1 --> P2["Step 2: name, and condition if they wish"]
+  P2 --> P3["Step 3: who should we reach? Name, phone number and role for each person. The patient picks the role"]
+  P3 --> P4["Step 4: alert choices, all off at first: auto call, auto SMS, loud alarm, reminders, background watching"]
+  P4 --> PT["Today screen"]
+
+  C2 --> M1["About you: name only. No role to choose"]
+  M1 --> M2["Create an account with the number the patient gave"]
+  M2 --> M3["Join: enter the code or scan the QR. Can be skipped"]
+  M3 --> MT["People I look after"]
+
+  C3 --> D1["About you, doctor: name as patients see it"]
+  D1 --> D2["Create an account with your phone number"]
+  D2 --> D3["Join with a patient code or QR, or show your own card"]
+  D3 --> DT["My patients"]

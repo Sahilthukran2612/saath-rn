@@ -1,0 +1,21 @@
+sequenceDiagram
+  autonumber
+  actor Pat as Patient
+  participant PA as Patient app
+  participant SB as Supabase
+  participant DA as Doctor app
+  actor Doc as Doctor
+
+  Pat->>PA: Add sugar reading, saved on the phone
+  PA->>PA: Sync pass: is a joined doctor at Full?
+  alt A doctor is at Full
+    PA->>SB: Upsert readings not yet sent, only the person may insert
+    SB-->>PA: Stored, keyed by household and reading
+  else No doctor at Full
+    PA->>PA: Nothing leaves the phone
+  end
+  Doc->>DA: Open the patient
+  DA->>SB: Fetch readings
+  SB->>SB: Allow only the patient, or a doctor at dial 2
+  SB-->>DA: Readings, newest first
+  DA-->>Doc: Average, lowest, highest, line and daily charts. Read-only, no meaning given

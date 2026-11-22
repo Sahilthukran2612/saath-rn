@@ -1,0 +1,12 @@
+flowchart TD
+  U["Patient types a message in the helper window"] --> E{"Sounds like an emergency? Fall, chest pain, very low sugar, self-harm"}
+  E -->|"Yes"| L["Answered on the phone only. Nothing is sent anywhere. Open Safety button, call 112"]
+  E -->|"No"| N{"Online?"}
+  N -->|"No"| O["Says the helper needs internet"]
+  N -->|"Yes"| S["Send the recent turns and the anonymous summary to the ai function"]
+  S --> C{"Topic filter: health, food, routine or using Saath?"}
+  C -->|"No, or unsure"| R["One fixed refusal. No answer is written"]
+  C -->|"Yes"| A["Groq writes a short reply"]
+  A --> G{"Phone guard: any dose, diagnosis or reading meaning?"}
+  G -->|"Yes"| F["Replaced by a fixed safe line"]
+  G -->|"No"| SH["Reply shown. Chat kept on the phone only"]

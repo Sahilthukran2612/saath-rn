@@ -1,0 +1,21 @@
+sequenceDiagram
+  autonumber
+  actor Doc as Doctor
+  participant DA as Doctor app
+  actor Pat as Patient
+  participant PA as Patient app
+  participant SB as Supabase
+
+  Doc->>DA: My patients, Add a patient
+  DA-->>Doc: QR card with name and number (needs sign-in first)
+  Doc-->>Pat: Shows the card on the screen
+  Pat->>PA: Scans with the phone camera
+  PA->>PA: Opens Add a person, already filled in as Doctor
+  Pat->>PA: Confirms once
+  PA->>SB: Upload the invite
+  PA-->>Pat: Shows a code and QR
+  Pat-->>Doc: Shows the code back
+  Doc->>DA: Scans or types the code
+  DA->>SB: accept_invite(code)
+  SB-->>DA: Joined as a doctor at Full access
+  DA-->>Doc: The patient appears in My patients

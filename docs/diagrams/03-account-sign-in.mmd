@@ -1,0 +1,11 @@
+flowchart TD
+  A["Me: Sign in or create account"] --> B["Drawer: phone number and password, then Continue"]
+  B --> C{"Number and password valid? Password long enough?"}
+  C -->|"No"| X1["Say what is wrong. Nothing is created"]
+  C -->|"Yes"| D{"Does an account with this number exist?"}
+  D -->|"Yes"| E["Sign in"]
+  D -->|"No"| F["Create the account, then sign in"]
+  E --> G["Household found or made. Sync turns on"]
+  F --> G
+  A --> H["Skip for now: everything stays on this phone, lost if data is cleared"]
+  G --> I["No password reset. A forgotten password cannot be recovered"]

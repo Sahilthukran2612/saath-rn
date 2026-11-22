@@ -1,0 +1,18 @@
+sequenceDiagram
+  autonumber
+  participant Pad as Today pad (patient phone)
+  participant G as Phone guard
+  participant FN as Edge Function ai
+  participant LLM as Groq model
+
+  Pad->>Pad: Cards missing or stale (new day, language, or 3 hours)?
+  Pad->>Pad: Build an anonymous summary: language, time of day, task counts, flags
+  Pad->>FN: POST kind cards with the summary
+  FN->>FN: Keep only allowed fields, per-address and daily limits
+  FN->>LLM: Write 5 to 7 ideas as JSON
+  LLM-->>FN: Cards
+  FN-->>Pad: Cards
+  Pad->>G: Check every card: no doses, no diagnosis, no meaning of a reading
+  G-->>Pad: Safe cards only, duplicates of rule cards dropped
+  Pad->>Pad: Care cards from rules first, then up to seven AI ideas
+  Note over Pad,FN: Offline, failed, or a hard week: the rule-based cards are shown instead

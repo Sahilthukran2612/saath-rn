@@ -1,0 +1,17 @@
+sequenceDiagram
+  autonumber
+  actor Doc as Doctor
+  participant DA as Doctor app
+  participant SB as Supabase
+  participant PA as Patient app
+  actor Pat as Patient
+
+  Doc->>DA: Patient panel, Edit care plan
+  DA->>SB: Load the latest plan to edit
+  Doc->>DA: Medicines as written, tasks, tests per day, a note
+  Doc->>DA: Publish plan
+  DA->>SB: Insert into care_plans, only allowed for a clinician member
+  PA->>SB: Next sync: fetch the latest plan
+  PA->>PA: Clean the plan, drop anything unsafe or oversized
+  PA->>PA: Apply: medicines, tasks, tests per day
+  PA-->>Pat: Notice: the doctor updated your plan. Got it

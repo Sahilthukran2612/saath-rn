@@ -1,0 +1,13 @@
+flowchart TD
+  EV["New event in a household"] --> T{"Event type"}
+  T -->|"0 Safety: fall, quiet, I'm OK"| ALL["Every member receives it. Cannot be switched off"]
+  T -->|"1 Routine: task done"| R{"Member dial 1 or higher, and not on Time off?"}
+  T -->|"2 Summary"| S{"Member dial 2, and not on Time off?"}
+  R -->|"Yes"| SEE["Member sees it"]
+  R -->|"No"| HID["Hidden from that member"]
+  S -->|"Yes"| SEE
+  S -->|"No"| HID
+
+  RD["Sugar readings"] --> RC{"Reader is the patient, or a doctor at dial 2?"}
+  RC -->|"Yes"| RSEE["Readable"]
+  RC -->|"No"| RHID["Not readable, enforced by the database"]

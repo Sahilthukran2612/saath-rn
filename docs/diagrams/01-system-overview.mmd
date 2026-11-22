@@ -1,0 +1,25 @@
+flowchart LR
+  subgraph Phone["Phone app (Expo SDK 58, React Native 0.88)"]
+    UI["Screens: Today, Circle, Safety, Care, Plan, Me"]
+    STATE["Saved on the phone: works with no signal"]
+    RULES["Plain rules: privacy dial, alert logic, care rules, AI guard"]
+    NATIVE["Kotlin modules: fall sensing, calls, SMS, siren, Bluetooth band"]
+    UI --> STATE
+    UI --> RULES
+    UI --> NATIVE
+  end
+  subgraph Supabase["Supabase (free tier)"]
+    AUTH["Auth: phone number and password"]
+    DB[("Postgres with row-level security")]
+    PUSHFN["Edge Function: push"]
+    AIFN["Edge Function: ai"]
+  end
+  FCM["Firebase Cloud Messaging"]
+  GROQ["Groq models"]
+  Phone <-->|"only what the privacy dial allows"| AUTH
+  Phone <--> DB
+  Phone -->|"anonymous summary, chat turns"| AIFN
+  DB -->|"new safety event"| PUSHFN
+  PUSHFN --> FCM
+  FCM -->|"alert notification"| Phone
+  AIFN -->|"key stays on the server"| GROQ

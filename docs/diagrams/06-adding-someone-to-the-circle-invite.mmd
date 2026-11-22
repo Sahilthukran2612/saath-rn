@@ -1,0 +1,26 @@
+sequenceDiagram
+  autonumber
+  actor Pat as Patient
+  participant App as Patient app
+  participant SB as Supabase
+  participant Inv as Invited phone
+  actor Per as Invited person
+
+  Pat->>App: Circle, Add a person: name, phone number, role
+  App->>App: Add as emergency contact and make an invite code, together
+  App-->>Pat: Share sheet and a QR with the code
+  App->>SB: Upload the invite when signed in and online
+  Pat-->>Per: Sends the code or lets them scan the QR
+  Per->>Inv: Install, choose I look after someone or I am a doctor
+  Inv->>SB: Sign up with the same phone number
+  Per->>Inv: Enter the code or scan the QR
+  Inv->>SB: accept_invite(code)
+  SB->>SB: Checks: code pending, under 14 days, number matches, under 10 wrong tries
+  alt Checks pass
+    SB->>SB: Add member with the role the patient chose. Dial 0, or 2 for a doctor
+    SB-->>Inv: Joined. The patient appears in People I look after
+    SB-->>App: Member shows in Circle, one row, one privacy switch
+  else A check fails
+    SB->>SB: Count a wrong try
+    SB-->>Inv: Code not accepted
+  end
