@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { Check, ClipboardList } from '../icons';
 import { BigButton, Body, Caption, Card } from '../ui';
 import Sheet from '../Sheet';
-import { Badge, ListGroup, ListRow, ScreenHeader, Toggle } from '../kit';
+import { Badge, ListGroup, ListRow, SectionTitle, Toggle } from '../kit';
 import CarePlanBuilder from '../circle/CarePlanBuilder';
 import { useStore } from '../../state/store';
 import { colors } from '../../theme';
@@ -13,10 +13,12 @@ import { PatientSugar } from '../care/CareCharts';
 import { visitStatus } from '../../visits';
 import { ago, describeEvent, fmt, isAlert, pendingAlert } from '../../circleFeed';
 
-// One person I look after, shown for my role with them. A guardian sees how they are doing; a neighbour sees safety
+// One person I look after, shown for my role with them, as a page pushed from the list (the Screen around it gives the
+// title and Back). A doctor sees the readings and the care plan first, then the latest activity.
+// A guardian sees how they are doing; a neighbour sees safety
 // only (the server lets nothing else through); a doctor sees the same and also writes their care plan. The server
 // decides what each role may read under the person's privacy dial: this screen never widens it.
-export default function PatientPanel({ circle, onBack }) {
+export default function PatientPanel({ circle }) {
   const { state, dispatch, t } = useStore();
   const now = useNow();
   const cfg = cloudConfig();
@@ -26,6 +28,7 @@ export default function PatientPanel({ circle, onBack }) {
   const signedIn = Boolean(state.cloud.access);
   const doctor = circle.role === 'clinician';
   const [planOpen, setPlanOpen] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const visit = visitStatus(state.visits[circle.household_id], now);
 
   // A doctor reads the patient's sugar readings from the server. The database answers only while the patient has
@@ -56,15 +59,17 @@ export default function PatientPanel({ circle, onBack }) {
     if (!r.ok) dispatch({ type: 'CIRCLE_TIMEOFF', id: circle.household_id, on: !on });
   };
 
+  const shown = showAll ? feed : feed.slice(0, 6);
   return (
-    <View style={{ gap: 14 }}>
-      <ScreenHeader title={name} onBack={onBack} backLabel={t('back')} />
+    <>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
         <Badge tone="indigo" label={t(`role.${circle.role}`)} />
         <Caption style={{ flex: 1 }}>{fmt(t('cf.sees'), { level: t(`dial${circle.dial}`) })}</Caption>
       </View>
-      <Body bold>{t('cf.youAre').replace('{role}', t(`role.${circle.role}`))}</Body>
-      <Caption>{t('cf.note')}</Caption>
+      <View style={{ gap: 2 }}>
+        <Body bold>{t('cf.youAre').replace('{role}', t(`role.${circle.role}`))}</Body>
+        <Caption>{t('cf.note')}</Caption>
+      </View>
 
       {alert ? (
         <Card style={{ backgroundColor: colors.brickTint }}>
@@ -75,29 +80,13 @@ export default function PatientPanel({ circle, onBack }) {
         </Card>
       ) : null}
 
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-        <View style={{ flex: 1 }}>
-          <Body>{t('cf.timeOff')}</Body>
-          <Caption>{t('cf.timeOffNote')}</Caption>
-        </View>
-        <Toggle value={!!circle.time_off} label={t('cf.timeOff')} onValueChange={pause} />
-      </View>
-
-      {feed.length === 0 ? (
-        <Body>{t('cf.empty')}</Body>
-      ) : (
-        <ListGroup>
-          {feed.map((e, i) => (
-            <ListRow
-              key={e.id}
-              title={describeEvent(e, name, t)}
-              subtitle={ago(e.created_at, now, t)}
-              trailing={isAlert(e) ? <Badge tone="brick" label={t('tabSafety')} /> : null}
-              last={i === feed.length - 1}
-            />
-          ))}
-        </ListGroup>
-      )}
+      {doctor ? <PatientSugar readings={readings} loaded={loaded} /> : null}
+      {doctor ? (
+        <Card style={{ gap: 12 }}>
+          <Body bold>{t('plan.build')}</Body>
+          <BigButton icon={ClipboardList} label={t('plan.editBtn')} onPress={() => setPlanOpen(true)} />
+        </Card>
+      ) : null}
 
       {circle.role === 'asha' ? (
         <Card style={{ gap: 12 }}>
@@ -116,16 +105,45 @@ export default function PatientPanel({ circle, onBack }) {
           />
         </Card>
       ) : null}
-      {doctor ? <PatientSugar readings={readings} loaded={loaded} /> : null}
-      {doctor ? (
-        <Card style={{ gap: 12 }}>
-          <Body bold>{t('plan.build')}</Body>
-          <BigButton icon={ClipboardList} label={t('plan.editBtn')} onPress={() => setPlanOpen(true)} />
-        </Card>
-      ) : null}
+
+      <View style={{ gap: 8 }}>
+        <SectionTitle>{t('cf.recent')}</SectionTitle>
+        {feed.length === 0 ? (
+          <Card>
+            <Body soft>{t('cf.empty')}</Body>
+          </Card>
+        ) : (
+          <ListGroup>
+            {shown.map((e) => (
+              <ListRow
+                key={e.id}
+                title={describeEvent(e, name, t)}
+                subtitle={ago(e.created_at, now, t)}
+                trailing={isAlert(e) ? <Badge tone="brick" label={t('tabSafety')} /> : null}
+              />
+            ))}
+          </ListGroup>
+        )}
+        {feed.length > shown.length ? (
+          <BigButton
+            kind="text"
+            label={fmt(t('cf.showAll'), { n: feed.length })}
+            onPress={() => setShowAll(true)}
+          />
+        ) : null}
+      </View>
+
+      <ListGroup>
+        <ListRow
+          title={t('cf.timeOff')}
+          subtitle={t('cf.timeOffNote')}
+          trailing={<Toggle value={!!circle.time_off} label={t('cf.timeOff')} onValueChange={pause} />}
+        />
+      </ListGroup>
+
       <Sheet visible={planOpen} onClose={() => setPlanOpen(false)} title={t('plan.build')}>
         <CarePlanBuilder circle={circle} />
       </Sheet>
-    </View>
+    </>
   );
 }

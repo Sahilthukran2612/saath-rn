@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import Text from '../AppText';
-import { BigButton, Body, Caption, Card } from '../ui';
+import { BigButton, Body, Caption, Card, Screen } from '../ui';
+import { Push } from '../motion';
 import { Avatar, Badge, ListGroup, ListRow, SectionTitle } from '../kit';
 import { useStore } from '../../state/store';
 import { useNow } from '../useNow';
@@ -29,7 +30,7 @@ function JoinLink() {
 // The home of everyone who looks after someone: all their people in one place. The role is per person, because the
 // same phone can be a guardian for one, a neighbour for another and a doctor for a third. What each role gets to see
 // is decided by the server under that person's privacy dial; this screen only words it. Most urgent first.
-export default function PatientsHome() {
+export default function PatientsHome({ title, subtitle }) {
   const { state, dispatch, t } = useStore();
   const now = useNow();
   const [open, setOpen] = useState(null); // household id
@@ -37,7 +38,14 @@ export default function PatientsHome() {
   const alertOf = (c) => pendingAlert(state.feeds[c.household_id] || [], state.seen[c.household_id], now);
 
   const circle = circlesFor(state).find((c) => c.household_id === open);
-  if (circle) return <PatientPanel circle={circle} onBack={() => setOpen(null)} />;
+  if (circle)
+    return (
+      <Push key={circle.household_id}>
+        <Screen title={nameOf(circle)} onBack={() => setOpen(null)} backLabel={title}>
+          <PatientPanel circle={circle} />
+        </Screen>
+      </Push>
+    );
 
   const all = circlesFor(state);
   const hidden = hiddenCount(state);
@@ -79,7 +87,7 @@ export default function PatientsHome() {
   };
 
   return (
-    <View style={{ gap: 16 }}>
+    <Screen title={title} subtitle={subtitle}>
       <Card
         style={[
           { flexDirection: 'row', alignItems: 'center', gap: 14 },
@@ -145,6 +153,6 @@ export default function PatientsHome() {
       ) : null}
       <AddMyPatient />
       <JoinLink />
-    </View>
+    </Screen>
   );
 }

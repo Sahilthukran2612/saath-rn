@@ -63,8 +63,24 @@ export default function AuthForm({ mode, onModeChange, onDone }) {
 
   return (
     <View style={{ gap: 14 }}>
-      <Field label={t('acc.phone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
-      <Field label={t('acc.pass')} value={password} onChangeText={setPassword} secureTextEntry={!show} />
+      <Field
+        label={t('acc.phone')}
+        value={phone}
+        onChangeText={(v) => {
+          setPhone(v);
+          setMsg('');
+        }}
+        keyboardType="phone-pad"
+      />
+      <Field
+        label={t('acc.pass')}
+        value={password}
+        onChangeText={(v) => {
+          setPassword(v);
+          setMsg('');
+        }}
+        secureTextEntry={!show}
+      />
       <View style={{ flexDirection: 'row' }}>
         <Chip label={show ? t('acc.hide') : t('acc.show')} onPress={() => setShow(!show)} />
       </View>

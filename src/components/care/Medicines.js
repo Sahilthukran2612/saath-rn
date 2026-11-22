@@ -21,7 +21,7 @@ function MedRow({ m, taken, last }) {
       icon={Pill}
       title={m.name}
       subtitle={`${m.dose ? `${m.dose}, ` : ''}${t(`when.${m.when}`)}${
-        m.plan && author ? `. ${t('plan.setBy').replace('{who}', author)}` : ''
+        m.plan && author ? `, ${t('plan.setBy').replace('{who}', author)}` : ''
       }`}
       trailing={<CheckMark done={taken} size={34} />}
       onPress={() => dispatch({ type: 'MED_TAKEN', id: m.id, now: nowMs() })}

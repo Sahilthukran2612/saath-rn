@@ -718,6 +718,9 @@ export const strings = {
     'auth.createTitle': 'Create your account',
     'auth.exists': 'This number already has an account. Sign in instead.',
     'auth.wrong': 'The number or the password is wrong.',
+    'ago.yesterday': 'Yesterday',
+    'cf.recent': 'Recent activity',
+    'cf.showAll': 'Show all {n}',
   },
   hi: {
     tabToday: 'आज',
@@ -1433,6 +1436,9 @@ export const strings = {
     'auth.createTitle': 'अपना खाता बनाएँ',
     'auth.exists': 'इस नंबर का खाता पहले से है। साइन इन करें।',
     'auth.wrong': 'नंबर या पासवर्ड गलत है।',
+    'ago.yesterday': 'कल',
+    'cf.recent': 'हाल की गतिविधि',
+    'cf.showAll': 'सभी {n} देखें',
   },
 };
 

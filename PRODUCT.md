@@ -32,7 +32,7 @@ The central object is **the circle**, not the patient's data. Sensing is one wea
 
 - Phone-side works with no internet: sensors, detector, alert flow, escalation. Accelerometer is sampled 10 times a second into an 8-second in-memory buffer.
 - Alert flow: hard impact then stillness (or inactivity far beyond the person's own normal) leads to a full-screen "Are you OK?" with a 30-second countdown, spoken prompt and vibration. "I'm OK" cancels. "False alarm" cancels and makes the app slightly less sensitive for this person. If unanswered, it escalates family, neighbour, ASHA, clinician (15 s each) via Call, WhatsApp and SMS. Optionally, with consent, it sends the alert SMS by itself, and in production dials contacts one by one.
-- Optional free sync via Supabase (Postgres, Row Level Security, anonymous sign-in or phone number plus password). Members join with invite codes. Push through Firebase is planned.
+- An account is required on first run (decided 23 November 2026): the welcome screen offers "Create account" or "I already have an account" (phone number plus password, no SMS, free Supabase tier with Row Level Security). The first run therefore needs internet; after that everything on the phone works offline as before. Signing in on a new phone works out the role from the account and brings back the name, the doctor's plan and the sugar readings. A build with no server configured skips the account. Members join with invite codes. Push goes through Firebase.
 - Production (release) builds start empty with a first-run setup. Demo data and simulations load only on request, and demo mode never places a real call or message.
 - Screens: Today, Circle, Safety, Care, Plan, Me.
 

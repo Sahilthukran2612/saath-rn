@@ -264,12 +264,7 @@ function ProHome() {
 export default function TodayScreen() {
   const { state } = useStore();
   const { title, date } = useGreeting();
-  if (looksAfterOthers(state))
-    return (
-      <Screen title={title} subtitle={date}>
-        <PatientsHome />
-      </Screen>
-    );
+  if (looksAfterOthers(state)) return <PatientsHome title={title} subtitle={date} />;
   const body =
     state.role === 'person' ? (
       <PersonHome />

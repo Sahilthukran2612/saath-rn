@@ -28,7 +28,8 @@ export function ago(iso, now, t) {
   if (Number.isNaN(min) || min < 1) return t('ago.now');
   if (min < 60) return fmt(t('ago.min'), { n: min });
   if (min < 60 * 24) return fmt(t('ago.hour'), { n: Math.round(min / 60) });
-  return fmt(t('ago.day'), { n: Math.round(min / (60 * 24)) });
+  const days = Math.round(min / (60 * 24));
+  return days === 1 ? t('ago.yesterday') : fmt(t('ago.day'), { n: days });
 }
 
 const time = (e) => new Date(e.created_at).getTime();
