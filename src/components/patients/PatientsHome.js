@@ -63,8 +63,9 @@ export default function PatientsHome({ title, subtitle }) {
         key={c.household_id}
         lead={<Avatar name={nameOf(c)} role={c.role} size={44} />}
         title={nameOf(c)}
+        // my role with this person, then their latest news; a dot, not a comma, so it never reads as "Guardian, ..."
         subtitle={
-          (grouped ? '' : `${t(`role.${c.role}`)}, `) +
+          (grouped ? '' : `${t(`role.${c.role}`)} · `) +
           (latest ? describeEvent(latest, nameOf(c), t) : t('cf.empty'))
         }
         trailing={
