@@ -1,4 +1,5 @@
 import React from 'react';
+import { Alert } from 'react-native';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import { StoreProvider } from '../src/state/store';
 import AppShell from '../src/AppShell';
@@ -401,8 +402,21 @@ describe('account card', () => {
     });
     expect(screen.getByText('Signed in as +91 9876543210')).toBeTruthy();
     expect(screen.getByText('1 updates waiting to send')).toBeTruthy();
+    // signing out asks first, then forgets this phone's copy and goes back to the welcome screen
+    const ask = jest.spyOn(Alert, 'alert').mockImplementation((title, msg, buttons) => buttons[1].onPress());
+    global.fetch = jest.fn(async () => reply(204, null));
     await fireEvent.press(screen.getByLabelText('Sign out'));
-    await waitFor(() => expect(screen.getByLabelText('Sign in or create account')).toBeTruthy());
+    expect(ask).toHaveBeenCalled();
+    await waitFor(() => expect(screen.getByLabelText('I already have an account')).toBeTruthy());
+    ask.mockRestore();
+  });
+  test('cancelling sign-out keeps the account', async () => {
+    configure();
+    await open({ cloud: { phone: '9876543210', userId: 'u', access: 'A', refresh: 'R', householdId: 'h' } });
+    const ask = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    await fireEvent.press(screen.getByLabelText('Sign out'));
+    expect(screen.getByText('Signed in as +91 9876543210')).toBeTruthy();
+    ask.mockRestore();
   });
   test('an account without a phone number says what is lost if the data is cleared', async () => {
     configure();

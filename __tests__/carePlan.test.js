@@ -67,6 +67,16 @@ describe('applying a plan', () => {
     expect(reducer(s1, { type: 'PLAN_APPLY', plan, version: '2026-11-19T10:00:00Z', author: 'Dr X', at: 9 })).toBe(s1);
   });
 
+  test('a plan with tasks replaces the starter tasks nobody renamed; renamed and added tasks stay', () => {
+    const own = { id: 'mine', title: 'Pray', done: false, hour: 6 };
+    const renamed = { id: 't2', title: 'Lunch with dal', done: false, hour: 13 };
+    const tasks = [...initialState.tasks.filter((x) => x.id !== 't2'), renamed, own];
+    const s = reducer({ ...start, tasks }, { type: 'PLAN_APPLY', plan, version: 'a', author: 'Dr', at: 1 });
+    expect(s.tasks.map((x) => x.id).filter((id) => /^t\d$/.test(id))).toEqual(['t2']);
+    expect(s.tasks.some((x) => x.id === 'mine')).toBe(true);
+    expect(s.tasks.filter((x) => x.plan)).toHaveLength(plan.tasks.length);
+  });
+
   test('a task the person already ticked stays ticked when the plan is updated', () => {
     const s1 = reducer(start, { type: 'PLAN_APPLY', plan, version: 'a', author: 'Dr', at: 1 });
     const id = s1.tasks.find((x) => x.plan).id;

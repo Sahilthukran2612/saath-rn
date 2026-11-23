@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import React from 'react';
-import { Platform } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import { StoreProvider } from '../src/state/store';
 import AppShell from '../src/AppShell';
@@ -229,6 +229,7 @@ describe('in the app', () => {
     spy.mockResolvedValue({ ok: true, token: 'FCM-TOKEN-1' });
     await mount({ ...signedIn, cloud: { ...signedIn.cloud, pushToken: 'FCM-TOKEN-1', pushState: 'on' } });
     await fireEvent.press(screen.getByLabelText('Me'));
+    jest.spyOn(Alert, 'alert').mockImplementation((title, msg, buttons) => buttons[1].onPress()); // confirm sign-out
     await fireEvent.press(screen.getByLabelText('Sign out'));
     await waitFor(() => {
       const del = global.fetch.mock.calls.find(([u, i]) => u.includes('device_tokens') && i.method === 'DELETE');

@@ -721,6 +721,8 @@ export const strings = {
     'ago.yesterday': 'Yesterday',
     'cf.recent': 'Recent activity',
     'cf.showAll': 'Show all {n}',
+    'acc.outConfirm':
+      'This phone forgets your data and goes back to the start. What is on your account comes back when you sign in again.',
   },
   hi: {
     tabToday: 'आज',
@@ -1439,6 +1441,8 @@ export const strings = {
     'ago.yesterday': 'कल',
     'cf.recent': 'हाल की गतिविधि',
     'cf.showAll': 'सभी {n} देखें',
+    'acc.outConfirm':
+      'यह फ़ोन आपका डेटा भूल जाएगा और शुरू में लौट जाएगा। खाते की जानकारी दोबारा साइन इन करने पर वापस आ जाएगी।',
   },
 };
 

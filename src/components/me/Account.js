@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View } from 'react-native';
+import { Alert, View } from 'react-native';
 import { Cloud } from '../icons';
 import { BigButton, Body, Caption, Card } from '../ui';
 import Sheet from '../Sheet';
@@ -17,6 +17,24 @@ export default function Account() {
   const [mode, setMode] = useState('signin');
   const cfg = cloudConfig();
   const signedIn = Boolean(state.cloud.access);
+
+  // Signing out forgets this phone's copy, so the next person to sign in never sees it, and goes back to the welcome
+  // screen. What lives on the server (name, readings, the doctor's plan) comes back on the next sign-in. It asks first.
+  const signOut = () =>
+    Alert.alert(t('acc.out'), t('acc.outConfirm'), [
+      { text: t('cancel'), style: 'cancel' },
+      {
+        text: t('acc.out'),
+        style: 'destructive',
+        onPress: async () => {
+          // stop alerts to this phone first (best effort)
+          await deleteDeviceToken(cfg, state.cloud, state.cloud.pushToken);
+          const lang = state.lang;
+          dispatch({ type: 'RESET' });
+          dispatch({ type: 'SET', key: 'lang', value: lang });
+        },
+      },
+    ]);
 
   const done = (r) => {
     dispatch({ type: 'CLOUD_SET', patch: r.cloud });
@@ -49,15 +67,7 @@ export default function Account() {
               {t(`push.${state.cloud.pushState}`)}
             </Caption>
           ) : null}
-          <BigButton
-            kind="quiet"
-            label={t('acc.out')}
-            onPress={async () => {
-              // stop alerts to this phone first (best effort), then forget the account here
-              await deleteDeviceToken(cfg, state.cloud, state.cloud.pushToken);
-              dispatch({ type: 'CLOUD_SIGN_OUT' });
-            }}
-          />
+          <BigButton kind="quiet" label={t('acc.out')} onPress={signOut} />
         </View>
       ) : (
         <View style={{ gap: 10 }}>

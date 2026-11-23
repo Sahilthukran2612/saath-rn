@@ -1,3 +1,4 @@
+import { STARTERS } from './taskLabel';
 import { WHEN } from './medicines';
 
 // A care plan: what a clinician sets for a person, as plain data. The clinician writes it in their own Saath app and
@@ -60,8 +61,10 @@ export function planPatch(state, plan, meta) {
     ...plan.meds.map((m) => ({ id: `plan-${tag(`${m.name}|${m.dose}|${m.when}`)}`, ...m, plan: true })),
   ];
   const keptDone = new Set(state.tasks.filter((x) => x.done).map((x) => x.id));
+  // A plan with tasks replaces the app's starter tasks the person never renamed; anything they added or renamed stays.
+  const untouchedStarter = (x) => STARTERS[x.id] && x.title === STARTERS[x.id];
   const tasks = [
-    ...state.tasks.filter((x) => !x.plan),
+    ...state.tasks.filter((x) => !x.plan && !(plan.tasks.length > 0 && untouchedStarter(x))),
     ...plan.tasks.map((x) => {
       const id = `plan-${tag(x.title)}`;
       return { id, icon: '📋', title: x.title, hour: x.hour, done: keptDone.has(id), plan: true };
